@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</head>
+<body>
+
+<th:block layout:fragment="content">
+    <div class="page-container">
+        <div class="common-card complete-card">
+
+            <div class="common-header">
+                <h1 th:text="${title}">제목</h1>
+                <p th:utext="${message}">처리 결과 메시지</p>
+            </div>
+
+            <button type="button" class="btn-submit"
+                    th:onclick="|location.href='@{/}'|">
+                메인화면으로 이동
+            </button>
+
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><body>
+<header th:fragment="header" class="site-header">
+ <div class="wrap header-inner">
+  <a class="brand" href="/" th:href="@{/}"><img th:src="@{/dist/images/itda-logo.png}" alt="잇다 로고"><span><strong>잇다</strong><b>EAT-DA</b><small>맛을 잇고, 사람을 잇다</small></span></a>
+  <nav class="nav" aria-label="주 메뉴"><a href="/" th:href="@{/}" >홈</a><details><summary>레시피 찾기</summary><div class="dropdown"><a href="/" th:href="@{/}" data-recipe-category="">전체 레시피</a>
+<a href="/?category=자취" th:href="@{/?category=자취}" data-recipe-category="자취">자취 요리</a>
+<a href="/?category=건강" th:href="@{/?category=건강}" data-recipe-category="건강">건강 요리</a>
+<a href="/?category=제철" th:href="@{/?category=제철}" data-recipe-category="제철">제철 요리</a>
+<a href="/?category=재료" th:href="@{/?category=재료}" data-recipe-category="재료">재료별 레시피</a>
+<a href="/?category=태그" th:href="@{/?category=태그}" data-recipe-category="태그">태그별 레시피</a>
+<a href="/?category=인기" th:href="@{/?category=인기}" data-recipe-category="인기">인기 레시피</a></div></details>
+<details><summary>함께하는 주방</summary><div class="dropdown"><a href="/community/free" th:href="@{/community/free}" >자유 이야기</a>
+<a href="/community/recipes" th:href="@{/community/recipes}" >모두의 레시피</a>
+<a href="/community/cooking" th:href="@{/community/cooking}" >따라 만든 요리</a>
+<a href="/community/questions" th:href="@{/community/questions}" >요리 질문</a>
+<a href="/community/share" th:href="@{/community/share}" >재료 나눔</a>
+<a href="/community/meet" th:href="@{/community/meet}" >같이 먹어요</a></div></details>
+<details><summary>나의 주방</summary><div class="dropdown"><a href="/my/fridge" th:href="@{/my/fridge}" >내 냉장고</a>
+<a href="/my/recipes" th:href="@{/my/recipes}" >내가 쓴 레시피</a>
+<a href="/my/bookmarks" th:href="@{/my/bookmarks}" >찜한 레시피</a>
+<a href="/my/notifications" th:href="@{/my/notifications}" >알림</a>
+<a href="/my/preferences" th:href="@{/my/preferences}" >관심사 설정</a>
+<a href="/member/pwd" th:href="@{/member/pwd}" >회원정보</a>
+<a href="/my/messages" th:href="@{/my/messages}" >쪽지</a></div></details><a href="/missions" th:href="@{/missions}" >미션/포인트</a><a href="/shop" th:href="@{/shop}" >장보기</a><a href="/admin" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">관리자</a></nav>
+  <button type="button" class="button" data-open-login sec:authorize="isAnonymous()">로그인 / 회원가입</button>
+  <form th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()"><button class="button secondary" type="submit">로그아웃</button></form>
+ </div>
+ <details class="wrap mobile-menu"><summary>메뉴</summary><nav class="mobile-links"><a href="/" th:href="@{/}" >전체 레시피</a>
+<a href="/?category=자취" th:href="@{/?category=자취}" >자취 요리</a>
+<a href="/?category=건강" th:href="@{/?category=건강}" >건강 요리</a>
+<a href="/?category=제철" th:href="@{/?category=제철}" >제철 요리</a>
+<a href="/?category=재료" th:href="@{/?category=재료}" >재료별 레시피</a>
+<a href="/?category=태그" th:href="@{/?category=태그}" >태그별 레시피</a>
+<a href="/?category=인기" th:href="@{/?category=인기}" >인기 레시피</a>
+<a href="/community/free" th:href="@{/community/free}" >자유 이야기</a>
+<a href="/community/recipes" th:href="@{/community/recipes}" >모두의 레시피</a>
+<a href="/community/cooking" th:href="@{/community/cooking}" >따라 만든 요리</a>
+<a href="/community/questions" th:href="@{/community/questions}" >요리 질문</a>
+<a href="/community/share" th:href="@{/community/share}" >재료 나눔</a>
+<a href="/community/meet" th:href="@{/community/meet}" >같이 먹어요</a>
+<a href="/my/fridge" th:href="@{/my/fridge}" >내 냉장고</a>
+<a href="/my/recipes" th:href="@{/my/recipes}" >내가 쓴 레시피</a>
+<a href="/my/bookmarks" th:href="@{/my/bookmarks}" >찜한 레시피</a>
+<a href="/my/notifications" th:href="@{/my/notifications}" >알림</a>
+<a href="/my/preferences" th:href="@{/my/preferences}" >관심사 설정</a>
+<a href="/member/pwd" th:href="@{/member/pwd}" >회원정보</a>
+<a href="/my/messages" th:href="@{/my/messages}" >쪽지</a><a href="/missions" th:href="@{/missions}" >미션/포인트</a><a href="/shop" th:href="@{/shop}" >장보기</a></nav></details>
+</header></body></html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head><title>홈 · 잇다</title></head>
+<body><th:block layout:fragment="content">
+    <!-- 브랜드 인트로: 샘플 데이터와 별개. JS가 실패하면 홈을 가리지 않습니다. -->
+    <dialog id="intro-dialog" class="intro-dialog" aria-label="잇다 시작 화면">
+      <button id="intro-skip" class="intro-skip" aria-label="인트로 건너뛰고 홈으로 이동">
+        <img src="../../static/dist/images/itda-logo.png" th:src="@{/dist/images/itda-logo.png}" alt="잇다 로고" />
+        <span class="intro-brand">EAT-DA</span>
+        <span class="intro-lines" aria-hidden="true">
+          <span id="intro-line-one"></span>
+          <span id="intro-line-two"></span>
+        </span>
+        <span class="intro-hint">화면을 클릭하거나 아무 키나 누르면 바로 이동합니다</span>
+      </button>
+    </dialog>
+    
+    
+    <main class="wrap home-main">
+      <section class="hero hero-layout">
+        <div>
+          <span class="pill">✨ 재료를 이어 요리로, 요리를 이어 우리로</span>
+          <h1>냉장고를 열고,<br /><span>한 끼를 잇다.</span></h1>
+          <p>남은 김치 한 포기, 계란 두 개로도 근사한 순간이 완성됩니다.<br />냉장고 속 잊혀졌던 재료들을 맛있는 레시피와 따뜻한 이야기로 이어 드릴게요.</p>
+          <button id="open-search" class="search-trigger">
+            <i class="search-icon fa-solid fa-utensils" aria-hidden="true"></i><span>냉장고에 남은 재료를 검색해 보세요 (예: 계란, 대파, 스팸)</span><b>레시피 검색 →</b>
+          </button>
+        </div>
+        <section class="basket-panel">
+          <div class="basket-heading"><h2><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> 빠른 재료 조합기</h2><button id="basket-clear">초기화</button></div>
+          <div id="quick-ingredients" class="tags"></div>
+          <p id="quick-status" class="status">재료 목록을 불러오는 중입니다.</p>
+          <div class="basket-summary"><p>선택된 나의 냉장고 재료:</p><div id="basket-selected" class="tags"><em>위의 재료를 선택해보세요!</em></div>
+          <button id="basket-search" class="button yellow">
+            이 재료로 만들 수 있는 레시피 찾기 ✨</button></div>
+        </section>
+      </section>
+      <section>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><i class="fa-solid fa-fire" aria-hidden="true"></i> TODAY'S RECOMMENDATION</p>
+            <h2>지금 가장 인기 있는 레시피 잇다 🔥</h2>
+          </div>
+          <div id="category-filters" class="filters">
+            <button data-category="" class="active">전체</button
+            ><button data-category="자취" class="">자취요리</button
+            ><button data-category="건강" class="">건강식</button
+            ><button data-category="초간단" class="">초간단 10분</button
+            ><button data-category="야식/안주" class="">야식/안주</button>
+          </div>
+        </div>
+        <p id="home-recipe-status" class="status" role="status"></p>
+        <div id="home-recipes" class="recipe-grid"></div>
+      </section>
+      <section class="home-bottom">
+        <article class="panel">
+          <h2>냉장고 신선도 매니저</h2>
+          <div id="fridge-items"></div>
+          <div class="actions">
+            <a class="button" href="/my/fridge" th:href="@{/my/fridge}">냉장고 관리</a>
+          </div>
+        </article>
+        <article class="panel">
+          <h2>함께하는 주방 (커뮤니티 소식)</h2>
+          <div id="community-highlights"></div>
+          <div class="actions">
+            <a
+              class="button secondary"
+              href="../community/share.html"
+              th:href="@{/community/share}"
+              >재료 나눔</a
+            ><a
+              class="button secondary"
+              href="../community/meet.html"
+              th:href="@{/community/meet}"
+              >같이 먹어요</a
+            >
+          </div>
+        </article>
+      </section>
+    </main>
+    <aside class="mini-rail" aria-label="미니게임">
+      <small><i class="fa-solid fa-gamepad" aria-hidden="true"></i><br />미니게임</small
+      ><button data-unlinked aria-label="메뉴 추천 챗봇"><i class="fa-solid fa-robot" aria-hidden="true"></i></button
+      ><button data-unlinked aria-label="랜덤 메뉴 추천"><i class="fa-solid fa-dice" aria-hidden="true"></i></button
+      ><button data-unlinked aria-label="메뉴 추천 미니게임"><i class="fa-solid fa-trophy" aria-hidden="true"></i></button
+      ><button data-unlinked aria-label="오늘의 괴식"><i class="fa-solid fa-flask" aria-hidden="true"></i></button>
+    </aside>
+    
+    <div th:replace="~{fragments/recipe-dialogs :: recipeDialogs}">
+      <dialog id="search-dialog" class="modal wide">
+        <div class="modal-head">
+          <h2>레시피 검색</h2>
+          <button
+            class="icon-button"
+            data-close="search-dialog"
+            aria-label="검색 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="recipe-search-form" class="search-form">
+            <input
+              id="ingredient-query"
+              class="text-input"
+              placeholder="재료 검색"
+              aria-label="재료 검색어"
+              autocomplete="off"
+            /><button class="button">검색</button>
+          </form>
+          <div
+            id="ingredient-options"
+            class="ingredient-results"
+            aria-label="재료 검색 결과"
+          ></div>
+          <div id="search-selected" class="tags"></div>
+          <p id="search-status" class="status" role="status"></p>
+          <div id="search-results" class="recipe-grid"></div>
+          <div class="more-wrap">
+            <button id="search-more" class="button secondary" hidden>
+              더 보기
+            </button>
+          </div>
+        </div>
+      </dialog>
+      <dialog id="recipe-dialog" class="modal">
+        <div class="modal-head">
+          <h2>레시피 상세</h2>
+          <button
+            class="icon-button"
+            data-close="recipe-dialog"
+            aria-label="상세 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div id="recipe-detail" class="modal-body"></div>
+      </dialog>
+      <dialog id="cook-dialog" class="modal">
+        <div class="modal-head">
+          <h2 id="cook-title">단계별 조리</h2>
+          <button
+            class="icon-button"
+            data-close="cook-dialog"
+            aria-label="조리 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="cook-counter" class="muted"></p>
+          <div class="cook-progress"><div id="cook-progress"></div></div>
+          <section id="cook-step" class="cook-step"></section>
+          <div class="cook-actions">
+            <button id="cook-prev" class="button secondary">이전</button
+            ><button id="cook-next" class="button">다음</button
+            ><button id="cook-complete" class="button yellow">단계 완료</button>
+          </div>
+          <p class="muted">좌우로 스와이프하거나 버튼으로 단계를 이동하세요.</p>
+        </div>
+      </dialog>
+      <dialog id="complete-dialog" class="modal">
+        <div class="modal-body complete-card">
+          <div class="check">✓</div>
+          <b>OK!</b>
+          <p id="complete-message"></p>
+          <button class="button" data-close="complete-dialog">확인</button>
+        </div>
+      </dialog>
+    </div>
+    
+    
+  </th:block>
+<th:block layout:fragment="script"><script type="module" src="../../static/dist/js/intro.js" th:src="@{/dist/js/intro.js}"></script>
+<script
+      type="module"
+      src="../../static/dist/js/home.js"
+      th:src="@{/dist/js/home.js}"
+    ></script></th:block></body></html>

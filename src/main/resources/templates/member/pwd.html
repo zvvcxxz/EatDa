@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>패스워드 재확인</title>
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</head>
+<body>
+
+<th:block layout:fragment="content">
+    <div class="page-container">
+        <div class="common-card pwd-card">
+            
+            <div class="common-header">
+                <h1 th:text="${mode == 'dropout' ? '회원 탈퇴 확인' : '패스워드 재확인'}">패스워드 재확인</h1>
+                <p>정보보호를 위해 패스워드를 다시 한 번 입력해 주세요.</p>
+            </div>
+
+            <form name="pwdForm" th:action="@{/member/pwd}" method="post">
+                <div class="input-group">
+                    <label for="login_id">아이디</label>
+                    <input type="text" id="login_id" name="login_id" 
+                           th:value="${#authentication.principal.username}" readonly>
+                </div>
+
+                <div class="input-group" style="margin-top: 12px;">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="비밀번호 입력" autocomplete="off" autofocus required>
+                </div>
+
+                <input type="hidden" name="mode" th:value="${mode}">
+
+                <div class="message-area" th:if="${message != null}" style="color: #e53e3e;">
+                    <p th:utext="${message}"></p>
+                </div>
+
+                <button type="button" class="btn-submit" onclick="sendOk()">확인</button>
+                <button type="button" class="btn-sub" style="width: 100%; height: 44px; margin-top: 8px;" th:onclick="|location.href='@{/}'|">취소</button>
+            </form>
+
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+    function sendOk() {
+        const f = document.pwdForm;
+        if (!f.password.value.trim()) {
+            alert('패스워드를 입력하세요.');
+            f.password.focus();
+            return;
+        }
+        f.submit();
+    }
+    </script>
+</th:block>
+</body>
+</html>

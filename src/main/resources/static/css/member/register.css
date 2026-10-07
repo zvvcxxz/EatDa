@@ -1,0 +1,303 @@
+@charset "UTF-8";
+
+/* ==================================================
+   Register CSS
+   회원가입 / 정보수정 전용 스타일 (잇다 웜톤 테마)
+================================================== */
+
+/* ===== 브랜드 색상 변수 ===== */
+:root {
+	--main-color: #ff771b;       /* 메인 오렌지 */
+	--main-dark: #e05c00;        /* 오렌지 Dark */
+	--main-light: #fff4e9;       /* 연주황 포인트 배경 */
+	--main-gradient: linear-gradient(115deg, #ff771b, #ff6550);
+
+	--text-main: #2c221e;        /* 딥 브라운 메인 텍스트 */
+	--text-body: #452514;        /* 본문 텍스트 */
+	--text-sub: #8d7568;         /* 서브/설명 텍스트 */
+
+	--border-color: #eadfd7;     /* 베이지 테두리 */
+	--background-light: #fff8ee; /* 연한 크림 배경 */
+}
+
+/* ===== 기본 스타일 Reset ===== */
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: 'Noto Sans KR', 'Pretendard', -apple-system, sans-serif;
+}
+
+body {
+	background-color: #fffdf7;  /* 메인 페이지와 동일한 크림 배경 */
+	color: var(--text-main);
+	min-height: 100vh;
+	padding: 40px 20px;
+}
+
+/* ===== 회원가입 컨테이너 ===== */
+.register-container {
+	background-color: #ffffff;
+	width: 100%;
+	max-width: 680px;
+	padding: 40px;
+	border-radius: 24px;
+	box-shadow: 0 10px 30px rgba(69, 37, 20, 0.06);
+	border: 1px solid #f0e2d3;
+	margin: auto;
+}
+
+.register-header {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.register-header h1 {
+	font-size: 26px;
+	font-weight: 800;
+	color: var(--text-main);
+	margin-bottom: 6px;
+}
+
+.register-header h1 span {
+	color: var(--main-color); /* 포인트 오렌지 컬러 */
+}
+
+.register-header p {
+	font-size: 14px;
+	color: var(--text-sub);
+}
+
+/* ===== 폼 섹션 스타일 ===== */
+.form-section {
+	margin-bottom: 28px;
+}
+
+.section-title {
+	font-size: 15px;
+	font-weight: 800;
+	color: var(--main-color);
+	border-bottom: 2px solid #f5ece3;
+	padding-bottom: 8px;
+	margin-bottom: 16px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* ===== Grid Layout ===== */
+.form-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.full-width {
+	grid-column: span 2;
+}
+
+.input-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.input-group label {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.input-wrapper {
+	display: flex;
+	gap: 8px;
+}
+
+.input-wrapper input {
+	flex: 1;
+}
+
+/* ===== Input Controls ===== */
+input[type="text"], 
+input[type="password"], 
+input[type="email"], 
+input[type="tel"],
+input[type="date"], 
+select {
+	width: 100%;
+	height: 44px;
+	padding: 0 14px;
+	background-color: #ffffff;
+	border: 1px solid var(--border-color);
+	border-radius: 10px !important; 
+	color: var(--text-main);
+	font-size: 14px;
+	outline: none;
+	transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+	border-color: var(--main-color);
+	box-shadow: 0 0 0 3px rgba(255, 119, 27, 0.15);
+}
+
+input::placeholder {
+	color: #bfaea2;
+}
+
+input[readonly] {
+	background-color: var(--background-light);
+}
+
+/* ===== 버튼 스타일 ===== */
+.btn-sub {
+	padding: 0 16px;
+	background-color: var(--main-light);
+	color: #bc4e30;
+	border: 1px solid #ffdbc1;
+	border-radius: 10px !important;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: all 0.2s ease;
+}
+
+.btn-sub:hover {
+	background-color: var(--main-color);
+	color: #ffffff;
+	border-color: var(--main-color);
+}
+
+.btn-submit {
+	width: 100%;
+	height: 50px;
+	background: var(--main-gradient);
+	color: #ffffff;
+	border: none;
+	border-radius: 12px !important;
+	font-size: 16px;
+	font-weight: 800;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	margin-top: 12px;
+	box-shadow: 0 4px 12px rgba(255, 119, 27, 0.2);
+}
+
+.btn-submit:hover {
+	opacity: 0.93;
+	transform: translateY(-1px);
+}
+
+/* ===== 라디오 / 체크박스 커스텀 ===== */
+.radio-group {
+	display: flex;
+	gap: 10px;
+	height: 44px;
+}
+
+.radio-option {
+	flex: 1;
+	position: relative;
+}
+
+.radio-option input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.radio-option label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	background-color: #ffffff;
+	border: 1px solid var(--border-color);
+	border-radius: 10px !important;
+	color: var(--text-body);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.radio-option input[type="radio"]:checked + label {
+	background-color: var(--main-light);
+	border-color: var(--main-color);
+	color: var(--main-color);
+	font-weight: 800;
+}
+
+/* ===== 프로필 사진 업로드 ===== */
+.profile-avatar-wrapper {
+	position: relative;
+	width: 110px;
+	height: 110px;
+}
+
+.profile-avatar-preview {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background-color: var(--background-light);
+	border: 2px solid #f0e2d3;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 52px;
+	color: #bfaea2;
+	overflow: hidden;
+	box-shadow: 0 4px 12px rgba(69, 37, 20, 0.08);
+	object-fit: cover;
+}
+
+.profile-upload-btn {
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+	width: 34px;
+	height: 34px;
+	background-color: var(--main-color);
+	color: #ffffff;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	cursor: pointer;
+	border: 2px solid #ffffff;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+	transition: all 0.2s ease;
+}
+
+.profile-upload-btn:hover {
+	background-color: var(--main-dark);
+	transform: scale(1.1);
+}
+
+.extra-small {
+	font-size: 12px;
+}
+
+.input-wrapper .btn.sub {
+	flex: 0 0 60%;
+}
+
+.input-wrapper #userIdMessage {
+	flex: 0 0 40%;
+}
+
+/* 반응형 모바일 처리 */
+@media (max-width: 600px) {
+	.form-grid {
+		grid-template-columns: 1fr;
+	}
+	.full-width {
+		grid-column: span 1;
+	}
+	.register-container {
+		padding: 24px 16px;
+	}
+}

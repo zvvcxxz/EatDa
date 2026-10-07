@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <!-- 커스텀 CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</head>
+<body>
+
+<th:block layout:fragment="content">
+    <div class="page-container">
+        <div class="common-card complete-card">
+
+            <div class="common-header">
+                <h1>세션 만료</h1>
+                <p>
+                    세션이 만료 되었습니다.<br>
+                    <strong>다시 로그인 하시기 바랍니다.</strong>
+                </p>
+            </div>
+
+            <button type="button" class="btn-submit"
+                    th:onclick="|location.href='@{/}'|">
+                메인화면으로 이동
+            </button>
+
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

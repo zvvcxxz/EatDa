@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <!-- 기존 로그인 디자인을 순수 CSS로 표현한 독립 프래그먼트 -->
+  <dialog th:fragment="loginModal" id="login-modal" class="login-dialog"
+          aria-labelledby="modal-login-title" aria-describedby="modal-login-description">
+    <button type="button" class="login-close" data-close-login aria-label="로그인 닫기">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+
+    <div class="login-heading">
+      <div class="login-symbol" aria-hidden="true">잇</div>
+      <h3 id="modal-login-title">잇다 로그인 / 회원가입</h3>
+      <p id="modal-login-description">상세 레시피 확인 및 조리 가이드 모드는 로그인 후 이용 가능합니다.</p>
+    </div>
+
+    <form action="/member/login" th:action="@{/member/login}" method="post" class="login-form">
+      <!-- th:action 폼은 Spring에서 CSRF가 활성화되면 토큰을 자동 삽입합니다. -->
+      <div class="login-field">
+        <label for="modal-login-id">아이디 / 이메일</label>
+        <input type="text" id="modal-login-id" name="login_id" autocomplete="username"
+               placeholder="example@eatda.com" required>
+      </div>
+      <div class="login-field">
+        <label for="modal-login-password">비밀번호</label>
+        <input type="password" id="modal-login-password" name="password"
+               autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <div class="login-options">
+        <label class="login-remember">
+          <input type="checkbox" name="remember-me">
+          <span>로그인 상태 유지</span>
+        </label>
+        <nav class="login-links" aria-label="회원 계정 메뉴">
+          <a class="login-signup" href="/member/account" th:href="@{/member/account}">회원가입</a>
+          <span class="login-divider" aria-hidden="true">|</span>
+          <a href="/member/pwdFind" th:href="@{/member/pwdFind}">비밀번호 찾기</a>
+        </nav>
+      </div>
+      <button type="submit" class="login-submit">로그인하고 조리 시작하기 🍳</button>
+    </form>
+
+    <div class="login-social">
+      <p>SNS 계정으로 간편 시작</p>
+      <div class="login-social-buttons">
+        <a href="/oauth/kakao" th:href="@{/oauth/kakao}" class="login-social-button kakao">카카오</a>
+        <a href="/oauth/naver" th:href="@{/oauth/naver}" class="login-social-button naver">네이버</a>
+        <a href="/oauth/google" th:href="@{/oauth/google}" class="login-social-button google">구글</a>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

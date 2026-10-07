@@ -1,0 +1,125 @@
+/* 재료 나눔/같이 먹어요 공통 화면 */
+.community-main {
+  padding-top: 28px;
+  display: grid;
+  gap: 24px;
+}
+.community-tabs {
+  display: flex;
+  gap: 10px;
+}
+.community-main .hero {
+  padding: 36px;
+}
+.community-main .hero h1 {
+  font-size: 38px;
+  margin: 14px 0;
+}
+.post-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.post-toolbar > input {
+  flex: 1;
+}
+.post-toolbar > select {
+  max-width: 150px;
+}
+.post-toolbar .button {
+  white-space: nowrap;
+}
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.post-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 24px;
+  text-align: left;
+}
+.post-card h3 {
+  font-size: 19px;
+  margin: 12px 0;
+}
+.post-card p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+.post-card .post-meta {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 14px;
+}
+.post-card:hover {
+  box-shadow: 0 10px 22px #42281812;
+}
+.more-wrap {
+  text-align: center;
+}
+.post-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  background: #fff6e4;
+  padding: 22px;
+  border-radius: 20px;
+  margin: 20px 0;
+}
+.post-facts small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.post-content {
+  white-space: pre-wrap;
+  line-height: 1.9;
+  margin: 22px 0;
+}
+.post-detail-title {
+  font-size: 28px;
+}
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 1fr auto;
+  gap: 8px;
+  margin: 12px 0;
+}
+.ingredient-row input,
+.ingredient-row select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #e7ddd4;
+  padding: 10px;
+  border-radius: 9px;
+}
+.post-toolbar .text-input {
+  width: auto;
+}
+@media (max-width: 850px) {
+  .post-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .post-toolbar {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 550px) {
+  .post-grid,
+  .post-facts {
+    grid-template-columns: 1fr;
+  }
+  .ingredient-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .post-toolbar > input {
+    width: 100%;
+  }
+  .community-main .hero h1 {
+    font-size: 30px;
+  }
+}

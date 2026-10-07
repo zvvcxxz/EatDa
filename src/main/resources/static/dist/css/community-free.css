@@ -1,0 +1,401 @@
+/* 공통 화면의 높이와 커뮤니티 배치 */
+body.eatda-layout {
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+    margin:0
+}
+
+.eatda-layout>.site-header,.eatda-layout>.site-footer {
+    flex-shrink:0
+}
+
+.eatda-layout>.community-body {
+    flex:1
+}
+
+.community-body {
+    background:#f7f8ee;
+    color:#252a25;
+    padding:36px 24px 60px;
+    min-height:650px
+}
+
+.community-body * {
+    box-sizing:border-box
+}
+
+.community-body .app-shell {
+    display:grid;
+    grid-template-columns:220px minmax(0,1fr);
+    align-items:start;
+    gap:28px;
+    max-width:1240px;
+    margin:auto
+}
+
+.community-body .sidebar {
+    padding:26px 18px;
+    background:#edf2e4;
+    border:1px solid #dce3d2;
+    border-radius:18px
+}
+
+.community-body .eyebrow {
+    margin:0 0 20px;
+    color:#435a42;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:2px
+}
+
+.community-body .side-nav {
+    display:flex;
+    flex-direction:column;
+    gap:8px
+}
+
+.community-body .side-nav a {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 12px;
+    color:#303c30;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    border-radius:10px
+}
+
+.community-body .side-nav a:hover {
+    background:#dfe8d5
+}
+
+.community-body .side-nav a.active {
+    background:#d3e1c7;
+    color:#213d27;
+    font-weight:800
+}
+
+.community-body .side-message {
+    margin:30px 10px 0;
+    color:#4e5c49;
+    font-size:12px;
+    line-height:1.9
+}
+
+.community-body .content {
+    min-width:0;
+    padding:30px;
+    background:#fffef9;
+    border:1px solid #e3e6da;
+    border-radius:20px
+}
+
+.community-body .page-heading {
+    margin-bottom:24px
+}
+
+.community-body .page-heading h1 {
+    margin:0 0 10px;
+    color:#202520;
+    font-size:30px;
+    font-weight:800;
+    line-height:1.4;
+    overflow-wrap:anywhere
+}
+
+.community-body .meta {
+    color:#50594e;
+    font-size:13px;
+    line-height:1.8
+}
+
+.community-body .toolbar {
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:0 0 24px
+}
+
+.community-body .toolbar select {
+    width:140px;
+    flex:0 0 140px;
+    height:44px;
+    padding:0 12px;
+    background:#fff;
+    color:#293329;
+    border:1px solid #d7decf;
+    border-radius:10px
+}
+
+.community-body .search {
+    flex:1;
+    min-width:180px
+}
+
+.community-body .search input {
+    width:100%;
+    min-width:0;
+    height:44px;
+    padding:0 14px;
+    background:#fff;
+    color:#252a25;
+    border:1px solid #d7decf;
+    border-radius:10px
+}
+
+.community-body .search input::placeholder {
+    color:#626b5e
+}
+
+.community-body .toolbar button {
+    height:44px;
+    padding:0 20px;
+    background:#dce8d3;
+    color:#233e28;
+    border:1px solid #c6d5bc;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer
+}
+
+.community-body .toolbar>.meta {
+    width:100%;
+    margin-top:4px
+}
+
+.community-body .list {
+    border-top:2px solid #536a49
+}
+
+.community-body .list-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:22px 8px;
+    border-bottom:1px solid #e3e7db
+}
+
+.community-body .list-row>div {
+    min-width:0
+}
+
+.community-body .row-title {
+    margin-bottom:7px
+}
+
+.community-body .row-title a {
+    color:#252a25;
+    font-size:17px;
+    font-weight:700;
+    text-decoration:none;
+    overflow-wrap:anywhere
+}
+
+.community-body .row-title a:hover {
+    text-decoration:underline
+}
+
+.community-body .list-row>.meta {
+    flex-shrink:0
+}
+
+.community-body .list>p {
+    padding:60px 16px;
+    text-align:center;
+    border-bottom:1px solid #e3e7db
+}
+
+.community-body .pagination {
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:28px
+}
+
+.community-body .pagination a {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:38px;
+    height:38px;
+    padding:0 10px;
+    background:#f0f4e9;
+    color:#354832;
+    border:1px solid #dce3d2;
+    border-radius:8px;
+    text-decoration:none
+}
+
+.community-body .pagination a.current {
+    background:#d3e1c7;
+    color:#213d27;
+    border-color:#a9be9a;
+    font-weight:800
+}
+
+.community-body .breadcrumb {
+    margin-bottom:14px;
+    color:#50594e;
+    font-size:13px
+}
+
+.community-body .back-link {
+    display:inline-block;
+    margin-bottom:24px;
+    color:#354d32;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none
+}
+
+.community-body .panel {
+    padding:26px;
+    background:#fffef9;
+    border:1px solid #e1e5d8;
+    border-radius:14px
+}
+
+.community-body .panel .page-heading {
+    padding-bottom:22px;
+    border-bottom:1px solid #e1e5d8
+}
+
+.community-body .post-content {
+    min-height:240px;
+    padding-top:8px;
+    color:#292e28;
+    font-size:16px;
+    line-height:1.9;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere
+}
+
+@media(max-width:800px) {
+    .community-body .app-shell {
+    grid-template-columns:1fr
+}
+.community-body .side-nav {
+    flex-direction:row;
+    flex-wrap:wrap
+}
+.community-body .side-message {
+    display:none
+}
+.community-body .content {
+    padding:22px
+}
+
+}
+
+/* 푸터 위의 여백 제거 */
+.eatda-layout > .site-footer {
+    margin-top: 0;
+}
+
+/* 푸터 위 간격 제거 */
+.eatda-layout > .site-footer {
+    margin-top: 0;
+}
+
+/* 게시글 버튼 */
+.community-body .post-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.community-body .post-actions form {
+    margin: 0;
+}
+
+.community-body .community-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 18px;
+    background: #dce8d3;
+    color: #233e28;
+    border: 1px solid #c6d5bc;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.community-body .community-button:hover {
+    background: #cddfc1;
+}
+
+.community-body .cancel-button {
+    background: #f3f3eb;
+    color: #41483d;
+    border-color: #dce0d3;
+}
+
+.community-body .delete-button {
+    background: #fff0e9;
+    color: #873b2c;
+    border-color: #e9cfc2;
+}
+
+/* 등록·수정 입력란 */
+.community-body .community-editor {
+    display: grid;
+    gap: 24px;
+}
+
+.community-body .write-field {
+    display: grid;
+    gap: 10px;
+}
+
+.community-body .write-field label {
+    color: #293329;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.community-body .write-field input,
+.community-body .write-field textarea {
+    width: 100%;
+    padding: 14px;
+    background: #ffffff;
+    color: #252a25;
+    border: 1px solid #d7decf;
+    border-radius: 10px;
+    font: inherit;
+}
+
+.community-body .write-field input {
+    height: 48px;
+}
+
+.community-body .write-field textarea {
+    min-height: 320px;
+    line-height: 1.8;
+    resize: vertical;
+}
+
+.community-body .write-field input::placeholder,
+.community-body .write-field textarea::placeholder {
+    color: #626b5e;
+}
+
+.community-body .write-error {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: #fff0e9;
+    color: #873b2c;
+    border: 1px solid #e9cfc2;
+    border-radius: 10px;
+    font-size: 14px;
+}

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+      
+<head>
+<th:block layout:fragment="css">
+<link rel="stylesheet" th:href="@{/css/mykitchen.css}">
+</th:block>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>나의 주방</title>
+
+    <!-- Spring Security를 사용하는 경우 -->
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}">
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </th:block>
+
+    
+    <script defer th:src="@{/js/kitchen.js}"></script>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div class="kitchen-layout"
+     id="kitchenApp"
+     th:attr="data-api-base=@{/api/kitchen},
+              data-kitchen-url=@{/kitchen}">
+
+    <!-- 사이드 메뉴 -->
+    <aside class="sidebar">
+        <a class="brand" th:href="@{/kitchen}">
+            <span class="brand-icon" aria-hidden="true">🍳</span>
+            <span>나의 주방</span>
+        </a>
+
+        <div class="profile">
+            <div class="avatar" aria-hidden="true">👩‍🍳</div>
+            <strong th:text="${profile?.nickname}">요리하는 회원</strong>
+            <p>오늘도 맛있는 하루를 만들어 보세요.</p>
+        </div>
+
+        <nav class="side-nav" aria-label="나의 주방 메뉴">
+            <a th:href="@{/kitchen(tab='fridge')}"
+               th:classappend="${tab == 'fridge'} ? 'active'"
+               th:attr="aria-current=${tab == 'fridge' ? 'page' : null}">
+                <span aria-hidden="true">🧊</span> 내 냉장고
+            </a>
+            <a th:href="@{/kitchen(tab='mine')}"
+               th:classappend="${tab == 'mine'} ? 'active'">
+                <span aria-hidden="true">📖</span> 내가 작성한 레시피
+            </a>
+            <a th:href="@{/kitchen(tab='favorites')}"
+               th:classappend="${tab == 'favorites'} ? 'active'">
+                <span aria-hidden="true">♡</span> 찜한 레시피
+            </a>
+            <a th:href="@{/kitchen(tab='notifications')}"
+               th:classappend="${tab == 'notifications'} ? 'active'">
+                <span aria-hidden="true">🔔</span> 내 알림
+                <span class="nav-count"
+                      th:if="${unreadNotificationCount > 0}"
+                      th:text="${unreadNotificationCount}">3</span>
+            </a>
+            <a th:href="@{/kitchen(tab='tags')}"
+               th:classappend="${tab == 'tags'} ? 'active'">
+                <span aria-hidden="true">#</span> 관심 태그
+            </a>
+            <a th:href="@{/kitchen(tab='messages', box='received')}"
+               th:classappend="${tab == 'messages'} ? 'active'">
+                <span aria-hidden="true">✉</span> 쪽지
+            </a>
+            <a th:href="@{/kitchen(tab='inquiries')}"
+               th:classappend="${tab == 'inquiries'} ? 'active'">
+                <span aria-hidden="true">💬</span> 신고 / 문의
+            </a>
+            <a th:href="@{/kitchen(tab='activity')}"
+               th:classappend="${tab == 'activity'} ? 'active'">
+                <span aria-hidden="true">📊</span> 나의 활동
+            </a>
+        </nav>
+
+        <div class="sidebar-note">
+            구독 및 냉장고 재료 기반 레시피 작성은 준비 중입니다.
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">MY KITCHEN</p>
+                <h1 th:text="${pageTitle}">내 냉장고</h1>
+                <p class="muted" th:text="${pageDescription}">
+                    가지고 있는 재료를 관리하고 새로운 요리를 찾아보세요.
+                </p>
+            </div>
+            <a class="btn btn-light" th:href="@{/recipes}">레시피 둘러보기</a>
+        </header>
+
+        <!-- 활동 요약 -->
+        <section class="summary-grid" aria-label="나의 활동 요약">
+            <a class="summary-card" th:href="@{/kitchen(tab='mine')}">
+                <span>작성한 레시피</span>
+                <strong th:text="${summary?.recipeCount}">0</strong>
+            </a>
+            <a class="summary-card" th:href="@{/kitchen(tab='favorites')}">
+                <span>찜한 레시피</span>
+                <strong th:text="${summary?.favoriteCount}">0</strong>
+            </a>
+            <a class="summary-card" th:href="@{/kitchen(tab='fridge')}">
+                <span>냉장고 재료</span>
+                <strong th:text="${summary?.ingredientCount}">0</strong>
+            </a>
+            <div class="summary-card">
+                <span>구독자 <small>준비 중</small></span>
+                <strong>—</strong>
+            </div>
+        </section>
+
+        <!-- 1. 내 냉장고 -->
+        <section th:if="${tab == 'fridge'}" class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>우리 집 냉장고</h2>
+                    <p class="muted">등록일과 유통기한을 따로 확인하세요.</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="addIngredientButton">
+                    + 재료 추가
+                </button>
+            </div>
+
+            <form method="get" th:action="@{/kitchen}" class="toolbar">
+                <input type="hidden" name="tab" value="fridge">
+
+                <label class="sr-only" for="fridgeKeyword">보유 재료 검색</label>
+                <input id="fridgeKeyword" name="keyword" type="search"
+                       placeholder="보유한 재료를 검색하세요"
+                       th:value="${keyword}">
+
+                <label class="sr-only" for="fridgeStatus">재료 상태</label>
+                <select id="fridgeStatus" name="status">
+                    <option value="" th:selected="${status == ''}">전체 재료</option>
+                    <option value="OLD" th:selected="${status == 'OLD'}">오래된 재료</option>
+                    <option value="EXPIRING"
+                            th:selected="${status == 'EXPIRING'}">유통기한 임박</option>
+                    <option value="EXPIRED"
+                            th:selected="${status == 'EXPIRED'}">유통기한 경과</option>
+                </select>
+
+                <button class="btn btn-dark" type="submit">검색</button>
+            </form>
+
+            <div class="chip-row" aria-label="재료 카테고리">
+                <a class="chip"
+                   th:classappend="${categoryId == null} ? 'selected'"
+                   th:href="@{/kitchen(tab='fridge', keyword=${keyword}, status=${status})}">
+                    전체
+                </a>
+                <a class="chip"
+                   th:each="category : ${categories}"
+                   th:text="${category.name}"
+                   th:classappend="${category.id == categoryId} ? 'selected'"
+                   th:href="@{/kitchen(tab='fridge',
+                         categoryId=${category.id},
+                         keyword=${keyword}, status=${status})}">
+                    채소
+                </a>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(fridgeItems)}">
+                <span aria-hidden="true">🧺</span>
+                <h3>표시할 재료가 없어요</h3>
+                <p>새 재료를 등록하거나 검색 조건을 변경해 주세요.</p>
+            </div>
+
+            <div class="ingredient-grid">
+                <article class="ingredient-card" th:each="item : ${fridgeItems}">
+                    <div class="card-top">
+                        <span class="category-label" th:text="${item.categoryName}">채소</span>
+                        <div class="badge-group">
+                            <!-- 날짜 판단은 서버에서 수행 -->
+                            <span class="badge badge-old"
+                                  th:if="${item.old}">오래된 재료</span>
+                            <span class="badge badge-warning"
+                                  th:if="${item.expiring}">유통기한 임박</span>
+                            <span class="badge badge-danger"
+                                  th:if="${item.expired}">유통기한 경과</span>
+                        </div>
+                    </div>
+
+                    <h3>
+                        <a th:href="@{/kitchen(tab='recommendations',
+                                      fridgeItemId=${item.id})}"
+                           th:text="${item.ingredientName}">당근</a>
+                    </h3>
+
+                    <p class="quantity">
+                        <strong th:text="${item.quantity}">2</strong>
+                        <span th:text="${item.unitLabel}">개</span>
+                    </p>
+
+                    <dl class="date-list">
+                        <div>
+                            <dt>등록일</dt>
+                            <dd th:text="${item.registeredDate}">2026-01-01</dd>
+                        </div>
+                        <div>
+                            <dt>유통기한</dt>
+                            <dd th:text="${item.expiryDate ?: '미입력'}">미입력</dd>
+                        </div>
+                    </dl>
+
+                    <div class="card-actions">
+                        <button type="button" class="btn btn-light btn-small"
+                                data-action="edit-ingredient"
+                                th:attr="data-id=${item.id},
+                                         data-ingredient-id=${item.ingredientId},
+                                         data-name=${item.ingredientName},
+                                         data-quantity=${item.quantity},
+                                         data-unit=${item.unit},
+                                         data-registered=${item.registeredDate},
+                                         data-expiry=${item.expiryDate}">
+                            수정
+                        </button>
+                        <button type="button" class="btn btn-danger-light btn-small"
+                                data-action="delete-ingredient"
+                                th:attr="data-id=${item.id}">
+                            삭제
+                        </button>
+                    </div>
+                </article>
+            </div>
+
+            <div class="recommend-banner">
+                <div>
+                    <h3>냉장고 속 재료로 무엇을 만들까요?</h3>
+                    <p>보유 재료가 많이 일치하는 레시피를 찾아드립니다.</p>
+                </div>
+
+                <a th:if="${summary.ingredientCount > 0}"
+                   class="btn btn-primary"
+                   th:href="@{/kitchen(tab='recommendations')}">
+                    내 재료로 레시피 찾기
+                </a>
+
+                <button th:if="${summary.ingredientCount == 0}"
+                        class="btn btn-primary" disabled>
+                    먼저 재료를 등록해 주세요
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. 레시피: 내 레시피 / 찜 / 추천 -->
+        <section class="panel"
+                 th:if="${tab == 'mine' or tab == 'favorites' or tab == 'recommendations'}">
+
+            <div class="section-heading">
+                <h2 th:text="${pageTitle}">레시피 목록</h2>
+
+                <a th:if="${tab == 'mine'}"
+                   class="btn btn-primary"
+                   th:href="@{/recipes/new}">+ 레시피 작성</a>
+            </div>
+
+            <form th:if="${tab != 'recommendations'}"
+                  method="get" th:action="@{/kitchen}" class="toolbar">
+                <input type="hidden" name="tab" th:value="${tab}">
+
+                <label class="sr-only" for="recipeSort">정렬</label>
+                <select name="sort" id="recipeSort">
+                    <option value="latest" th:selected="${sort == 'latest'}"
+                            th:text="${tab == 'favorites' ? '최신 찜 순' : '최신순'}">
+                        최신순
+                    </option>
+                    <option value="likes" th:selected="${sort == 'likes'}">좋아요순</option>
+                </select>
+                <button type="submit" class="btn btn-light">정렬 적용</button>
+            </form>
+
+            <div th:if="${tab == 'recommendations'}" class="recommend-description">
+                <p class="muted">
+                    표준 재료 ID의 일치율이 높은 순으로 추천합니다.
+                    유통기한이 지난 재료는 추천 기준에서 제외됩니다.
+                </p>
+                <div class="chip-row">
+                    <span class="chip selected"
+                          th:each="ingredient : ${usedIngredients}"
+                          th:text="${ingredient.name}">당근</span>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(recipes)}">
+                <h3>표시할 레시피가 없어요</h3>
+                <p>레시피를 작성하거나 찜해 보세요. 추천에는 사용 가능한 재료가 필요합니다.</p>
+            </div>
+
+            <div class="recipe-grid">
+                <article class="recipe-card" th:each="recipe : ${recipes}">
+                    <a class="recipe-image"
+                       th:href="@{/recipes/{id}(id=${recipe.id})}">
+                        <img th:if="${recipe.imageUrl != null}"
+                             th:src="${recipe.imageUrl}"
+                             th:alt="${recipe.title}"
+                             loading="lazy">
+                        <span th:if="${recipe.imageUrl == null}"
+                              class="image-placeholder" aria-hidden="true">🍽️</span>
+                    </a>
+
+                    <div class="recipe-body">
+                        <div class="badge-group">
+                            <span th:if="${recipe.hidden}"
+                                  class="badge badge-danger">관리자 숨김</span>
+                            <span th:if="${!recipe.available}"
+                                  class="badge badge-old">열람 제한</span>
+                            <span th:if="${tab == 'recommendations'}"
+                                  class="badge badge-success"
+                                  th:text="|재료 일치 ${recipe.matchRate}%|">
+                                재료 일치 80%
+                            </span>
+                        </div>
+
+                        <h3 th:text="${recipe.title}">당근 볶음밥</h3>
+                        <p class="muted">
+                            <span th:text="${recipe.createdDate}">2026-01-01</span>
+                            · 좋아요 <span th:text="${recipe.likeCount}">0</span>
+                        </p>
+
+                        <div th:if="${tab == 'recommendations'}" class="match-info">
+                            <p>
+                                <strong>보유 재료</strong>
+                                <span th:text="${#strings.listJoin(recipe.ownedNames, ', ')}">
+                                    당근, 밥
+                                </span>
+                            </p>
+                            <div>
+                                <strong>부족 재료</strong>
+                                <span th:if="${#lists.isEmpty(recipe.missingIngredients)}">
+                                    없음
+                                </span>
+                                <div class="missing-item"
+                                     th:each="missing : ${recipe.missingIngredients}">
+                                    <span th:text="${missing.name}">대파</span>
+                                    <!-- 구매 연동은 보류: 장보기 화면으로만 이동 -->
+                                    <a th:href="@{/shopping(ingredientId=${missing.id})}">
+                                        장보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <a th:if="${recipe.available}"
+                               class="btn btn-light btn-small"
+                               th:href="@{/recipes/{id}(id=${recipe.id})}">보기</a>
+
+                            <a th:if="${tab == 'mine'}"
+                               class="btn btn-light btn-small"
+                               th:href="@{/recipes/{id}/edit(id=${recipe.id})}">수정</a>
+
+                            <button th:if="${tab == 'mine'}"
+                                    type="button"
+                                    class="btn btn-danger-light btn-small"
+                                    data-action="delete-recipe"
+                                    th:attr="data-id=${recipe.id}">삭제</button>
+
+                            <button th:if="${tab == 'favorites'}"
+                                    type="button"
+                                    class="btn btn-danger-light btn-small"
+                                    data-action="remove-favorite"
+                                    th:attr="data-id=${recipe.id}"
+                                    th:aria-label="|${recipe.title} 찜 해제|">
+                                ♥ 찜 해제
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- 3. 알림 -->
+        <section th:if="${tab == 'notifications'}" class="panel">
+            <div class="section-heading">
+                <h2>내 알림</h2>
+                <button type="button" class="btn btn-light"
+                        data-action="read-all-notifications">모두 읽음</button>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(notifications)}">
+                <h3>새로운 알림이 없어요</h3>
+            </div>
+
+            <div class="notification-list">
+                <button type="button" class="notification-item"
+                        th:each="notification : ${notifications}"
+                        th:classappend="${!notification.read} ? 'unread'"
+                        data-action="open-notification"
+                        th:attr="data-id=${notification.id}">
+                    <span class="notification-dot" aria-hidden="true"></span>
+                    <span class="notification-content">
+                        <strong th:text="${notification.title}">새 알림</strong>
+                        <span th:text="${notification.content}">알림 내용</span>
+                        <small th:text="${notification.createdAtText}">방금 전</small>
+                    </span>
+                    <span th:if="${!notification.read}" class="badge badge-success">
+                        읽지 않음
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. 관심 태그 -->
+        <section th:if="${tab == 'tags'}" class="panel">
+            <h2>나의 요리 취향을 알려주세요</h2>
+            <p class="muted">선택한 태그는 저장 후 다음 추천 요청부터 반영됩니다.</p>
+
+            <form id="tagForm">
+                <fieldset class="tag-fieldset">
+                    <legend class="sr-only">관심 태그 선택</legend>
+                    <label class="tag-choice" th:each="tag : ${tags}">
+                        <input type="checkbox" name="tagIds"
+                               th:value="${tag.id}"
+                               th:checked="${tag.selected}">
+                        <span th:text="|# ${tag.name}|"># 10분요리</span>
+                    </label>
+                </fieldset>
+
+                <button type="submit" class="btn btn-primary">관심 태그 저장</button>
+            </form>
+        </section>
+
+        <!-- 5. 쪽지 -->
+        <section th:if="${tab == 'messages'}" class="panel">
+            <div class="section-heading">
+                <div class="tab-links">
+                    <a th:href="@{/kitchen(tab='messages', box='received')}"
+                       th:classappend="${box == 'received'} ? 'active'">받은 쪽지</a>
+                    <a th:href="@{/kitchen(tab='messages', box='sent')}"
+                       th:classappend="${box == 'sent'} ? 'active'">보낸 쪽지</a>
+                </div>
+                <button type="button" class="btn btn-primary" id="composeMessageButton">
+                    쪽지 보내기
+                </button>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(messages)}">
+                <h3>쪽지가 없어요</h3>
+            </div>
+
+            <div class="message-list">
+                <article th:each="message : ${messages}" class="message-item">
+                    <button type="button" class="message-open"
+                            data-action="open-message"
+                            th:attr="data-id=${message.id}">
+                        <span>
+                            <strong th:text="${message.counterpartNickname}">상대방</strong>
+                            <span class="badge badge-success"
+                                  th:if="${!message.read}">읽지 않음</span>
+                        </span>
+                        <strong th:text="${message.title}">제목</strong>
+                        <span class="muted" th:text="${message.preview}">내용 일부</span>
+                        <small th:text="${message.createdAtText}">2026-01-01</small>
+                    </button>
+                    <button type="button" class="btn btn-danger-light btn-small"
+                            data-action="delete-message"
+                            th:attr="data-id=${message.id}">삭제</button>
+                </article>
+            </div>
+        </section>
+
+        <!-- 6. 신고 / 문의 -->
+        <section th:if="${tab == 'inquiries'}" class="panel">
+            <div class="section-heading">
+                <h2>내 신고 / 문의 내역</h2>
+                <a class="btn btn-primary" th:href="@{/inquiries/new}">문의 작성</a>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(inquiries)}">
+                <h3>등록한 신고나 문의가 없어요</h3>
+            </div>
+
+            <details class="inquiry-item" th:each="inquiry : ${inquiries}">
+                <summary>
+                    <span class="badge badge-old" th:text="${inquiry.typeLabel}">문의</span>
+                    <strong th:text="${inquiry.title}">문의 제목</strong>
+                    <span class="muted" th:text="${inquiry.createdDate}">2026-01-01</span>
+                    <span class="badge"
+                          th:classappend="${inquiry.completed}
+                              ? 'badge-success' : 'badge-warning'"
+                          th:text="${inquiry.statusLabel}">대기</span>
+                </summary>
+
+                <div class="inquiry-body">
+                    <h3>작성 내용</h3>
+                    <p class="preserve-lines" th:text="${inquiry.content}">내용</p>
+
+                    <div class="admin-answer">
+                        <h3>관리자 답변</h3>
+                        <p class="preserve-lines"
+                           th:text="${inquiry.answer ?: '아직 등록된 답변이 없습니다.'}">
+                            관리자 답변
+                        </p>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <!-- 7. 나의 활동 -->
+        <section th:if="${tab == 'activity'}" class="panel">
+            <h2>월별 레시피 작성 활동</h2>
+            <p class="muted">
+                삭제되지 않은 레시피 기준입니다. 관리자 숨김 레시피도 포함합니다.
+            </p>
+
+            <div class="activity-chart" role="list" aria-label="월별 레시피 작성 수">
+                <div class="chart-column" role="listitem"
+                     th:each="month : ${monthlyActivities}"
+                     th:aria-label="|${month.label}: ${month.count}개|">
+                    <strong th:text="${month.count}">0</strong>
+                    <div class="bar-track">
+                        <div class="chart-bar"
+                             th:style="|height: ${month.percent}%;|"></div>
+                    </div>
+                    <span th:text="${month.label}">1월</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 서버가 현재 탭의 페이지 링크를 생성 -->
+        <nav th:if="${pagination?.totalPages > 1}"
+             class="pagination" aria-label="페이지 이동">
+            <a th:each="link : ${pagination.links}"
+               th:href="${link.url}"
+               th:text="${link.label}"
+               th:classappend="${link.current} ? 'active'"
+               th:attr="aria-current=${link.current ? 'page' : null}">1</a>
+        </nav>
+    </main>
+</div>
+
+<!-- 냉장고 재료 등록 / 수정 -->
+<dialog id="ingredientDialog" class="app-dialog">
+    <form id="ingredientForm">
+        <div class="dialog-header">
+            <h2 id="ingredientDialogTitle">재료 추가</h2>
+            <button type="button" class="icon-button"
+                    data-close-dialog aria-label="닫기">×</button>
+        </div>
+
+        <input type="hidden" id="fridgeItemId">
+
+        <div id="ingredientSearchArea">
+            <label for="ingredientCategory">표준 재료 카테고리</label>
+            <select id="ingredientCategory">
+                <option value="">전체</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.id}"
+                        th:text="${category.name}">채소</option>
+            </select>
+
+            <div class="autocomplete">
+                <label for="ingredientSearch">표준 재료 검색</label>
+                <input id="ingredientSearch" type="search" autocomplete="off"
+                       placeholder="재료명 입력 후 검색 결과에서 선택">
+
+                <div id="ingredientSuggestions" class="suggestions"
+                     aria-label="표준 재료 검색 결과" hidden></div>
+            </div>
+        </div>
+
+        <p class="selected-value" id="selectedIngredient" aria-live="polite">
+            선택한 재료가 없습니다.
+        </p>
+
+        <div class="form-grid">
+            <div>
+                <label for="ingredientQuantity">보유 수량</label>
+                <input id="ingredientQuantity" type="number"
+                       min="0.001" step="0.001" required>
+            </div>
+            <div>
+                <label for="ingredientUnit">단위</label>
+                <select id="ingredientUnit" required>
+                    <option value="EA">개</option>
+                    <option value="G">g</option>
+                    <option value="KG">kg</option>
+                    <option value="ML">ml</option>
+                    <option value="L">L</option>
+                    <option value="PACK">팩</option>
+                </select>
+            </div>
+            <div>
+                <label for="registeredDate">등록일</label>
+                <input id="registeredDate" type="date" required
+                       th:attr="data-server-today=${serverToday}">
+            </div>
+            <div>
+                <label for="expiryDate">유통기한 <small>선택</small></label>
+                <input id="expiryDate" type="date">
+            </div>
+        </div>
+
+        <p class="form-error" id="ingredientError" role="alert"></p>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-light" data-close-dialog>취소</button>
+            <button type="submit" class="btn btn-primary">저장</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- 쪽지 작성 -->
+<dialog id="composeDialog" class="app-dialog">
+    <form id="messageForm">
+        <div class="dialog-header">
+            <h2>쪽지 보내기</h2>
+            <button type="button" class="icon-button"
+                    data-close-dialog aria-label="닫기">×</button>
+        </div>
+
+        <div class="autocomplete">
+            <label for="recipientSearch">받는 회원</label>
+            <input id="recipientSearch" type="search" autocomplete="off"
+                   placeholder="닉네임으로 검색 후 선택">
+            <div id="recipientSuggestions" class="suggestions"
+                 aria-label="회원 검색 결과" hidden></div>
+        </div>
+
+        <p id="selectedRecipient" class="selected-value" aria-live="polite">
+            수신자를 선택해 주세요.
+        </p>
+
+        <label for="messageTitle">제목</label>
+        <input id="messageTitle" maxlength="100" required>
+
+        <label for="messageContent">내용</label>
+        <textarea id="messageContent" rows="7" maxlength="5000" required></textarea>
+
+        <p class="form-error" id="messageError" role="alert"></p>
+
+        <div class="dialog-footer">
+            <button type="button" class="btn btn-light" data-close-dialog>취소</button>
+            <button type="submit" class="btn btn-primary">보내기</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- 쪽지 상세 -->
+<dialog id="messageDetailDialog" class="app-dialog">
+    <div class="dialog-header">
+        <h2 id="detailMessageTitle">쪽지</h2>
+        <button type="button" class="icon-button"
+                data-close-dialog aria-label="닫기">×</button>
+    </div>
+    <p id="detailMessageMeta" class="muted"></p>
+    <p id="detailMessageContent" class="preserve-lines"></p>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</th:block>
+</body>
+
+</html>

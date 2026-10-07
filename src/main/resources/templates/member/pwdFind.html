@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>패스워드 찾기</title>
+</head>
+
+<!-- 1. 페이지 전용 CSS는 layout3의 css 프래그먼트 위치로 전달 -->
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</th:block>
+
+<body>
+
+<!-- 2. layout3의 <main layout:fragment="content"> 영역에 들어갈 본문 -->
+<th:block layout:fragment="content">
+    <div class="page-container">
+        <div class="common-card find-card">
+            
+            <div class="common-header">
+                <h1>패스워드 찾기</h1>
+                <p>가입 시 등록한 아이디와 이름을 입력해 주세요.</p>
+            </div>
+
+            <!-- POST 전송 (th:action 사용 시 Spring Security CSRF 토큰 자동 포함) -->
+            <form name="pwdForm" th:action="@{/member/pwdFind}" method="post">
+                <div class="input-group">
+                    <label for="login_id">아이디</label>
+                    <input type="text" id="login_id" name="login_id" placeholder="아이디 입력" autofocus required>
+                </div>
+
+                <div class="input-group" style="margin-top: 12px;">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" placeholder="이름 입력" required>
+                </div>
+
+                <!-- 결과 메시지 영역 -->
+                <div class="message-area" th:if="${message != null}" style="color: #e53e3e;">
+                    <p th:utext="${message}"></p>
+                </div>
+
+                <button type="button" class="btn-submit" onclick="sendOk()">임시 비밀번호 발급</button>
+                
+                <!-- 로그인 이동 버튼 (모달을 띄우는 구조라면 onclick="openLoginModal()" 로 변경 가능) -->
+                <button type="button" class="btn-sub" style="width: 100%; height: 44px; margin-top: 8px;" 
+                        th:onclick="|location.href='@{/member/login}'|">로그인으로 이동</button>
+            </form>
+
+        </div>
+    </div>
+</th:block>
+
+<!-- 3. layout3의 script 프래그먼트 위치로 전달될 자바스크립트 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+    function sendOk() {
+        const f = document.pwdForm;
+
+        if (!f.login_id.value.trim()) {
+            alert('아이디를 입력하세요.');
+            f.login_id.focus();
+            return;
+        }
+        if (!f.name.value.trim()) {
+            alert('이름을 입력하세요.');
+            f.name.focus();
+            return;
+        }
+
+        f.submit();
+    }
+    </script>
+</th:block>
+
+</body>
+</html>

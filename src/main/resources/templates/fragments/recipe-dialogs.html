@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="recipeDialogs">
+      <dialog id="search-dialog" class="modal wide">
+        <div class="modal-head">
+          <h2>레시피 검색</h2>
+          <button
+            class="icon-button"
+            data-close="search-dialog"
+            aria-label="검색 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="recipe-search-form" class="search-form">
+            <input
+              id="ingredient-query"
+              class="text-input"
+              placeholder="재료 검색"
+              aria-label="재료 검색어"
+              autocomplete="off"
+            /><button class="button">검색</button>
+          </form>
+          <div
+            id="ingredient-options"
+            class="ingredient-results"
+            aria-label="재료 검색 결과"
+          ></div>
+          <div id="search-selected" class="tags"></div>
+          <p id="search-status" class="status" role="status"></p>
+          <div id="search-results" class="recipe-grid"></div>
+          <div class="more-wrap">
+            <button id="search-more" class="button secondary" hidden>
+              더 보기
+            </button>
+          </div>
+        </div>
+      </dialog>
+      <dialog id="recipe-dialog" class="modal">
+        <div class="modal-head">
+          <h2>레시피 상세</h2>
+          <button
+            class="icon-button"
+            data-close="recipe-dialog"
+            aria-label="상세 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div id="recipe-detail" class="modal-body"></div>
+      </dialog>
+      <dialog id="cook-dialog" class="modal">
+        <div class="modal-head">
+          <h2 id="cook-title">단계별 조리</h2>
+          <button
+            class="icon-button"
+            data-close="cook-dialog"
+            aria-label="조리 닫기"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="cook-counter" class="muted"></p>
+          <div class="cook-progress"><div id="cook-progress"></div></div>
+          <section id="cook-step" class="cook-step"></section>
+          <div class="cook-actions">
+            <button id="cook-prev" class="button secondary">이전</button
+            ><button id="cook-next" class="button">다음</button
+            ><button id="cook-complete" class="button yellow">단계 완료</button>
+          </div>
+          <p class="muted">좌우로 스와이프하거나 버튼으로 단계를 이동하세요.</p>
+        </div>
+      </dialog>
+      <dialog id="complete-dialog" class="modal">
+        <div class="modal-body complete-card">
+          <div class="check">✓</div>
+          <b>OK!</b>
+          <p id="complete-message"></p>
+          <button class="button" data-close="complete-dialog">확인</button>
+        </div>
+      </dialog>
+    </div>
+  </body>
+</html>

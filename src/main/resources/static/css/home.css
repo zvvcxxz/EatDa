@@ -1,0 +1,332 @@
+body {
+            background-color: #FFFDF7;
+            color: #2C221E;
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF7E6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF6B4A;
+            border-radius: 4px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 166, 35, 0.2);
+        }
+
+        .recipe-card-hover:hover .recipe-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ingredient-chip {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .ingredient-chip:hover {
+            transform: translateY(-2px) scale(1.04);
+        }
+
+/* 새 모달에만 적용: 기존 메인 디자인 유지 */
+.recipe-feature-modal { z-index: 70; }
+.recipe-feature-modal [hidden] { display: none !important; }
+#cook-completion-overlay:not(.hidden) {
+    position: fixed; inset: 0; z-index: 80; display: flex;
+    align-items: center; justify-content: center; padding: 24px;
+    background: rgba(0,0,0,.72); backdrop-filter: blur(16px);
+    pointer-events: none;
+}
+.cook-completion-card {
+    width: min(100%, 430px); padding: 40px 28px; border-radius: 38px;
+    background: #333; color: white; text-align: center;
+    box-shadow: 0 0 70px rgba(146,237,62,.42);
+    animation: cook-confirm-pop .28s ease-out;
+}
+.cook-completion-check {
+    width: 130px; height: 130px; margin: 0 auto 22px; border-radius: 50%;
+    background: #10b981; font-size: 80px; font-weight: 900; line-height: 130px;
+    box-shadow: 0 0 40px rgba(16,185,129,.25);
+}
+.cook-completion-card h3 { color: #fde047; font-size: 40px; font-weight: 900; }
+.cook-completion-card p { margin: 8px 0 24px; font-size: 20px; font-weight: 800; }
+.cook-completion-card > span {
+    display: inline-block; background: #4b4b4b; color: #ddd;
+    padding: 8px 20px; border-radius: 999px; font-size: 14px;
+}
+@keyframes cook-confirm-pop {
+    from { opacity: 0; transform: scale(.85); }
+    to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cook-completion-card { animation: none; }
+}
+.recipe-modal-panel { max-height: 92dvh; }
+#cook-swipe-area { touch-action: pan-y; min-height: 0; }
+.recipe-feature-modal button:disabled { opacity: .45; cursor: not-allowed; }
+.recipe-card-hover:focus-within .recipe-overlay { opacity: 1; transform: translateY(0); }
+@media (hover: none) {
+    .recipe-overlay { opacity: 1 !important; transform: none !important; background: rgba(0,0,0,.28); }
+}
+
+/* 공통 헤더 */
+.site-header {
+    position: relative;
+    z-index: 50;
+    background: #fffdf7;
+    border-bottom: 1px solid #e8e1d5;
+}
+
+.site-header .wrap {
+    width: min(1280px, calc(100% - 48px));
+    margin: 0 auto;
+}
+
+.site-header .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 88px;
+}
+
+.site-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    color: #242824;
+    text-decoration: none;
+}
+
+/* 로고가 원본 크기로 표시되지 않도록 제한 */
+.site-header .brand img {
+    display: block;
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+}
+
+.site-header .brand > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+    max-width: 170px;
+}
+
+.site-header .brand strong {
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.site-header .brand b {
+    font-size: 14px;
+}
+
+.site-header .brand small {
+    width: 100%;
+    font-size: 11px;
+    color: #575d55;
+}
+
+.site-header .nav {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.site-header .nav > a,
+.site-header .nav summary {
+    color: #292d28;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.site-header .nav details {
+    position: relative;
+}
+
+.site-header summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.site-header summary::-webkit-details-marker {
+    display: none;
+}
+
+.site-header .nav summary::after {
+    content: " ▾";
+    font-size: 11px;
+}
+
+/* 펼친 메뉴는 본문 위에 표시 */
+.site-header .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 180px;
+    margin-top: 14px;
+    padding: 8px;
+    background: #fffdf7;
+    border: 1px solid #e3e4da;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px #00000012;
+}
+
+.site-header .dropdown a {
+    display: block;
+    padding: 10px 12px;
+    color: #292d28;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.site-header .dropdown a:hover {
+    background: #edf2e7;
+}
+
+.site-header .button {
+    padding: 10px 16px;
+    border: 1px solid #e4d4c2;
+    border-radius: 10px;
+    background: #fff4e9;
+    color: #873b19;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.site-header form {
+    margin: 0;
+}
+
+.site-header .mobile-menu {
+    display: none;
+}
+
+/* 창이 좁아질 때만 접이식 메뉴 사용 */
+@media (max-width: 1100px) {
+    .site-header .nav {
+        display: none;
+    }
+
+    .site-header .mobile-menu {
+        display: block;
+        padding-bottom: 14px;
+    }
+
+    .site-header .mobile-links {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding-top: 16px;
+    }
+
+    .site-header .mobile-links a {
+        color: #292d28;
+        font-size: 13px;
+        text-decoration: none;
+    }
+}
+
+/* 공통 푸터 */
+.site-footer {
+    padding: 36px 24px;
+    background: #2c352b;
+    color: #fffdf7;
+    border-top: 1px solid #465342;
+}
+
+.site-footer .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.site-footer .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-footer .footer-brand span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #dce8d3;
+    color: #253e28;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.site-footer .footer-brand strong {
+    color: #fffdf7;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.site-footer p {
+    margin-top: 12px;
+    color: #e0e7db;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.site-footer .footer-links a {
+    color: #f0f3ea;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.site-footer .footer-links a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+    .site-footer .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* 본문이 남은 높이를 채워 푸터를 아래에 배치 */
+body.eatda-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.eatda-layout > .site-header,
+.eatda-layout > .site-footer {
+    flex-shrink: 0;
+}
+
+.eatda-layout > .community-body {
+    flex: 1;
+}

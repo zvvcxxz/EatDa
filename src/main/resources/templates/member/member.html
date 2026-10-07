@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title th:text="${mode == 'update' ? '회원 정보 수정' : '회원가입'}">회원가입</title>
+
+    <!-- 회원가입 전용 CSS -->
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/member/register.css}" />
+
+    <!-- 카카오/다음 우편번호 서비스 API CDN -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+
+<body>
+
+<th:block layout:fragment="content">
+    <div class="register-container">
+        
+        <!-- 헤더 -->
+        <div class="register-header">
+            <h1 th:text="${mode == 'update' ? '회원 정보 수정' : '회원가입'}">회원가입</h1>
+            <p th:text="${mode == 'update' ? '회원님의 개인정보를 수정합니다.' : '서비스 이용을 위한 회원가입'}">서비스 회원가입</p>
+        </div>
+
+        <!-- 폼 (가입: /member/account, 수정: /member/update) -->
+		<form name="memberForm" 
+		      th:action="${mode == 'update'} ? @{/member/update} : @{/member/account}" 
+		      method="POST" 
+		      enctype="multipart/form-data">
+            
+            <!-- 0. 프로필 사진 업로드 영역 -->
+            <div class="form-section text-center">
+                <div class="profile-avatar-wrapper">
+                    <!-- 기존 프로필 이미지가 있으면 렌더링, 없으면 기본 아이콘 -->
+                    <img class="img-avatar profile-avatar-preview" 
+     					th:src="${dto?.profile_photo != null and !#strings.isEmpty(dto.profile_photo)} ? @{/uploads/member/{img}(img=${dto.profile_photo})} : @{/dist/images/user.png}" 
+                         alt="프로필 이미지">
+                    <label for="selectFile" class="profile-upload-btn" title="프로필 사진 선택">
+                        <i class="bi bi-camera-fill"></i>
+                    </label>
+                </div>
+                <!-- MemberDto의 MultipartFile selectFile 필드 매핑 -->
+                <input type="file" class="file-input-hidden" id="selectFile" name="selectFile" accept="image/png, image/jpg, image/jpeg">
+                <button type="button" class="btn-sub btn-photo-init" style="margin-top: 8px;">사진 초기화</button>
+                <div class="profile-help-text">JPG, PNG 파일만 가능 (최대 800KB)</div>
+            </div>
+
+            <!-- 1. 계정 정보 -->
+            <div class="form-section">
+                <div class="section-title">🔒 계정 정보</div>
+                <div class="form-grid">
+                    
+                    <!-- 아이디 -->
+                    <div class="input-group full-width wrap-loginId">
+                        <label for="login_id">아이디</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="login_id" name="login_id" th:value="${dto?.login_id}"
+                                   th:readonly="${mode == 'update'}" placeholder="영문 소문자로 시작하는 5~10자" required>
+                            <button type="button" class="btn-sub" onclick="userIdCheck()" th:if="${mode == 'account'}">중복확인</button>
+                        </div>
+                        <span id="userIdMessage" class="profile-help-text" th:if="${mode == 'account'}">아이디는 5~10자 이내이며, 첫글자는 영문 소문자이어야 합니다.</span>
+                    </div>
+
+                    <!-- 비밀번호 -->
+					<div class="input-group">
+					    <label for="password">비밀번호</label>
+					    <input type="password" id="password" name="password" placeholder="5~10자 (영문+숫자+특수문자)" autocomplete="off">
+					    <small id="pwdRuleMsg" class="profile-help-text" style="margin-top: 4px; font-weight: 600;"></small>
+					</div>
+					
+					<!-- 비밀번호 확인 -->
+					<div class="input-group">
+					    <label for="password2">비밀번호 확인</label>
+					    <input type="password" id="password2" name="password2" placeholder="비밀번호 재입력" autocomplete="off">
+					    <small id="pwdMatchMsg" class="profile-help-text" style="margin-top: 4px; font-weight: 600;"></small>
+					</div>
+                </div>
+            </div>
+
+            <!-- 2. 개인 정보 -->
+            <div class="form-section">
+                <div class="section-title">👤 개인 정보</div>
+                <div class="form-grid">
+                    
+                    <!-- 이름 -->
+                    <div class="input-group">
+                        <label for="name">이름</label>
+                        <input type="text" id="name" name="name" th:value="${dto?.name}"
+                               th:readonly="${mode == 'update'}" placeholder="홍길동" required>
+                    </div>
+
+                    <!-- 생년월일 -->
+                    <div class="input-group">
+                        <label for="birth">생년월일</label>
+                        <input type="date" id="birth" name="birth" th:value="${dto?.birth}"
+                               th:readonly="${mode == 'update'}">
+                    </div>
+
+                    <!-- 이메일 -->
+                    <div class="input-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" th:value="${dto?.email}" placeholder="example@domain.com" required>
+                    </div>
+
+                    <!-- 전화번호 -->
+                    <div class="input-group">
+                        <label for="tel">연락처</label>
+                        <input type="tel" id="tel" name="tel" th:value="${dto?.tel}" placeholder="01012345678 ('-' 제외)">
+                    </div>
+
+                    <!-- 메일 수신 동의 -->
+					<div class="input-group full-width" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 0;">
+					    <!-- 좌측 라벨 -->
+					    <label style="margin-bottom: 0; white-space: nowrap;">이메일 수신 여부</label>
+					    
+					    <!-- 우측 체크박스 + 동의 문구 -->
+					    <label class="checkbox-label" for="receive_email" style="cursor: pointer; margin-bottom: 0;">
+					        <input type="checkbox" id="receive_email" name="receive_email" value="1"
+					               th:checked="${dto == null or dto.receive_email == 1}">
+					        <span>이동통신사/서비스 이벤트 및 혜택 알림 수신 동의</span>
+					    </label>
+					</div>
+                </div>
+            </div>
+
+            <!-- 3. 주소 정보 (다음/카카오 API 연동) -->
+            <div class="form-section">
+                <div class="section-title">📍 주소 정보</div>
+                <div class="form-grid">
+                    
+                    <!-- 우편번호 -->
+                    <div class="input-group full-width">
+                        <label for="zip">우편번호</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="zip" name="zip" th:value="${dto?.zip}" placeholder="우편번호" readonly tabindex="-1">
+                            <button type="button" class="btn-sub" onclick="daumPostcode()">주소 검색</button>
+                        </div>
+                    </div>
+
+                    <!-- 기본 주소 -->
+                    <div class="input-group full-width">
+                        <label for="addr1">기본 주소</label>
+                        <input type="text" id="addr1" name="addr1" th:value="${dto?.addr1}" placeholder="기본 주소" readonly tabindex="-1">
+                    </div>
+
+                    <!-- 상세 주소 -->
+                    <div class="input-group full-width">
+                        <label for="addr2">상세 주소</label>
+                        <input type="text" id="addr2" name="addr2" th:value="${dto?.addr2}" placeholder="상세 주소를 입력하세요">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 약관 동의 (가입 모드일 때만 노출) -->
+            <div class="form-section" th:if="${mode == 'account'}">
+                <div class="input-group full-width">
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="checkbox" id="agree" name="agree" checked onchange="document.getElementById('sendBtn').disabled = !this.checked">
+                            <label for="agree">서비스 <a href="#" style="color: #2b6cb0; text-decoration: underline;">이용약관</a> 및 개인정보 처리방침에 동의합니다.</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 버튼 영역 -->
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button type="button" id="sendBtn" class="btn-submit" onclick="memberOk()" 
+                        th:text="${mode == 'update' ? '정보 수정 완료' : '회원가입 완료'}">회원가입 완료</button>
+                <button type="button" class="btn-sub" style="flex: 1;" th:onclick="|location.href='@{/}'|" 
+                        th:text="${mode == 'update' ? '수정 취소' : '가입 취소'}">취소</button>
+            </div>
+
+            <!-- 아이디 중복 검사 여부 확인용 플래그 -->
+            <input type="hidden" name="loginIdValid" id="loginIdValid" value="false">
+        </form>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const defaultImg = /*[[@{/dist/images/user.png}]]*/ '/dist/images/user.png';
+        const uploadImgPath = /*[[@{/uploads/member/}]]*/ '/uploads/member/';
+        const existingImg = /*[[${dto?.profile_photo}]]*/ null;
+
+        const avatarEL = document.querySelector('.img-avatar');
+        const inputEL = document.querySelector('#selectFile');
+        const btnInitEL = document.querySelector('.btn-photo-init');
+        
+        const pwdInput = document.querySelector('#password');
+        const pwd2Input = document.querySelector('#password2');
+        const pwdRuleMsg = document.querySelector('#pwdRuleMsg');
+        const pwdMatchMsg = document.querySelector('#pwdMatchMsg');
+
+        // 영문, 숫자, 특수문자(!@#$%^&*+=-) 필수 포함, 5~10자 정규식
+        //const pwdPattern = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*+=-]).{5,10}$/;
+        const pwdPattern = /^(?=.*[a-zA-Z])(?=.*[0-9!@#$%^&*+=-]).{5,10}$/;
+
+        // 1. 비밀번호 입력 시 규칙 및 재확인 동시 검증
+        if (pwdInput) {
+            pwdInput.addEventListener('input', () => {
+                const val = pwdInput.value;
+
+                if (val === '') {
+                    pwdRuleMsg.textContent = '';
+                } else if (!pwdPattern.test(val)) {
+                    pwdRuleMsg.textContent = '❌ 5~10자 이내의 영문, 숫자 또는 특수문자를 조합하세요.';
+                    pwdRuleMsg.style.color = '#e53e3e'; // 빨간색
+                } else {
+                    pwdRuleMsg.textContent = '✅ 안전한 비밀번호입니다.';
+                    pwdRuleMsg.style.color = '#38a169'; // 초록색
+                }
+
+                // 비밀번호 재확인 입력창에 값이 있으면 일치 여부도 다시 체크
+                checkPasswordMatch();
+            });
+        }
+
+        // 2. 비밀번호 확인 입력 시 일치 여부 실시간 검증
+        if (pwd2Input) {
+            pwd2Input.addEventListener('input', checkPasswordMatch);
+        }
+
+        function checkPasswordMatch() {
+            const val1 = pwdInput.value;
+            const val2 = pwd2Input.value;
+
+            if (val2 === '') {
+                pwdMatchMsg.textContent = '';
+                return;
+            }
+
+            if (val1 === val2) {
+                pwdMatchMsg.textContent = '✅ 비밀번호가 일치합니다.';
+                pwdMatchMsg.style.color = '#38a169'; // 초록색
+            } else {
+                pwdMatchMsg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
+                pwdMatchMsg.style.color = '#e53e3e'; // 빨간색
+            }
+        }
+        
+        // 프로필 사진 변경 미리보기
+        const maxSize = 800 * 1024; // 800KB
+        inputEL.addEventListener('change', ev => {
+            let file = ev.target.files[0];
+            if (!file) {
+                avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
+                return;
+            }
+            
+            if (file.size > maxSize || !file.type.match('image.*')) {
+                alert('800KB 이하의 이미지 파일만 업로드 가능합니다.');
+                inputEL.value = '';
+                return;
+            }
+            
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                avatarEL.src = e.target.result;
+            }
+            reader.readAsDataURL(file);          
+        });
+        
+        // 사진 초기화 버튼
+        btnInitEL.addEventListener('click', () => {
+            inputEL.value = '';
+            avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
+        });
+
+        // 아이디 변경 시 중복 검사 초기화
+        const loginIdInput = document.querySelector('#login_id');
+        if (loginIdInput) {
+            loginIdInput.addEventListener('input', () => {
+                document.querySelector('#loginIdValid').value = 'false';
+            });
+        }
+    });
+
+
+    // 아이디 중복 검사 (Controller /member/userIdCheck 연동)
+    function userIdCheck() {
+        const loginIdInput = document.querySelector('#login_id');
+        const loginId = loginIdInput.value.trim();
+        const msgEl = document.querySelector('#userIdMessage');
+
+        const p = /^[a-z][a-z0-9_]{4,9}$/i;
+        if (!p.test(loginId)) {
+            alert('아이디는 5~10자 이내이며, 첫글자는 영문 소문자로 시작해야 합니다.');
+            loginIdInput.focus();
+            return;
+        }
+
+        const url = /*[[@{/member/userIdCheck}]]*/ '/member/userIdCheck';
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ 'login_id': loginId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.passed === 'true') {
+                alert('사용 가능한 아이디입니다.');
+                document.querySelector('#loginIdValid').value = 'true';
+                if (msgEl) msgEl.textContent = '사용 가능한 아이디입니다.';
+            } else {
+                alert('이미 사용 중인 아이디입니다.');
+                document.querySelector('#loginIdValid').value = 'false';
+                if (msgEl) msgEl.textContent = '이미 사용 중인 아이디입니다.';
+                loginIdInput.focus();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('중복 검사 중 오류가 발생했습니다.');
+        });
+    }
+
+    // 폼 유효성 검사 및 전송
+    function memberOk() {
+        const f = document.memberForm;
+        const mode = /*[[${mode}]]*/ 'account';
+        let str, p; 
+		
+        // 회원가입 모드일 때만 아이디 및 중복검사 체크
+        if (mode === 'account') {
+            p = /^[a-z][a-z0-9_]{4,9}$/i;
+            str = f.login_id.value;
+            if (!p.test(str)) { 
+                alert('아이디를 올바르게 입력하세요.');
+                f.login_id.focus();
+                return;
+            }
+
+            if (f.loginIdValid.value !== 'true') {
+                alert('아이디 중복 검사를 실행해 주세요.');
+                f.login_id.focus();
+                return;
+            }
+
+            // 비밀번호 필수 입력
+            
+            p = /^(?=.*[a-z])(?=.*[!@#$%^*+=-]|.*[0-9]).{5,10}$/i;
+            str = f.password.value;
+            if (!p.test(str)) { 
+                alert('패스워드는 5~10자 이내이며 숫자 또는 특수문자를 포함해야 합니다.');
+                f.password.focus();
+                return;
+            }
+
+            if (str !== f.password2.value) {
+                alert('패스워드가 일치하지 않습니다.');
+                f.password.focus();
+                return;
+            }
+        } else {
+            // 회원수정 모드일 때 비밀번호를 입력한 경우만 유효성 검사
+            if (f.password.value.trim() !== '') {
+                p = /^(?=.*[a-z])(?=.*[!@#$%^*+=-]|.*[0-9]).{5,10}$/i;
+                str = f.password.value;
+                if (!p.test(str)) { 
+                    alert('패스워드는 5~10자 이내이며 숫자 또는 특수문자를 포함해야 합니다.');
+                    f.password.focus();
+                    return;
+                }
+
+                if (str !== f.password2.value) {
+                    alert('패스워드가 일치하지 않습니다.');
+                    f.password.focus();
+                    return;
+                }
+            }
+        }
+
+        // 이름 검증
+        p = /^[가-힣]{2,5}$/;
+        str = f.name.value;
+        if (!p.test(str)) {
+            alert('이름은 2~5자 한글로 입력하세요.');
+            f.name.focus();
+            return;
+        }
+
+        // 생년월일 검증
+        str = f.birth.value;
+        if (!isValidDateString(str)) {
+            alert('올바른 생년월일을 선택하세요.');
+            f.birth.focus();
+            return;
+        }
+
+        // 이메일 검증
+        p = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;    
+        str = f.email.value;
+        if (!p.test(str)) {
+            alert('올바른 이메일 주소를 입력하세요.');
+            f.email.focus();
+            return;
+        }
+
+        // 전화번호 검증
+        p = /^(010)-?\d{4}-?\d{4}$/;    
+        str = f.tel.value;
+        if (!p.test(str)) {
+            alert('올바른 전화번호를 입력하세요.');
+            f.tel.focus();
+            return;
+        }
+
+        // 주소 검증
+        if (f.zip.value === '' || f.addr1.value === '') {
+            alert('우편번호 검색을 통해 주소를 입력해 주세요.');
+            return;
+        }
+
+        f.submit();
+    }
+
+    // 다음/카카오 우편번호 API
+    function daumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let fullAddr = '';
+                let extraAddr = '';
+
+                if (data.userSelectedType === 'R') {
+                    fullAddr = data.roadAddress;
+                } else {
+                    fullAddr = data.jibunAddress;
+                }
+
+                if (data.userSelectedType === 'R') {
+                    if (data.bname !== '') {
+                        extraAddr += data.bname;
+                    }
+                    if (data.buildingName !== '') {
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+                }
+
+                document.getElementById('zip').value = data.zonecode;
+                document.getElementById('addr1').value = fullAddr;
+                document.getElementById('addr2').focus();
+            }
+        }).open();
+    }
+    </script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.MemberMapper">
+
+    <!-- 계정 상태(STATUS) 변경 -->
+	<update id="updateMemberStatus" parameterType="map">
+		UPDATE MEMBER 
+		SET STATUS = #{status},
+			UPDATED_AT = SYSTIMESTAMP
+		<where>
+			<choose>
+				<when test="login_id != null">
+					LOGIN_ID = #{login_id}
+				</when>
+				<otherwise>
+					MEMBER_ID = #{member_id}
+				</otherwise>
+			</choose>
+		</where>
+	</update>
+	
+	<!-- 회원 탈퇴 처리 (개인정보 파기 및 상태 변경) -->
+	<update id="withdrawMember" parameterType="Long">
+	    UPDATE MEMBER
+	    SET STATUS = 3, -- 3: 탈퇴
+	        PASSWORD_HASH = 'WITHDRAWN_USER',
+	        NAME = NULL,
+	        EMAIL = NULL,
+	        PHONE = NULL,
+	        PROFILE_URL = NULL,
+	        UPDATED_AT = SYSTIMESTAMP
+	    WHERE MEMBER_ID = #{member_id}
+	</update>
+
+	<!-- 로그인 성공 시 시간 갱신 및 실패 횟수 초기화 (MEMBER_ID 기준) -->
+	<update id="updateLastLogin" parameterType="Long">
+		UPDATE MEMBER 
+		SET LAST_LOGIN_AT = SYSTIMESTAMP, 
+			FAILURE_CNT = 0
+		WHERE MEMBER_ID = #{member_id}
+	</update>
+
+	<!-- 로그인 성공 시 시간 갱신 및 실패 횟수 초기화 (LOGIN_ID 기준) -->
+	<update id="updateLastLoginId" parameterType="String">
+		UPDATE MEMBER 
+		SET LAST_LOGIN_AT = SYSTIMESTAMP, 
+			FAILURE_CNT = 0
+		WHERE LOGIN_ID = #{login_id}
+	</update>
+
+	<!-- 회원 정보 상세 조회 (MEMBER_ID 기준) -->
+	<select id="findById" parameterType="Long" resultType="MemberDto">
+		SELECT 
+			m.MEMBER_ID, m.ROLE_ID, r.ROLE_CODE AS authority, r.ROLE_NAME,
+			m.LOGIN_ID, m.PASSWORD_HASH AS password, m.NAME, m.EMAIL,
+			m.PHONE AS tel, m.PROFILE_URL AS profile_photo, m.STATUS AS enabled,
+			m.FAILURE_CNT, m.LAST_LOGIN_AT AS last_login,
+			TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
+			m.ZIP, m.ADDR1, m.ADDR2, m.RECEIVE_EMAIL,
+			m.SNS_PROVIDER, m.SNS_ID,
+			m.CREATED_AT, m.UPDATED_AT
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		WHERE m.MEMBER_ID = #{member_id}
+	</select>
+
+	<!-- 회원 정보 상세 조회 (LOGIN_ID 기준 - 로그인/인증용) -->
+	<select id="findByLoginId" parameterType="String" resultType="MemberDto">
+		SELECT 
+			m.MEMBER_ID, m.ROLE_ID, r.ROLE_CODE AS authority, r.ROLE_NAME,
+			m.LOGIN_ID, m.PASSWORD_HASH AS password, m.NAME, m.EMAIL,
+			m.PHONE AS tel, m.PROFILE_URL AS profile_photo, m.STATUS AS enabled,
+			m.FAILURE_CNT, m.LAST_LOGIN_AT AS last_login,
+			TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
+			m.ZIP, m.ADDR1, m.ADDR2, m.RECEIVE_EMAIL,
+			m.SNS_PROVIDER, m.SNS_ID,
+			m.CREATED_AT, m.UPDATED_AT
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		WHERE m.LOGIN_ID = #{login_id}
+	</select>
+
+	<!-- LOGIN_ID로 MEMBER_ID 조회 -->
+	<select id="getMemberId" parameterType="String" resultType="Long">
+		SELECT MEMBER_ID
+		FROM MEMBER
+		WHERE LOGIN_ID = #{login_id}
+	</select>
+
+	<!-- 패스워드 실패 횟수 조회 -->
+	<select id="checkFailureCount" parameterType="String" resultType="Integer">
+		SELECT NVL(FAILURE_CNT, 0) AS failure_cnt
+		FROM MEMBER
+		WHERE LOGIN_ID = #{login_id}
+	</select>
+	
+	<!-- 패스워드 실패 횟수 초기화 -->
+	<update id="updateFailureCountReset" parameterType="String">
+		UPDATE MEMBER 
+		SET FAILURE_CNT = 0
+		WHERE LOGIN_ID = #{login_id}
+	</update>
+	
+	<!-- 패스워드 실패 횟수 증가 -->
+	<update id="updateFailureCount" parameterType="String">
+		UPDATE MEMBER 
+		SET FAILURE_CNT = FAILURE_CNT + 1
+		WHERE LOGIN_ID = #{login_id}
+	</update>
+
+	<!-- 회원 권한 코드 조회 (Spring Security 연동용) -->
+	<select id="findByAuthority" parameterType="String" resultType="String">
+		SELECT r.ROLE_CODE AS authority
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		WHERE m.LOGIN_ID = #{login_id}
+	</select>	
+	
+	
+	<!-- 1. 소셜 회원 로그인 조회 (loginSnsMember) -->
+	<select id="loginSnsMember" parameterType="map" resultType="MemberDto">
+		SELECT 
+			m.MEMBER_ID, m.ROLE_ID, r.ROLE_CODE AS authority, r.ROLE_NAME,
+			m.LOGIN_ID, m.PASSWORD_HASH AS password, m.NAME, m.EMAIL,
+			m.PHONE AS tel, m.PROFILE_URL AS profile_photo, m.STATUS AS enabled,
+			m.FAILURE_CNT, m.LAST_LOGIN_AT AS last_login,
+			m.SNS_PROVIDER, m.SNS_ID, m.CREATED_AT, m.UPDATED_AT
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		WHERE m.SNS_PROVIDER = #{sns_provider} 
+		  AND m.SNS_ID = #{sns_id}
+	</select>
+
+	<!-- 2. 일반 회원 가입 (insertMember) -->
+	<insert id="insertMember" parameterType="MemberDto">
+		INSERT INTO MEMBER (
+			MEMBER_ID, ROLE_ID, LOGIN_ID, PASSWORD_HASH, NAME, EMAIL, 
+			PHONE, PROFILE_URL, STATUS, FAILURE_CNT, BIRTH, ZIP, ADDR1, ADDR2, 
+			RECEIVE_EMAIL, CREATED_AT, UPDATED_AT
+		) VALUES (
+			SEQ_MEMBER.NEXTVAL, 
+			#{role_id, jdbcType=NUMERIC}, 
+			#{login_id}, 
+			#{password}, 
+			#{name, jdbcType=VARCHAR}, 
+			#{email}, 
+			#{tel, jdbcType=VARCHAR}, 
+			#{profile_photo, jdbcType=VARCHAR}, 
+			1, 
+			0, 
+			TO_DATE(#{birth, jdbcType=VARCHAR}, 'YYYY-MM-DD'), 
+			#{zip, jdbcType=VARCHAR}, 
+			#{addr1, jdbcType=VARCHAR}, 
+			#{addr2, jdbcType=VARCHAR}, 
+			#{receive_email}, 
+			SYSTIMESTAMP, 
+			SYSTIMESTAMP
+		)
+	</insert>
+
+	<!-- 3. 소셜 회원 가입 (insertSnsMember) -->
+	<insert id="insertSnsMember" parameterType="MemberDto">
+		INSERT INTO MEMBER (
+			MEMBER_ID, ROLE_ID, LOGIN_ID, PASSWORD_HASH, NAME, EMAIL, 
+			PROFILE_URL, STATUS, FAILURE_CNT, SNS_PROVIDER, SNS_ID, CREATED_AT, UPDATED_AT
+		) VALUES (
+			SEQ_MEMBER.NEXTVAL, 
+			#{role_id, jdbcType=NUMERIC}, 
+			#{sns_provider} || '_' || #{sns_id}, -- 소셜 가입 시 임시 LOGIN_ID 생성
+			'SNS_USER', 
+			#{name, jdbcType=VARCHAR}, 
+			#{email, jdbcType=VARCHAR}, 
+			#{profile_photo, jdbcType=VARCHAR}, 
+			1, 
+			0, 
+			#{sns_provider}, 
+			#{sns_id}, 
+			SYSTIMESTAMP, 
+			SYSTIMESTAMP
+		)
+	</insert>
+
+	<!-- 4. 회원 정보 수정 (updateMember) -->
+	<update id="updateMember" parameterType="MemberDto">
+		UPDATE MEMBER
+		<set>
+			<if test="name != null">NAME = #{name},</if>
+			<if test="email != null">EMAIL = #{email},</if>
+			<if test="tel != null">PHONE = #{tel},</if>
+			<if test="profile_photo != null">PROFILE_URL = #{profile_photo},</if>
+			<if test="birth != null">BIRTH = TO_DATE(#{birth}, 'YYYY-MM-DD'),</if>
+			<if test="zip != null">ZIP = #{zip},</if>
+			<if test="addr1 != null">ADDR1 = #{addr1},</if>
+			<if test="addr2 != null">ADDR2 = #{addr2},</if>
+			<if test="receive_email != 0">RECEIVE_EMAIL = #{receive_email},</if>
+			<if test="role_id != 0">ROLE_ID = #{role_id},</if>
+			UPDATED_AT = SYSTIMESTAMP
+		</set>
+		WHERE MEMBER_ID = #{member_id}
+	</update>
+
+	<!-- 5. 비밀번호 변경 (updateMemberPassword) -->
+	<update id="updateMemberPassword" parameterType="MemberDto">
+		UPDATE MEMBER
+		SET PASSWORD_HASH = #{password},
+			UPDATED_AT = SYSTIMESTAMP
+		WHERE LOGIN_ID = #{login_id}
+	</update>
+
+	<!-- 6. 프로필 사진 삭제 (deleteProfilePhoto) -->
+	<update id="deleteProfilePhoto" parameterType="map">
+		UPDATE MEMBER
+		SET PROFILE_URL = NULL,
+			UPDATED_AT = SYSTIMESTAMP
+		WHERE MEMBER_ID = #{member_id}
+	</update>
+
+	<!-- 7. 회원 검색 목록 조회 (listFindMember) -->
+	<select id="listFindMember" parameterType="map" resultType="MemberDto">
+		SELECT 
+			m.MEMBER_ID, m.ROLE_ID, r.ROLE_CODE AS authority, r.ROLE_NAME,
+			m.LOGIN_ID, m.NAME, m.EMAIL, m.PHONE AS tel,
+			m.STATUS AS enabled, m.LAST_LOGIN_AT AS last_login, m.CREATED_AT
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		<where>
+			<if test="kwd != null and kwd != ''">
+				<choose>
+					<when test="schType == 'login_id'">
+						m.LOGIN_ID LIKE '%' || #{kwd} || '%'
+					</when>
+					<when test="schType == 'name'">
+						m.NAME LIKE '%' || #{kwd} || '%'
+					</when>
+					<otherwise>
+						(m.LOGIN_ID LIKE '%' || #{kwd} || '%' OR m.NAME LIKE '%' || #{kwd} || '%')
+					</otherwise>
+				</choose>
+			</if>
+			<if test="enabled != null">
+				AND m.STATUS = #{enabled}
+			</if>
+		</where>
+		ORDER BY m.MEMBER_ID DESC
+	</select>
+
+	<!-- 8. 메서드명 매핑 보완 (findByAuthority) -->
+	<select id="findAuthorityByLoginId" parameterType="String" resultType="String">
+		SELECT r.ROLE_CODE AS authority
+		FROM MEMBER m
+		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		WHERE m.LOGIN_ID = #{login_id}
+	</select>
+	
+</mapper>
