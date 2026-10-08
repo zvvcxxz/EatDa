@@ -1,20 +1,238 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
 </th:block>
-      
+  	  
 <th:block layout:fragment="content">
-	<div class="section" data-aos="fade-up" data-aos-delay="200">
-		<div class="section-body">
-			괸라자 메인 화면 입니다.
+	<div class="admin-wrap" id="view-admin">
+        <!-- 타이틀 영역 -->
+		<section class="page-heading">
+			<div>
+				<p class="eyebrow">ADMIN DASHBOARD</p>
+				<h1 class="page-title">관리자 페이지</h1>
+				<p class="subtitle">우리의 주방을 더 즐겁고 안전하게 관리해요.</p>
+			</div>
+			<span class="custom-badge orange">관리자 전용</span>
+		</section>
+
+		<!-- 상단 통계 -->
+		<section class="summary-grid" aria-label="관리 현황">
+		    <article class="summary-card">
+		        <div class="summary-top"><span>전체 회원</span><span class="summary-icon">👥</span></div>
+		        <strong th:text="${stats?.memberCount != null ? #numbers.formatInteger(stats.memberCount, 1, 'COMMA') : '0'}"></strong>
+		        <small>전체 서비스 회원</small>
+		    </article>
+		    <article class="summary-card">
+		        <div class="summary-top"><span>등록 레시피</span><span class="summary-icon">📖</span></div>
+		        <strong th:text="${stats?.recipeCount != null ? #numbers.formatInteger(stats.recipeCount, 1, 'COMMA') : '0'}"></strong>
+		        <small>회원이 공유한 레시피</small>
+		    </article>
+		    <article class="summary-card attention">
+		        <div class="summary-top"><span>처리 대기 신고</span><span class="summary-icon">🚩</span></div>
+		        <strong id="pending-report-count" th:text="${stats?.pendingReportCount != null ? stats.pendingReportCount : '0'}"></strong>
+		        <small>확인이 필요한 신고</small>
+		    </article>
+		    <article class="summary-card attention">
+		        <div class="summary-top"><span>답변 대기 문의</span><span class="summary-icon">💬</span></div>
+		        <strong id="pending-inquiry-count" th:text="${stats?.pendingInquiryCount != null ? stats.pendingInquiryCount : '0'}"></strong>
+		        <small>회원의 질문</small>
+		    </article>
+		</section>
+
+        <!-- 탭 별 본문 영역 (left.html 메뉴 클릭 시 전환됨) -->
+		<div class="admin-tab-contents">
+            
+            <!-- 공지사항 관리 탭 -->
+			<section class="panel admin-tab" id="tab-notices">
+				<div class="panel-head">
+					<div><h2>공지사항 관리</h2><p>서비스 소식을 회원들에게 전해주세요.</p></div>
+					<button type="button" class="custom-btn primary" data-open="notice-dialog">+ 공지 등록</button>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead><tr><th>구분</th><th>제목</th><th>작성일</th><th>상태</th><th>관리</th></tr></thead>
+						<tbody id="notice-rows">
+							<tr>
+								<td><span class="custom-badge orange">공지</span></td>
+								<td class="cell-title">내가요리왕에 오신 것을 환영합니다!</td>
+								<td class="muted">2026.09.28</td>
+								<td><span class="custom-badge green" data-state>공개</span></td>
+								<td><button type="button" class="custom-btn secondary small" data-toggle="notice">비공개</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+            <!-- 회원 관리 탭 -->
+			<section class="panel admin-tab" id="tab-members" hidden>
+				<div class="panel-head">
+					<div><h2>회원 관리</h2><p>회원 상태를 확인하고 이용 제한을 관리해요.</p></div>
+					<input class="search-input" type="search" placeholder="닉네임 검색" data-search="member-rows">
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead><tr><th>닉네임</th><th>가입일</th><th>레시피</th><th>상태</th><th>관리</th></tr></thead>
+						<tbody id="member-rows">
+							<tr data-search-text="요리왕">
+								<td class="cell-title">요리왕</td><td class="muted">2026.09.20</td><td>12개</td>
+								<td><span class="custom-badge green" data-state>정상</span></td>
+								<td><button type="button" class="custom-btn danger small" data-toggle="member">이용 제한</button></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<p class="empty" data-empty-for="member-rows" hidden>검색 결과가 없습니다.</p>
+			</section>
+
+            <!-- 레시피 관리 탭 -->
+            <section class="panel admin-tab" id="tab-recipes" hidden>
+                <div class="panel-head">
+                    <div><h2>레시피 관리</h2><p>등록된 레시피의 공개 상태를 관리해요.</p></div>
+                    <input class="search-input" type="search" placeholder="레시피 이름 검색" data-search="recipe-rows">
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>레시피</th><th>작성자</th><th>신고</th><th>상태</th><th>관리</th></tr></thead>
+                        <tbody id="recipe-rows">
+                            <tr data-search-text="토마토 달걀 볶음">
+                                <td class="cell-title">🍅 토마토 달걀 볶음</td><td>요리왕</td><td>0건</td>
+                                <td><span class="custom-badge green" data-state>공개</span></td>
+                                <td><button type="button" class="custom-btn secondary small" data-toggle="recipe">숨김</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 신고 / 문의 탭 -->
+			<section class="panel admin-tab" id="tab-requests" hidden>
+				<div class="panel-head">
+					<div><h2>신고 / 문의 처리</h2><p>접수 내용을 펼쳐 확인하고 처리해주세요.</p></div>
+					<span class="custom-badge orange">통합 관리</span>
+				</div>
+				<div class="panel-body request-list">
+					<details class="request" data-request="report">
+						<summary>
+							<span class="custom-badge red">신고</span>
+							<span class="request-title">게시글에 부적절한 표현이 있어요</span>
+							<span class="custom-badge orange" data-request-state>처리 대기</span>
+						</summary>
+						<div class="request-body">
+							<p>대상: 자유게시판 게시글 #24<br>사유: 다른 회원을 비방하는 내용이 포함되어 있습니다.<br>접수일: 2026.10.01</p>
+							<div class="actions">
+								<button type="button" class="custom-btn danger small" data-report-action="숨김 처리">대상 숨김</button>
+								<button type="button" class="custom-btn secondary small" data-report-action="기각">신고 기각</button>
+							</div>
+						</div>
+					</details>
+					<details class="request" data-request="inquiry">
+						<summary>
+							<span class="custom-badge blue">문의</span>
+							<span class="request-title">레시피 대표 사진을 바꾸고 싶어요</span>
+							<span class="custom-badge orange" data-request-state>답변 대기</span>
+						</summary>
+						<div class="request-body">
+							<p>레시피를 등록했는데 대표 사진을 다른 사진으로 바꾸고 싶습니다.<br>어디에서 수정할 수 있나요?<br>접수일: 2026.10.01</p>
+							<form id="inquiry-form" class="form-grid">
+								<label class="field">
+									<span>관리자 답변</span>
+									<textarea name="answer" required maxlength="2000" placeholder="문의에 대한 답변을 입력해주세요."></textarea>
+								</label>
+								<button type="submit" class="custom-btn primary">답변 등록</button>
+							</form>
+							<div class="answer-preview" id="answer-preview" hidden></div>
+						</div>
+					</details>
+				</div>
+			</section>
+
+            <!-- 태그 관리 탭 -->
+			<section class="panel admin-tab" id="tab-tags" hidden>
+				<div class="panel-head">
+					<div><h2>태그 관리</h2><p>레시피와 관심 태그에 사용할 항목을 관리해요.</p></div>
+					<button type="button" class="custom-btn primary" data-open="tag-dialog">+ 태그 추가</button>
+				</div>
+				<div class="panel-body">
+					<div class="tag-list" id="tag-list"></div>
+				</div>
+			</section>
+			
+            <!-- 미션 관리 탭 (어드민용) -->
+			<section class="panel admin-tab" id="tab-missions" hidden>
+				<div class="panel-head">
+					<div><h2>미션 관리</h2><p>회원들이 함께 도전할 새로운 미션을 만들어보세요.</p></div>
+					<button type="button" class="custom-btn primary" data-open="mission-dialog">+ 미션 등록</button>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead><tr><th>미션명</th><th>기간</th><th>참여</th><th>보상</th><th>상태</th></tr></thead>
+						<tbody id="admin-mission-rows"></tbody>
+					</table>
+				</div>
+			</section>
+
 		</div>
 	</div>
 </th:block>
 
-<th:block layout:fragment="script">
-</th:block>
+<th:block layout:fragment="aside-container">
+	<!-- 공지 등록 모달 -->
+	<dialog id="notice-dialog">
+		<div class="dialog-head">
+			<h2>공지사항 등록</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<form id="notice-form" class="form-grid">
+				<label class="field"><span>제목</span><input type="text" name="title" required maxlength="100"></label>
+				<label class="field"><span>내용</span><textarea name="content" required maxlength="5000"></textarea></label>
+				<button type="submit" class="custom-btn primary full">공지 등록</button>
+			</form>
+		</div>
+	</dialog>
 
+    <!-- 태그 등록 모달 -->
+    <dialog id="tag-dialog">
+        <div class="dialog-head">
+            <h2>새 태그 추가</h2><button type="button" class="close-btn" data-close>×</button>
+        </div>
+        <div class="dialog-body">
+            <form id="tag-form" class="form-grid">
+                <label class="field"><span>태그 이름</span><input type="text" name="name" required maxlength="20" placeholder="예: 에어프라이어"></label>
+                <button type="submit" class="custom-btn primary full">태그 추가</button>
+            </form>
+        </div>
+    </dialog>
+
+	<!-- 미션 등록 모달 -->
+	<dialog id="mission-dialog">
+		<div class="dialog-head">
+			<h2>새 미션 등록</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<form id="mission-form" class="form-grid">
+				<label class="field"><span>미션명</span><input type="text" name="title" required></label>
+				<label class="field"><span>미션 설명</span><textarea name="description" required></textarea></label>
+				<div class="form-row">
+					<label class="field"><span>시작일</span><input type="date" name="start" required></label>
+					<label class="field"><span>종료일</span><input type="date" name="end" required></label>
+				</div>
+				<label class="field"><span>보상 포인트</span><input type="number" name="reward" required value="100"></label>
+				<button type="submit" class="custom-btn primary full mt-2">미션 등록</button>
+			</form>
+		</div>
+	</dialog>
+
+	<!-- 알림 토스트 -->
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
 </html>
