@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityPostMapper">
+
+    <!-- 게시글 등록 -->
+    <insert id="insertPost" parameterType="com.sp.app.domain.dto.CommunityPostDto">
+        INSERT INTO COMMUNITY_POST(POST_ID, AUTHOR_ID, POST_TYPE, TITLE, CONTENT,
+            STATUS, VIEW_COUNT, CREATED_AT, UPDATED_AT)
+        VALUES (SEQ_COMMUNITY_POST.NEXTVAL, #{authorId}, 0, #{title},
+            #{content, jdbcType=CLOB}, 0, 0, SYSTIMESTAMP, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 검색 조건 -->
+    <sql id="where-list">
+        <choose>
+            <when test="schType == 'all'">
+                <![CDATA[
+                    (
+                        INSTR(P.TITLE, #{kwd}) > 0
+                        OR DBMS_LOB.INSTR(REGEXP_REPLACE(P.CONTENT, '<[^>]+>', ''), #{kwd}) > 0
+                    )
+                ]]>
+            </when>
+            <when test="schType == 'content'">
+                <![CDATA[
+                    DBMS_LOB.INSTR(REGEXP_REPLACE(P.CONTENT, '<[^>]+>', ''), #{kwd}) > 0
+                ]]>
+            </when>
+            <otherwise>
+                INSTR(P.TITLE, #{kwd}) &gt; 0
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 글 수 -->
+    <select id="dataCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+    </select>
+
+    <!-- 목록에 공개 댓글·답글 수와 좋아요 수 표시 -->
+    <select id="listPost" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
+        SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
+            P.TITLE AS title, P.VIEW_COUNT AS viewCount,
+            TO_CHAR(P.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            NVL(C.commentCount, 0) AS commentCount, NVL(L.likeCount, 0) AS likeCount
+        FROM COMMUNITY_POST P
+        LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
+        LEFT OUTER JOIN (
+            SELECT POST_ID, COUNT(*) AS commentCount
+            FROM POST_COMMENT
+            WHERE STATUS = 0
+            GROUP BY POST_ID
+        ) C ON P.POST_ID = C.POST_ID
+        LEFT OUTER JOIN (
+            SELECT POST_ID, COUNT(*) AS likeCount
+            FROM POST_LIKE
+            GROUP BY POST_ID
+        ) L ON P.POST_ID = L.POST_ID
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+        ORDER BY P.POST_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <!-- 글 상세 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityPostDto">
+        SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
+            P.TITLE AS title, P.CONTENT AS content, P.VIEW_COUNT AS viewCount,
+            TO_CHAR(P.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            NVL(L.likeCount, 0) AS likeCount
+        FROM COMMUNITY_POST P
+        LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
+        LEFT OUTER JOIN (
+            SELECT POST_ID, COUNT(*) AS likeCount
+            FROM POST_LIKE
+            GROUP BY POST_ID
+        ) L ON P.POST_ID = L.POST_ID
+        WHERE P.POST_ID = #{postId}
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+    </select>
+
+    <!-- 조회수 증가 -->
+    <update id="updateHitCount" parameterType="Long">
+        UPDATE COMMUNITY_POST SET VIEW_COUNT = VIEW_COUNT + 1
+        WHERE POST_ID = #{postId}
+            AND POST_TYPE = 0 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 본인 글만 수정 -->
+    <update id="updatePost" parameterType="com.sp.app.domain.dto.CommunityPostDto">
+        UPDATE COMMUNITY_POST
+        SET TITLE = #{title}, CONTENT = #{content, jdbcType=CLOB}, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId} AND AUTHOR_ID = #{authorId}
+            AND POST_TYPE = 0 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 본인 글을 삭제 상태로 변경 -->
+    <update id="deletePost" parameterType="map">
+        UPDATE COMMUNITY_POST
+        SET STATUS = 2, DELETED_AT = SYSTIMESTAMP, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId} AND AUTHOR_ID = #{authorId}
+            AND POST_TYPE = 0 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 숨김은 삭제일시를 변경하지 않음 -->
+    <update id="hidePost" parameterType="Long">
+        UPDATE COMMUNITY_POST SET STATUS = 1, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId}
+            AND POST_TYPE = 0 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 현재보다 번호가 큰 글 중 가장 가까운 글 -->
+    <select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
+        SELECT P.POST_ID AS postId, P.TITLE AS title
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_ID &gt; #{postId}
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+        ORDER BY P.POST_ID ASC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <!-- 현재보다 번호가 작은 글 중 가장 가까운 글 -->
+    <select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
+        SELECT P.POST_ID AS postId, P.TITLE AS title
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_ID &lt; #{postId}
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+        ORDER BY P.POST_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <!-- 내가 누른 좋아요 확인 -->
+    <select id="hasPostLike" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) FROM POST_LIKE
+        WHERE POST_ID = #{postId} AND MEMBER_ID = #{memberId}
+    </select>
+
+    <!-- 전체 좋아요 수 -->
+    <select id="postLikeCount" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) FROM POST_LIKE WHERE POST_ID = #{postId}
+    </select>
+
+    <!-- 공개 글에만 등록하고 중복 좋아요 제외 -->
+    <insert id="insertPostLike" parameterType="map">
+        INSERT INTO POST_LIKE(POST_ID, MEMBER_ID, CREATED_AT)
+        SELECT P.POST_ID, #{memberId}, SYSTIMESTAMP
+        FROM COMMUNITY_POST P
+        WHERE P.POST_ID = #{postId}
+            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+            AND NOT EXISTS (
+                SELECT 1 FROM POST_LIKE L
+                WHERE L.POST_ID = P.POST_ID AND L.MEMBER_ID = #{memberId}
+            )
+    </insert>
+
+    <!-- 로그인 회원의 좋아요만 취소 -->
+    <delete id="deletePostLike" parameterType="map">
+        DELETE FROM POST_LIKE
+        WHERE POST_ID = #{postId} AND MEMBER_ID = #{memberId}
+    </delete>
+
+</mapper>

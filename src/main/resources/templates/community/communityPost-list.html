@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>자유 이야기 · 잇다</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+</th:block>
+
+<div layout:fragment="content" class="community-body">
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <p class="eyebrow">COMMUNITY</p>
+
+            <nav class="side-nav" aria-label="함께하는 주방 메뉴">
+                <a th:href="@{/community/free}" class="active">
+                    💬 자유 이야기
+                </a>
+                <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                <a th:href="@{/community/cooking}">📷 따라 만든 요리</a>
+                <a th:href="@{/community/questions}">🙋 요리 질문</a>
+            </nav>
+
+            <p class="side-message">
+                각자의 한 끼가 모여<br>
+                우리의 주방이 됩니다.
+            </p>
+        </aside>
+
+        <div class="content">
+            <div class="page-heading">
+                <h1>자유 이야기</h1>
+                <p class="meta">
+                    요리와 일상 이야기를 자유롭게 나눠보세요.
+                </p>
+            </div>
+
+            <!-- 검색 시 첫 페이지부터 조회 -->
+            <form class="toolbar"
+                  method="get"
+                  th:action="@{/community/free}">
+
+                <select name="schType" aria-label="검색 항목">
+                    <option value="all"
+                            th:selected="${schType == 'all'}">
+                        제목 + 내용
+                    </option>
+                    <option value="title"
+                            th:selected="${schType == 'title'}">
+                        제목
+                    </option>
+                    <option value="content"
+                            th:selected="${schType == 'content'}">
+                        내용
+                    </option>
+                </select>
+
+                <label class="search">
+                    <input name="kwd"
+                           th:value="${kwd}"
+                           placeholder="검색어 입력"
+                           aria-label="검색어">
+                </label>
+
+                <button type="submit">검색</button>
+
+                <span class="meta"
+                      th:text="|총 ${dataCount}개의 이야기|">
+                    총 0개의 이야기
+                </span>
+            </form>
+
+            <div class="post-actions">
+                <a class="community-button"
+                   th:href="@{/community/free/write}">
+                    글쓰기
+                </a>
+            </div>
+
+            <section class="list">
+                <!-- 조회한 게시글 반복 -->
+                <article class="list-row" th:each="post : ${posts}">
+                    <div>
+                        <div class="row-title">
+                            <a th:href="@{/community/free/{id}(
+                                    id=${post.postId},
+                                    page=${page},
+                                    schType=${schType},
+                                    kwd=${kwd})}"
+                               th:text="${post.title}">
+                                제목
+                            </a>
+                        </div>
+
+                        <div class="meta">
+                            <span th:text="${post.authorName}">작성자</span>
+                            ·
+                            <span th:text="${post.createdAt}">작성일</span>
+                            ·
+                            <span th:text="|조회 ${post.viewCount}|">
+                                조회 0
+                            </span>
+                        </div>
+                    </div>
+
+                    <span class="meta"
+                          th:text="|댓글 ${post.commentCount}|">
+                        댓글 0
+                    </span>
+                </article>
+
+                <p class="meta" th:if="${posts.isEmpty()}">
+                    게시글이 없습니다.
+                </p>
+            </section>
+
+            <!-- 페이지 이동 시 검색 조건 유지 -->
+            <nav class="pagination"
+                 aria-label="페이지 이동"
+                 th:if="${dataCount > 0}">
+
+                <a th:if="${page > 1}"
+                   th:href="@{/community/free(
+                           page=${page - 1},
+                           schType=${schType},
+                           kwd=${kwd})}">
+                    이전
+                </a>
+
+                <a th:each="num : ${#numbers.sequence(pageStart, pageEnd)}"
+                   th:href="@{/community/free(
+                           page=${num},
+                           schType=${schType},
+                           kwd=${kwd})}"
+                   th:classappend="${num == page} ? 'current' : ''"
+                   th:text="${num}">
+                    1
+                </a>
+
+                <a th:if="${page < totalPage}"
+                   th:href="@{/community/free(
+                           page=${page + 1},
+                           schType=${schType},
+                           kwd=${kwd})}">
+                    다음
+                </a>
+            </nav>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

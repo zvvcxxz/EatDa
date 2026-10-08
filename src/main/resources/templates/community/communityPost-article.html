@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>자유 이야기 상세 · 잇다</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+</th:block>
+
+<div layout:fragment="content" class="community-body">
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <p class="eyebrow">COMMUNITY</p>
+
+            <nav class="side-nav" aria-label="함께하는 주방 메뉴">
+                <a th:href="@{/community/free}" class="active">
+                    💬 자유 이야기
+                </a>
+                <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                <a th:href="@{/community/cooking}">📷 따라 만든 요리</a>
+                <a th:href="@{/community/questions}">🙋 요리 질문</a>
+            </nav>
+
+            <p class="side-message">
+                각자의 한 끼가 모여<br>
+                우리의 주방이 됩니다.
+            </p>
+        </aside>
+
+        <div class="content">
+            <div class="breadcrumb">자유 이야기 / 상세</div>
+
+            <a class="back-link"
+               th:href="@{/community/free(
+                       page=${page},
+                       schType=${schType},
+                       kwd=${kwd})}">
+                ← 목록으로
+            </a>
+
+            <article class="panel">
+                <div class="page-heading">
+                    <h1 th:text="${post.title}">게시글 제목</h1>
+
+                    <div class="meta">
+                        <span th:text="${post.authorName}">작성자</span>
+                        ·
+                        <span th:text="${post.createdAt}">작성일</span>
+                        ·
+                        <span th:text="|조회 ${post.viewCount}|">
+                            조회 0
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 본문은 텍스트로 출력 -->
+                <div class="post-content"
+                     th:text="${post.content}">게시글 내용</div>
+            </article>
+
+            <div class="post-actions">
+
+                <!-- 작성자에게만 수정·삭제 버튼 표시 -->
+                <th:block th:if="${owner}">
+                    <a class="community-button"
+                       th:href="@{/community/free/{id}/update(
+                               id=${post.postId})}">
+                        수정
+                    </a>
+
+                    <form method="post"
+                          th:action="@{/community/free/{id}/delete(
+                                  id=${post.postId})}"
+                          onsubmit="return confirm('게시글을 삭제할까요?');">
+
+                        <button type="submit"
+                                class="community-button delete-button">
+                            삭제
+                        </button>
+                    </form>
+                </th:block>
+
+                <!-- 관리자에게만 숨김 버튼 표시 -->
+                <form sec:authorize="hasRole('ADMIN')"
+                      method="post"
+                      th:action="@{/community/free/{id}/hide(
+                              id=${post.postId})}"
+                      onsubmit="return confirm('게시글을 숨길까요?');">
+
+                    <button type="submit" class="community-button">
+                        숨김
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title th:text="${pageTitle}">자유 이야기 작성</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+</th:block>
+
+<div layout:fragment="content" class="community-body">
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <p class="eyebrow">COMMUNITY</p>
+
+            <nav class="side-nav" aria-label="함께하는 주방 메뉴">
+                <a th:href="@{/community/free}" class="active">
+                    💬 자유 이야기
+                </a>
+                <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                <a th:href="@{/community/cooking}">📷 따라 만든 요리</a>
+                <a th:href="@{/community/questions}">🙋 요리 질문</a>
+            </nav>
+
+            <p class="side-message">
+                각자의 한 끼가 모여<br>
+                우리의 주방이 됩니다.
+            </p>
+        </aside>
+
+        <div class="content">
+            <div class="page-heading">
+                <h1 th:text="${pageTitle}">자유 이야기 작성</h1>
+                <p class="meta">나누고 싶은 이야기를 작성해 주세요.</p>
+            </div>
+
+            <p class="write-error"
+               th:if="${error != null}"
+               th:text="${error}">
+                입력 내용을 확인해 주세요.
+            </p>
+
+            <!-- 등록·수정에 따라 전송 주소 변경 -->
+            <form class="community-editor"
+                  method="post"
+                  th:object="${post}"
+                  th:action="${mode == 'write'}
+                      ? @{/community/free/write}
+                      : @{/community/free/{id}/update(id=${post.postId})}">
+
+                <div class="write-field">
+                    <label for="title">제목</label>
+
+                    <input type="text"
+                           id="title"
+                           th:field="*{title}"
+                           maxlength="200"
+                           placeholder="제목을 입력해 주세요."
+                           required>
+                </div>
+
+                <div class="write-field">
+                    <label for="content">내용</label>
+
+                    <textarea id="content"
+                              th:field="*{content}"
+                              rows="14"
+                              placeholder="내용을 입력해 주세요."
+                              required></textarea>
+                </div>
+
+                <div class="post-actions">
+                    <a class="community-button cancel-button"
+                       th:href="@{/community/free}">
+                        취소
+                    </a>
+
+                    <button type="submit"
+                            class="community-button"
+                            th:text="${mode == 'write'} ? '등록' : '수정 완료'">
+                        등록
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
