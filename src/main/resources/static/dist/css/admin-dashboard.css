@@ -26,6 +26,39 @@
     line-height: 1.6;
 }
 
+/* 상단 디자인 */
+.sidebar-logo-wrap {
+    padding: 24px 20px; 
+    border-bottom: 1px solid var(--border-dash); 
+    margin-bottom: 16px;
+}
+
+.sidebar-logo {
+    text-decoration: none; 
+    color: var(--orange-dark); 
+    font-size: 1.25rem; 
+    font-weight: 800; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    transition: color 0.2s;
+}
+
+.sidebar-logo:hover {
+    color: var(--orange);
+}
+
+/* 상단 공백 제거 */
+body, .main-container, .right-panel, .admin-wrap {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.vertical-nav.sidebar {
+    top: 0 !important;
+    height: 100vh !important;
+}
+
 [hidden] { display: none !important; }
 
 /* 타이틀 & 헤딩 */

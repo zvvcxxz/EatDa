@@ -1,6 +1,5 @@
 package com.sp.app.admin.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,7 @@ import com.sp.app.admin.service.AdminHomeService;
 @Controller
 @RequestMapping("/admin/*")
 public class AdminHomeController {
-
-    @Autowired
+	@Autowired
     private AdminHomeService service;
 
     @GetMapping("main")

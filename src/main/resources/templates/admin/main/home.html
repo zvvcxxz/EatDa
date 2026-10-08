@@ -10,44 +10,44 @@
   	  
 <th:block layout:fragment="content">
 	<div class="admin-wrap" id="view-admin">
-        <!-- 타이틀 영역 -->
 		<section class="page-heading">
 			<div>
 				<p class="eyebrow">ADMIN DASHBOARD</p>
-				<h1 class="page-title">관리자 페이지</h1>
+			<div class="sidebar-logo-wrap">
+			    <a th:href="@{/}" class="sidebar-logo">
+			        <i class="bi bi-egg-fried"></i> 관리자 페이지
+			    </a>
+			</div>
 				<p class="subtitle">우리의 주방을 더 즐겁고 안전하게 관리해요.</p>
 			</div>
 			<span class="custom-badge orange">관리자 전용</span>
 		</section>
 
-		<!-- 상단 통계 -->
 		<section class="summary-grid" aria-label="관리 현황">
 		    <article class="summary-card">
 		        <div class="summary-top"><span>전체 회원</span><span class="summary-icon">👥</span></div>
-		        <strong th:text="${stats?.memberCount != null ? #numbers.formatInteger(stats.memberCount, 1, 'COMMA') : '0'}"></strong>
+		        <strong th:text="${stats.memberCount}"></strong>
 		        <small>전체 서비스 회원</small>
 		    </article>
 		    <article class="summary-card">
 		        <div class="summary-top"><span>등록 레시피</span><span class="summary-icon">📖</span></div>
-		        <strong th:text="${stats?.recipeCount != null ? #numbers.formatInteger(stats.recipeCount, 1, 'COMMA') : '0'}"></strong>
+		        <strong th:text="${stats.recipeCount}"></strong>
 		        <small>회원이 공유한 레시피</small>
 		    </article>
 		    <article class="summary-card attention">
 		        <div class="summary-top"><span>처리 대기 신고</span><span class="summary-icon">🚩</span></div>
-		        <strong id="pending-report-count" th:text="${stats?.pendingReportCount != null ? stats.pendingReportCount : '0'}"></strong>
+		        <strong id="pending-report-count" th:text="${stats.pendingReportCount}"></strong>
 		        <small>확인이 필요한 신고</small>
 		    </article>
 		    <article class="summary-card attention">
 		        <div class="summary-top"><span>답변 대기 문의</span><span class="summary-icon">💬</span></div>
-		        <strong id="pending-inquiry-count" th:text="${stats?.pendingInquiryCount != null ? stats.pendingInquiryCount : '0'}"></strong>
+		        <strong id="pending-inquiry-count" th:text="${stats.pendingInquiryCount}"></strong>
 		        <small>회원의 질문</small>
 		    </article>
 		</section>
 
-        <!-- 탭 별 본문 영역 (left.html 메뉴 클릭 시 전환됨) -->
 		<div class="admin-tab-contents">
             
-            <!-- 공지사항 관리 탭 -->
 			<section class="panel admin-tab" id="tab-notices">
 				<div class="panel-head">
 					<div><h2>공지사항 관리</h2><p>서비스 소식을 회원들에게 전해주세요.</p></div>
@@ -69,7 +69,6 @@
 				</div>
 			</section>
 
-            <!-- 회원 관리 탭 -->
 			<section class="panel admin-tab" id="tab-members" hidden>
 				<div class="panel-head">
 					<div><h2>회원 관리</h2><p>회원 상태를 확인하고 이용 제한을 관리해요.</p></div>
@@ -90,7 +89,6 @@
 				<p class="empty" data-empty-for="member-rows" hidden>검색 결과가 없습니다.</p>
 			</section>
 
-            <!-- 레시피 관리 탭 -->
             <section class="panel admin-tab" id="tab-recipes" hidden>
                 <div class="panel-head">
                     <div><h2>레시피 관리</h2><p>등록된 레시피의 공개 상태를 관리해요.</p></div>
@@ -110,7 +108,6 @@
                 </div>
             </section>
 
-            <!-- 신고 / 문의 탭 -->
 			<section class="panel admin-tab" id="tab-requests" hidden>
 				<div class="panel-head">
 					<div><h2>신고 / 문의 처리</h2><p>접수 내용을 펼쳐 확인하고 처리해주세요.</p></div>
@@ -152,7 +149,6 @@
 				</div>
 			</section>
 
-            <!-- 태그 관리 탭 -->
 			<section class="panel admin-tab" id="tab-tags" hidden>
 				<div class="panel-head">
 					<div><h2>태그 관리</h2><p>레시피와 관심 태그에 사용할 항목을 관리해요.</p></div>
@@ -163,7 +159,6 @@
 				</div>
 			</section>
 			
-            <!-- 미션 관리 탭 (어드민용) -->
 			<section class="panel admin-tab" id="tab-missions" hidden>
 				<div class="panel-head">
 					<div><h2>미션 관리</h2><p>회원들이 함께 도전할 새로운 미션을 만들어보세요.</p></div>
@@ -182,7 +177,6 @@
 </th:block>
 
 <th:block layout:fragment="aside-container">
-	<!-- 공지 등록 모달 -->
 	<dialog id="notice-dialog">
 		<div class="dialog-head">
 			<h2>공지사항 등록</h2><button type="button" class="close-btn" data-close>×</button>
@@ -196,7 +190,6 @@
 		</div>
 	</dialog>
 
-    <!-- 태그 등록 모달 -->
     <dialog id="tag-dialog">
         <div class="dialog-head">
             <h2>새 태그 추가</h2><button type="button" class="close-btn" data-close>×</button>
@@ -209,7 +202,6 @@
         </div>
     </dialog>
 
-	<!-- 미션 등록 모달 -->
 	<dialog id="mission-dialog">
 		<div class="dialog-head">
 			<h2>새 미션 등록</h2><button type="button" class="close-btn" data-close>×</button>
@@ -228,7 +220,6 @@
 		</div>
 	</dialog>
 
-	<!-- 알림 토스트 -->
 	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
 </th:block>	
 

@@ -2,7 +2,6 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-<!-- (기존 head 내용 동일하여 생략) -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spring</title>
@@ -12,16 +11,10 @@
 <link rel="stylesheet" th:href="@{/dist/css/main-dash.css}" type="text/css">
 <link rel="stylesheet" th:href="@{/dist/css/forms.css}" type="text/css">
 <th:block layout:fragment="css"></th:block>
+
 </head>
 <body>
-
-<header>
-	<!-- 수정된 부분: :: 양옆에 띄어쓰기 추가 -->
-	<th:block th:replace="~{admin/layout/header :: header}"></th:block>
-</header>
-
 <main class="main-container">
-	<!-- 수정된 부분: :: 양옆에 띄어쓰기 추가 -->
 	<th:block th:replace="~{admin/layout/left :: leftMenu}"></th:block> 
 	<div class="right-panel">
 		<div layout:fragment="content"></div>

@@ -22,7 +22,7 @@
 <a href="/my/notifications" th:href="@{/my/notifications}" >알림</a>
 <a href="/my/preferences" th:href="@{/my/preferences}" >관심사 설정</a>
 <a href="/member/pwd" th:href="@{/member/pwd}" >회원정보</a>
-<a href="/my/messages" th:href="@{/my/messages}" >쪽지</a></div></details><a href="/missions" th:href="@{/missions}" >미션/포인트</a><a href="/shop" th:href="@{/shop}" >장보기</a><a href="/admin" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">관리자</a></nav>
+<a href="/my/messages" th:href="@{/my/messages}" >쪽지</a></div></details><a href="/missions" th:href="@{/missions}" >미션/포인트</a><a href="/shop" th:href="@{/shop}" >장보기</a><a href="/admin" th:href="@{/admin/main}" sec:authorize="hasRole('ADMIN')">관리자</a></nav>
   <button type="button" class="button" data-open-login sec:authorize="isAnonymous()">로그인 / 회원가입</button>
   <form th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()"><button class="button secondary" type="submit">로그아웃</button></form>
  </div>

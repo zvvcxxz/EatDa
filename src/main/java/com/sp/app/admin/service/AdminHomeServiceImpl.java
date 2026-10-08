@@ -10,7 +10,6 @@ import com.sp.app.admin.mapper.AdminHomeMapper;
 
 @Service
 public class AdminHomeServiceImpl implements AdminHomeService {
-	
 	@Autowired
 	private AdminHomeMapper mapper;
 	
@@ -19,7 +18,6 @@ public class AdminHomeServiceImpl implements AdminHomeService {
 		Map<String, Object> map = new HashMap<>();
 		
 		try {
-			// Mapper에서 가져옴
 			map.put("memberCount", mapper.memberCount());
 			map.put("recipeCount", mapper.recipeCount());
 			map.put("pendingReportCount", mapper.pendingReportCount());
