@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>내 알림 - 나의 주방</title>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel">
+        <div class="section-heading">
+            <h2>내 알림</h2>
+            <button type="button" class="btn btn-light" data-action="read-all-notifications">모두 읽음</button>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(notifications)}">
+            <h3>새로운 알림이 없어요</h3>
+        </div>
+
+        <div class="notification-list">
+            <button type="button" class="notification-item"
+                    th:each="notification : ${notifications}"
+                    th:classappend="${!notification.read} ? 'unread'"
+                    data-action="open-notification"
+                    th:attr="data-id=${notification.id}">
+                <span class="notification-dot" aria-hidden="true"></span>
+                <span class="notification-content">
+                    <strong th:text="${notification.title}">새 알림</strong>
+                    <span th:text="${notification.content}">알림 내용</span>
+                    <small th:text="${notification.createdAtText}">방금 전</small>
+                </span>
+                <span th:if="${!notification.read}" class="badge badge-success">읽지 않음</span>
+            </button>
+        </div>
+    </section>
+</th:block>
+
+</body>
+</html>

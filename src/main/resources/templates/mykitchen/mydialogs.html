@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="dialogs">
+    <!-- 냉장고 재료 등록 / 수정 다이얼로그 -->
+    <dialog id="ingredientDialog" class="app-dialog">
+        <form id="ingredientForm">
+            <div class="dialog-header">
+                <h2 id="ingredientDialogTitle">재료 추가</h2>
+                <button type="button" class="icon-button" data-close-dialog aria-label="닫기">×</button>
+            </div>
+
+            <input type="hidden" id="fridgeItemId">
+
+            <div id="ingredientSearchArea">
+                <label for="ingredientCategory">표준 재료 카테고리</label>
+                <select id="ingredientCategory">
+                    <option value="">전체</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">채소</option>
+                </select>
+
+                <div class="autocomplete">
+                    <label for="ingredientSearch">표준 재료 검색</label>
+                    <input id="ingredientSearch" type="search" autocomplete="off" placeholder="재료명 입력 후 검색 결과에서 선택">
+                    <div id="ingredientSuggestions" class="suggestions" aria-label="표준 재료 검색 결과" hidden></div>
+                </div>
+            </div>
+
+            <p class="selected-value" id="selectedIngredient" aria-live="polite">선택한 재료가 없습니다.</p>
+
+            <div class="form-grid">
+                <div>
+                    <label for="ingredientQuantity">보유 수량</label>
+                    <input id="ingredientQuantity" type="number" min="0.001" step="0.001" required>
+                </div>
+                <div>
+                    <label for="ingredientUnit">단위</label>
+                    <select id="ingredientUnit" required>
+                        <option value="EA">개</option>
+                        <option value="G">g</option>
+                        <option value="KG">kg</option>
+                        <option value="ML">ml</option>
+                        <option value="L">L</option>
+                        <option value="PACK">팩</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="registeredDate">등록일</label>
+                    <input id="registeredDate" type="date" required th:attr="data-server-today=${serverToday}">
+                </div>
+                <div>
+                    <label for="expiryDate">유통기한 <small>선택</small></label>
+                    <input id="expiryDate" type="date">
+                </div>
+            </div>
+
+            <p class="form-error" id="ingredientError" role="alert"></p>
+
+            <div class="dialog-footer">
+                <button type="button" class="btn btn-light" data-close-dialog>취소</button>
+                <button type="submit" class="btn btn-primary">저장</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- 쪽지 작성 다이얼로그 -->
+    <dialog id="composeDialog" class="app-dialog">
+        <form id="messageForm">
+            <div class="dialog-header">
+                <h2>쪽지 보내기</h2>
+                <button type="button" class="icon-button" data-close-dialog aria-label="닫기">×</button>
+            </div>
+
+            <div class="autocomplete">
+                <label for="recipientSearch">받는 회원</label>
+                <input id="recipientSearch" type="search" autocomplete="off" placeholder="닉네임으로 검색 후 선택">
+                <div id="recipientSuggestions" class="suggestions" aria-label="회원 검색 결과" hidden></div>
+            </div>
+
+            <p id="selectedRecipient" class="selected-value" aria-live="polite">수신자를 선택해 주세요.</p>
+
+            <label for="messageTitle">제목</label>
+            <input id="messageTitle" maxlength="100" required>
+
+            <label for="messageContent">내용</label>
+            <textarea id="messageContent" rows="7" maxlength="5000" required></textarea>
+
+            <p class="form-error" id="messageError" role="alert"></p>
+
+            <div class="dialog-footer">
+                <button type="button" class="btn btn-light" data-close-dialog>취소</button>
+                <button type="submit" class="btn btn-primary">보내기</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- 쪽지 상세 다이얼로그 -->
+    <dialog id="messageDetailDialog" class="app-dialog">
+        <div class="dialog-header">
+            <h2 id="detailMessageTitle">쪽지</h2>
+            <button type="button" class="icon-button" data-close-dialog aria-label="닫기">×</button>
+        </div>
+        <p id="detailMessageMeta" class="muted"></p>
+        <p id="detailMessageContent" class="preserve-lines"></p>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</th:block>
+
+</body>
+</html>

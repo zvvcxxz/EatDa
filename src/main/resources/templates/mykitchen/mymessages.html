@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>쪽지함 - 나의 주방</title>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel">
+        <div class="section-heading">
+            <div class="tab-links">
+                <a th:href="@{/kitchen(tab='messages', box='received')}" th:classappend="${box == 'received'} ? 'active'">받은 쪽지</a>
+                <a th:href="@{/kitchen(tab='messages', box='sent')}" th:classappend="${box == 'sent'} ? 'active'">보낸 쪽지</a>
+            </div>
+            <button type="button" class="btn btn-primary" id="composeMessageButton">쪽지 보내기</button>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(messages)}">
+            <h3>쪽지가 없어요</h3>
+        </div>
+
+        <div class="message-list">
+            <article th:each="message : ${messages}" class="message-item">
+                <button type="button" class="message-open" data-action="open-message" th:attr="data-id=${message.id}">
+                    <span>
+                        <strong th:text="${message.counterpartNickname}">상대방</strong>
+                        <span class="badge badge-success" th:if="${!message.read}">읽지 않음</span>
+                    </span>
+                    <strong th:text="${message.title}">제목</strong>
+                    <span class="muted" th:text="${message.preview}">내용 일부</span>
+                    <small th:text="${message.createdAtText}">2026-01-01</small>
+                </button>
+                <button type="button" class="btn btn-danger-light btn-small" data-action="delete-message" th:attr="data-id=${message.id}">삭제</button>
+            </article>
+        </div>
+    </section>
+</th:block>
+
+</body>
+</html>

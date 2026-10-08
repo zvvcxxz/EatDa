@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>내 냉장고 - 나의 주방</title>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>우리 집 냉장고</h2>
+                <p class="muted">등록일과 유통기한을 따로 확인하세요.</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="addIngredientButton">
+                + 재료 추가
+            </button>
+        </div>
+
+        <form method="get" th:action="@{/kitchen}" class="toolbar">
+            <input type="hidden" name="tab" value="fridge">
+
+            <label class="sr-only" for="fridgeKeyword">보유 재료 검색</label>
+            <input id="fridgeKeyword" name="keyword" type="search"
+                   placeholder="보유한 재료를 검색하세요" th:value="${keyword}">
+
+            <label class="sr-only" for="fridgeStatus">재료 상태</label>
+            <select id="fridgeStatus" name="status">
+                <option value="" th:selected="${status == ''}">전체 재료</option>
+                <option value="OLD" th:selected="${status == 'OLD'}">오래된 재료</option>
+                <option value="EXPIRING" th:selected="${status == 'EXPIRING'}">유통기한 임박</option>
+                <option value="EXPIRED" th:selected="${status == 'EXPIRED'}">유통기한 경과</option>
+            </select>
+
+            <button class="btn btn-dark" type="submit">검색</button>
+        </form>
+
+        <div class="chip-row" aria-label="재료 카테고리">
+            <a class="chip" th:classappend="${categoryId == null} ? 'selected'"
+               th:href="@{/kitchen(tab='fridge', keyword=${keyword}, status=${status})}">전체</a>
+            <a class="chip" th:each="category : ${categories}" th:text="${category.name}"
+               th:classappend="${category.id == categoryId} ? 'selected'"
+               th:href="@{/kitchen(tab='fridge', categoryId=${category.id}, keyword=${keyword}, status=${status})}">채소</a>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(fridgeItems)}">
+            <span aria-hidden="true">🧺</span>
+            <h3>표시할 재료가 없어요</h3>
+            <p>새 재료를 등록하거나 검색 조건을 변경해 주세요.</p>
+        </div>
+
+        <div class="ingredient-grid">
+            <article class="ingredient-card" th:each="item : ${fridgeItems}">
+                <div class="card-top">
+                    <span class="category-label" th:text="${item.categoryName}">채소</span>
+                    <div class="badge-group">
+                        <span class="badge badge-old" th:if="${item.old}">오래된 재료</span>
+                        <span class="badge badge-warning" th:if="${item.expiring}">유통기한 임박</span>
+                        <span class="badge badge-danger" th:if="${item.expired}">유통기한 경과</span>
+                    </div>
+                </div>
+
+                <h3>
+                    <a th:href="@{/kitchen(tab='recommendations', fridgeItemId=${item.id})}"
+                       th:text="${item.ingredientName}">당근</a>
+                </h3>
+
+                <p class="quantity">
+                    <strong th:text="${item.quantity}">2</strong>
+                    <span th:text="${item.unitLabel}">개</span>
+                </p>
+
+                <dl class="date-list">
+                    <div>
+                        <dt>등록일</dt>
+                        <dd th:text="${item.registeredDate}">2026-01-01</dd>
+                    </div>
+                    <div>
+                        <dt>유통기한</dt>
+                        <dd th:text="${item.expiryDate ?: '미입력'}">미입력</dd>
+                    </div>
+                </dl>
+
+                <div class="card-actions">
+                    <button type="button" class="btn btn-light btn-small"
+                            data-action="edit-ingredient"
+                            th:attr="data-id=${item.id}, data-ingredient-id=${item.ingredientId}, data-name=${item.ingredientName}, data-quantity=${item.quantity}, data-unit=${item.unit}, data-registered=${item.registeredDate}, data-expiry=${item.expiryDate}">수정</button>
+                    <button type="button" class="btn btn-danger-light btn-small"
+                            data-action="delete-ingredient" th:attr="data-id=${item.id}">삭제</button>
+                </div>
+            </article>
+        </div>
+
+        <div class="recommend-banner">
+            <div>
+                <h3>냉장고 속 재료로 무엇을 만들까요?</h3>
+                <p>보유 재료가 많이 일치하는 레시피를 찾아드립니다.</p>
+            </div>
+            <a th:if="${summary?.ingredientCount > 0}" class="btn btn-primary" th:href="@{/kitchen(tab='recommendations')}">내 재료로 레시피 찾기</a>
+            <button th:if="${summary?.ingredientCount == 0}" class="btn btn-primary" disabled>먼저 재료를 등록해 주세요</button>
+        </div>
+    </section>
+</th:block>
+
+</body>
+</html>

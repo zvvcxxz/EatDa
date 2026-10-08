@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>신고 / 문의 - 나의 주방</title>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel">
+        <div class="section-heading">
+            <h2>내 신고 / 문의 내역</h2>
+            <a class="btn btn-primary" th:href="@{/inquiries/new}">문의 작성</a>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(inquiries)}">
+            <h3>등록한 신고나 문의가 없어요</h3>
+        </div>
+
+        <details class="inquiry-item" th:each="inquiry : ${inquiries}">
+            <summary>
+                <span class="badge badge-old" th:text="${inquiry.typeLabel}">문의</span>
+                <strong th:text="${inquiry.title}">문의 제목</strong>
+                <span class="muted" th:text="${inquiry.createdDate}">2026-01-01</span>
+                <span class="badge" th:classappend="${inquiry.completed} ? 'badge-success' : 'badge-warning'" th:text="${inquiry.statusLabel}">대기</span>
+            </summary>
+
+            <div class="inquiry-body">
+                <h3>작성 내용</h3>
+                <p class="preserve-lines" th:text="${inquiry.content}">내용</p>
+
+                <div class="admin-answer">
+                    <h3>관리자 답변</h3>
+                    <p class="preserve-lines" th:text="${inquiry.answer ?: '아직 등록된 답변이 없습니다.'}">관리자 답변</p>
+                </div>
+            </div>
+        </details>
+    </section>
+</th:block>
+
+</body>
+</html>

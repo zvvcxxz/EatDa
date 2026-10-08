@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>관심 태그 - 나의 주방</title>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel">
+        <h2>나의 요리 취향을 알려주세요</h2>
+        <p class="muted">선택한 태그는 저장 후 다음 추천 요청부터 반영됩니다.</p>
+
+        <form id="tagForm">
+            <fieldset class="tag-fieldset">
+                <legend class="sr-only">관심 태그 선택</legend>
+                <label class="tag-choice" th:each="tag : ${tags}">
+                    <input type="checkbox" name="tagIds" th:value="${tag.id}" th:checked="${tag.selected}">
+                    <span th:text="|# ${tag.name}|"># 10분요리</span>
+                </label>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">관심 태그 저장</button>
+        </form>
+    </section>
+</th:block>
+
+</body>
+</html>

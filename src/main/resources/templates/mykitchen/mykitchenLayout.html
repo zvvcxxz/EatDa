@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/mykitchen.css}">
+    </th:block>
+    <!-- Spring Security CSRF Token -->
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}">
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </th:block>
+    <script defer th:src="@{/js/mykitchen/mykitchen.js}"></script>
+</head>
+<body>
+
+<th:block layout:fragment="content">
+<div class="kitchen-layout"
+     id="kitchenApp"
+     th:attr="data-api-base=@{/api/kitchen}, data-kitchen-url=@{/kitchen}">
+
+    <!-- [좌측] 사이드 메뉴 -->
+    <aside class="sidebar">
+        <a class="brand" th:href="@{/my}">
+            <span class="brand-icon" aria-hidden="true">🍳</span>
+            <span>나의 주방</span>
+        </a>
+
+        <div class="profile">
+            <div class="avatar" aria-hidden="true">👩‍🍳</div>
+            <strong th:text="${profile?.nickname}">요리하는 회원</strong>
+            <p>오늘도 맛있는 하루를 만들어 보세요.</p>
+        </div>
+
+        <nav class="side-nav" aria-label="나의 주방 메뉴">
+            <a th:href="@{/my/fridge}"
+               th:classappend="${tab == 'fridge' or tab == null} ? 'active'"
+               th:attr="aria-current=${tab == 'fridge' or tab == null ? 'page' : null}">
+                <span aria-hidden="true">🧊</span> 내 냉장고
+            </a>
+            <a th:href="@{/my/recipes}"
+               th:classappend="${tab == 'mine'} ? 'active'">
+                <span aria-hidden="true">📖</span> 내가 작성한 레시피
+            </a>
+            <a th:href="@{/my/bookmarks}"
+               th:classappend="${tab == 'favorites'} ? 'active'">
+                <span aria-hidden="true">♡</span> 찜한 레시피
+            </a>
+            <a th:href="@{/my/notifications}"
+               th:classappend="${tab == 'notifications'} ? 'active'">
+                <span aria-hidden="true">🔔</span> 내 알림
+                <span class="nav-count"
+                      th:if="${unreadNotificationCount > 0}"
+                      th:text="${unreadNotificationCount}">3</span>
+            </a>
+            <a th:href="@{/my/preferences}"
+               th:classappend="${tab == 'tags'} ? 'active'">
+                <span aria-hidden="true">#</span> 관심 태그
+            </a>
+            <a th:href="@{/my/messages}"
+               th:classappend="${tab == 'messages'} ? 'active'">
+                <span aria-hidden="true">✉</span> 쪽지
+            </a>
+            <a th:href="@{/my/inquiries}"
+               th:classappend="${tab == 'inquiries'} ? 'active'">
+                <span aria-hidden="true">💬</span> 신고 / 문의
+            </a>
+            <a th:href="@{/my/activity}"
+               th:classappend="${tab == 'activity'} ? 'active'">
+                <span aria-hidden="true">📊</span> 나의 활동
+            </a>
+        </nav>
+
+        <div class="sidebar-note">
+            구독 및 냉장고 재료 기반 레시피 작성은 준비 중입니다.
+        </div>
+    </aside>
+
+    <!-- [우측] 메인 상세 콘텐츠 영역 (각 메뉴 파일이 동적으로 주입됨) -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">MY KITCHEN</p>
+                <h1 th:text="${pageTitle}">내 냉장고</h1>
+                <p class="muted" th:text="${pageDescription}">
+                    가지고 있는 재료를 관리하고 새로운 요리를 찾아보세요.
+                </p>
+            </div>
+            <a class="btn btn-light" th:href="@{/recipes}">레시피 둘러보기</a>
+        </header>
+
+        <!-- 활동 요약 공통 영역 -->
+        <section class="summary-grid" aria-label="나의 활동 요약">
+            <a class="summary-card" th:href="@{/my/activity}">
+                <span>작성한 레시피</span>
+                <strong th:text="${summary?.recipeCount}">0</strong>
+            </a>
+            <a class="summary-card" th:href="@{/my/bookmarks}">
+                <span>찜한 레시피</span>
+                <strong th:text="${summary?.favoriteCount}">0</strong>
+            </a>
+            <a class="summary-card" th:href="@{/my/fridge}">
+                <span>냉장고 재료</span>
+                <strong th:text="${summary?.ingredientCount}">0</strong>
+            </a>
+            <div class="summary-card">
+                <span>구독자 <small>준비 중</small></span>
+                <strong>—</strong>
+            </div>
+        </section>
+
+        <!-- ★ 각 개별 페이지의 내용이 삽입되는 구역 ★ -->
+        <th:block layout:fragment="kitchenContent"></th:block>
+
+        <!-- 공통 페이징 링크 -->
+        <nav th:if="${pagination?.totalPages > 1}" class="pagination" aria-label="페이지 이동">
+            <a th:each="link : ${pagination.links}"
+               th:href="${link.url}"
+               th:text="${link.label}"
+               th:classappend="${link.current} ? 'active'"
+               th:attr="aria-current=${link.current ? 'page' : null}">1</a>
+        </nav>
+    </main>
+</div>
+
+<!-- 공통 모달 레이어 프래그먼트 로드 -->
+<th:block th:replace="~{mykitchen/mydialogs :: dialogs}"></th:block>
+
+</th:block>
+</body>
+</html>
