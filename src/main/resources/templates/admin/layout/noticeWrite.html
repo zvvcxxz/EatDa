@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 작성</title>
+</head>
+<body>
+    <h2 th:text="${mode == 'update' ? '공지사항 수정' : '공지사항 작성'}">공지사항 작성</h2>
+    
+    <form th:action="@{${mode == 'update' ? '/admin/notice/update' : '/admin/notice/write'}}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="noticeId" th:value="${dto?.noticeId}">
+        
+        <div>제목: <input type="text" name="title" th:value="${dto?.title}" required></div>
+        <div>상단고정: <input type="checkbox" name="pinnedYn" value="Y" th:checked="${dto?.pinnedYn == 'Y'}"></div>
+        <div>공개여부: 
+            <select name="status">
+                <option value="1" th:selected="${dto?.status == 1}">공개</option>
+                <option value="0" th:selected="${dto?.status == 0}">숨김</option>
+            </select>
+        </div>
+        <div>내용: <textarea name="content" required th:text="${dto?.content}"></textarea></div>
+        <div>첨부파일: <input type="file" name="selectFile" multiple></div>
+        
+        <button type="submit">저장</button>
+        <button type="button" th:onclick="|location.href='@{/admin/notice/list}'|">취소</button>
+    </form>
+</body>
+</html>

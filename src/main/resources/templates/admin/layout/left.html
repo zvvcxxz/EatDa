@@ -2,31 +2,30 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 	
-    <!-- 핵심 수정: nav-expand-lg 클래스를 추가하여 넓이를 유지하고, overflow:hidden으로 깔끔하게 처리 -->
 	<aside th:fragment="leftMenu" class="vertical-nav nav-expand-lg sidebar panel" style="background-color: var(--white); border-right: 1px solid var(--border-dash); z-index: 100; overflow: hidden; white-space: nowrap;">
 		
 		<p class="sidebar-label" style="margin-top: 20px;">MANAGEMENT</p>
 		
 		<nav class="nav-list" aria-label="관리 메뉴" style="padding: 0 12px;">
-			<button type="button" class="nav-btn active" data-tab="notices">
+			<a th:href="@{/admin/notice}" class="nav-btn">
 				<span aria-hidden="true">📢</span> 공지사항
-			</button>
-			<button type="button" class="nav-btn" data-tab="members">
+			</a>
+			<a th:href="@{/admin/member}" class="nav-btn">
 				<span aria-hidden="true">👥</span> 회원 관리
-			</button>
-			<button type="button" class="nav-btn" data-tab="recipes">
+			</a>
+			<a th:href="@{/admin/recipe}" class="nav-btn">
 				<span aria-hidden="true">📖</span> 레시피 관리
-			</button>
-			<button type="button" class="nav-btn" data-tab="requests">
+			</a>
+			<a th:href="@{/admin/request}" class="nav-btn">
 				<span aria-hidden="true">💬</span> 신고 / 문의
 				<span class="nav-count" id="request-count">3</span>
-			</button>
-			<button type="button" class="nav-btn" data-tab="tags">
+			</a>
+			<a th:href="@{/admin/tag}" class="nav-btn">
 				<span aria-hidden="true">🏷️</span> 태그 관리
-			</button>
-			<button type="button" class="nav-btn" data-tab="missions">
+			</a>
+			<a th:href="@{/admin/mission}" class="nav-btn">
 				<span aria-hidden="true">🎯</span> 미션 관리
-			</button>
+			</a>
 		</nav>
 
 		<div class="sidebar-note" style="white-space: normal; line-height: 1.5;">

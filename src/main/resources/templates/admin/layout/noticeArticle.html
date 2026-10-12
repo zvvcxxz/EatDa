@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 상세</title>
+</head>
+<body>
+    <h2>공지사항 상세</h2>
+    <div th:text="|제목: ${dto.title}|">제목</div>
+    <div th:text="|작성자: ${dto.adminName} | 등록일: ${dto.createdAt} | 조회수: ${dto.hitCount}|">정보</div>
+    <hr>
+    <div th:text="${dto.content}">내용</div>
+    <hr>
+    
+    <div th:if="${not #lists.isEmpty(listFile)}">
+        <p>첨부파일:</p>
+        <ul>
+            <li th:each="file : ${listFile}" th:text="${file.originalFileName}">파일.jpg</li>
+        </ul>
+    </div>
+    
+    <button type="button" th:onclick="|location.href='@{/admin/notice/update(noticeId=${dto.noticeId})}'|">수정</button>
+    <button type="button" th:onclick="|location.href='@{/admin/notice/delete(noticeId=${dto.noticeId})}'|">삭제</button>
+    <button type="button" th:onclick="|location.href='@{/admin/notice/list}'|">목록</button>
+</body>
+</html>

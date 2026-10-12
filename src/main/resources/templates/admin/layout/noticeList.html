@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div>
+				<p class="eyebrow">NOTICE MANAGEMENT</p>
+				<h2>공지사항 관리</h2>
+				<p class="subtitle">서비스 소식을 회원들에게 전해주세요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>공지사항 목록</h2></div>
+				<button type="button" class="custom-btn primary" data-open="notice-dialog">+ 공지 등록</button>
+			</div>
+			<div class="table-wrap">
+				<table>
+					<thead><tr><th>구분</th><th>제목</th><th>조회수</th><th>작성일</th><th>상태</th><th>관리</th></tr></thead>
+					<tbody id="notice-rows">
+					    <tr th:each="dto : ${list}">
+					        <td><span class="custom-badge orange">공지</span></td>
+					        <td class="cell-title" th:text="${dto.title}">제목</td>
+					        
+					        <td th:text="${dto.hitCount}">0</td>
+					        
+					        <td class="muted" th:text="${dto.createdAt}">작성일</td>
+					        <td><span class="custom-badge green">공개</span></td>
+					        <td><button type="button" class="custom-btn secondary small">수정</button></td>
+					    </tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<dialog id="notice-dialog">
+		<div class="dialog-head">
+			<h2>공지사항 등록</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<!-- 💡 실제 등록 처리를 위해 action 주소 추가 필요 -->
+			<form id="notice-form" class="form-grid" method="post" th:action="@{/admin/notice/write}">
+				<label class="field"><span>제목</span><input type="text" name="title" required></label>
+				<label class="field"><span>내용</span><textarea name="content" required></textarea></label>
+				<button type="submit" class="custom-btn primary full">공지 등록</button>
+			</form>
+		</div>
+	</dialog>
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>
