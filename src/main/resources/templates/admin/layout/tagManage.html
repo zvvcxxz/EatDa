@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div>
+				<p class="eyebrow">TAG MANAGEMENT</p>
+				<h2>태그 관리</h2>
+				<p class="subtitle">레시피와 관심 태그에 사용할 항목을 관리해요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>등록된 태그</h2></div>
+				<button type="button" class="custom-btn primary" data-open="tag-dialog">+ 태그 추가</button>
+			</div>
+			<div class="panel-body">
+				<div class="tag-list" id="tag-list">
+					<!-- DB 연동 -->
+					<div class="tag-item" th:each="tag : ${list}">
+						<span th:text="'# ' + ${tag.tagName}"># 태그명</span>
+						<!-- 실제 삭제 처리를 위해 tag 번호(id)를 심어둡니다 -->
+						<button type="button" class="tag-delete" th:data-id="${tag.tagNum}">×</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<dialog id="tag-dialog">
+		<div class="dialog-head">
+			<h2>새 태그 추가</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<form id="tag-form" class="form-grid" method="post" th:action="@{/admin/tag/insert}">
+				<label class="field"><span>태그 이름</span><input type="text" name="tagName" required placeholder="예: 에어프라이어"></label>
+				<button type="submit" class="custom-btn primary full mt-2">태그 추가</button>
+			</form>
+		</div>
+	</dialog>
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>

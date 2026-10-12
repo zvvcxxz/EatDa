@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div>
+				<p class="eyebrow">REQUEST MANAGEMENT</p>
+				<h2>신고 / 문의 처리</h2>
+				<p class="subtitle">접수 내용을 펼쳐 확인하고 처리해주세요.</p>
+			</div>
+			<span class="custom-badge orange">통합 관리</span>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>접수 목록</h2></div>
+			</div>
+			<div class="panel-body request-list">
+				
+				<!-- DB 데이터 반복 출력 -->
+				<details class="request" th:each="dto : ${list}">
+					<summary>
+						<!-- 타입(type)이 '신고'면 빨간뱃지, '문의'면 파란뱃지 -->
+						<span class="custom-badge" th:classappend="${dto.type == '신고'} ? 'red' : 'blue'" th:text="${dto.type}">분류</span>
+						<span class="request-title" th:text="${dto.title}">제목</span>
+						<span class="custom-badge orange" data-request-state th:text="${dto.status == 0 ? '처리 대기' : '처리 완료'}">상태</span>
+					</summary>
+					<div class="request-body">
+						<p>
+							<span th:text="'내용: ' + ${dto.content}">내용</span><br>
+							<span class="muted" th:text="'접수일: ' + ${dto.reg_date}">날짜</span>
+						</p>
+						
+						<!-- 문의일 경우: 답변 다는 폼 -->
+						<form class="form-grid" method="post" th:action="@{/admin/request/answer}" th:if="${dto.type == '문의' and dto.status == 0}">
+							<input type="hidden" name="id" th:value="${dto.id}">
+							<label class="field">
+								<span>관리자 답변</span>
+								<textarea name="answer" required maxlength="2000" placeholder="문의에 대한 답변을 입력해주세요."></textarea>
+							</label>
+							<button type="submit" class="custom-btn primary">답변 등록</button>
+						</form>
+
+						<!-- 신고일 경우: 처리 버튼 -->
+						<div class="actions" th:if="${dto.type == '신고' and dto.status == 0}">
+							<button type="button" class="custom-btn danger small" th:data-id="${dto.id}">대상 숨김</button>
+							<button type="button" class="custom-btn secondary small" th:data-id="${dto.id}">신고 기각</button>
+						</div>
+						
+						<!-- 처리가 완료된 경우: 답변 내용이나 처리 결과 표시 -->
+						<div class="answer-preview" th:if="${dto.status != 0 and dto.answer != null}" th:text="${dto.answer}">
+							관리자 답변이 여기에 표시됩니다.
+						</div>
+					</div>
+				</details>
+
+			</div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>
