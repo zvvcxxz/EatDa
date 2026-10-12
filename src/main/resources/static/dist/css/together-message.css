@@ -1,0 +1,61 @@
+/* 기존 data-message-dialog HTML을 비차단 중앙 토스트로 표시합니다. */
+dialog.tg-message-dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    margin: 0;
+    width: max-content;
+    max-width: min(620px, calc(100vw - 32px));
+    max-height: calc(100dvh - 40px);
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 22px 30px;
+    border: 0;
+    border-radius: 28px;
+    background: #2c2523;
+    color: #fff;
+    box-shadow: 0 16px 45px rgb(0 0 0 / 22%);
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 14px));
+    pointer-events: none;
+    z-index: 10000;
+    transition: opacity .32s ease, transform .32s ease !important;
+}
+dialog.tg-message-dialog.tg-toast-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    animation: tg-toast-pop .65s both !important;
+}
+@keyframes tg-toast-pop {
+    0% { opacity: 0; transform: translate(-50%, calc(-50% + 48px)) scale(.92); }
+    55% { opacity: 1; transform: translate(-50%, calc(-50% - 7px)) scale(1.025); }
+    78% { opacity: 1; transform: translate(-50%, calc(-50% + 3px)) scale(.995); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.tg-message-dialog h2, .tg-message-dialog form { display: none; }
+.tg-message-dialog .tg-message-body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.tg-message-dialog .tg-message-body::before {
+    content: 'i';
+    display: grid;
+    place-items: center;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ff6b35;
+    color: #2c2523;
+    font: bold 16px Georgia, serif;
+}
+.tg-message-dialog .tg-message-body p { margin: 0; white-space: pre-wrap; }
+@media (max-width: 480px) {
+    dialog.tg-message-dialog { padding: 18px 22px; border-radius: 24px; }
+    .tg-message-dialog .tg-message-body { font-size: 15px; }
+}
+/* 사용자 요청에 따라 이 알림에만 공통 모션 감소 규칙을 재정의합니다. */

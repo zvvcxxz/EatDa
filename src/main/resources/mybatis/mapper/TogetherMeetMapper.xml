@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.TogetherMeetMapper">
+	<insert id="insertMeet" parameterType="TogetherMeetDto">
+		INSERT INTO meal_meeting(
+			meet_id,
+			author_id,
+			title,
+			content, 
+			status, 
+			location_text, 
+			meet_at,
+			application_deadline, 
+			max_participants, 
+			meet_status, 
+			created_at, 
+			updated_at
+		) VALUES (
+			SEQ_MEAL_MEETING.NEXTVAL, #{author_id}, #{title}, #{content}, #{status},#{location_text},
+			TO_TIMESTAMP(#{meet_at}, 'YYYY-MM-DD"T"HH24:MI'),
+			TO_TIMESTAMP(
+    		#{application_deadline, jdbcType=VARCHAR},
+    		'YYYY-MM-DD"T"HH24:MI'),
+			#{max_participants}, #{meet_status}, SYSTIMESTAMP, SYSTIMESTAMP
+		)
+	</insert>
+	
+	<select id="listMeet" resultType="TogetherMeetDto">
+		SELECT
+			t.meet_id,
+			t.author_id,
+			t.title,
+			t.meet_status,
+			t.content,
+			t.location_text,
+			TO_CHAR(t.meet_at,'YYYY-MM-DD HH24:MI') AS meet_at,
+			TO_CHAR(t.application_deadline,'YYYY-MM-DD HH24:MI') AS application_deadline,
+			t.max_participants,
+			TO_CHAR(t.created_at,'YYYY-MM-DD HH24:MI') AS created_at,
+			m.name,
+			t.view_count
+		FROM meal_meeting t
+		JOIN member m ON t.author_id = m.member_id
+		WHERE t.status = 0
+			AND t.deleted_at IS NULL
+		ORDER BY t.created_at DESC, t.meet_id DESC
+	</select>
+	
+	<select id="findMeetById" resultType="TogetherMeetDto">
+  	  SELECT
+        t.meet_id,
+        t.author_id,
+        t.title,
+        t.meet_status,
+        t.content,
+        t.location_text,
+        TO_CHAR(t.meet_at, 'YYYY-MM-DD HH24:MI') AS meet_at,
+        TO_CHAR(t.application_deadline, 'YYYY-MM-DD HH24:MI')
+            AS application_deadline,
+        t.max_participants,
+        TO_CHAR(t.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+        m.name,
+        t.view_count
+    	FROM meal_meeting t
+   		JOIN member m ON t.author_id = m.member_id
+    	WHERE t.meet_id = #{meet_id}
+      		AND t.status = 0
+      			AND t.deleted_at IS NULL
+	</select>
+
+	<update id="updateViewCount">
+		UPDATE meal_meeting
+		SET view_count = NVL(view_count, 0) + 1
+		WHERE meet_id = #{meet_id}
+			AND status = 0
+			AND deleted_at IS NULL
+	</update>
+	
+	<select id="countMeetParticipants" resultType="int">
+		SELECT COUNT(*) + 1
+		FROM meet_participant
+		WHERE meet_id = #{meet_id}
+			AND status = 1
+	</select>
+	
+	<insert id="createMeetParticipant">
+    	INSERT INTO meet_participant (
+        	meet_id,
+        	member_id,
+        	status,
+        	created_at,
+        	updated_at
+    	) VALUES (
+        	#{meet_id},
+        	#{member_id},
+        	0,
+        	SYSTIMESTAMP,
+        	SYSTIMESTAMP
+    	)
+	</insert>
+	
+	<select id="listParticipant" resultType="TogetherMeetParticipantDto">
+		SELECT
+			p.meet_id,
+			p.member_id,
+			m.name,
+			p.status,
+			TO_CHAR(p.created_at,'YYYY-MM-DD HH24:MI') AS created_at
+		FROM meet_participant p
+		JOIN member m ON p.member_id = m.member_id
+		WHERE p.meet_id = #{meet_id}
+		ORDER BY p.created_at DESC
+	</select>
+	
+	<update id="approveMeetParticipant">
+		UPDATE meet_participant
+		SET status = 1,
+			updated_at = SYSTIMESTAMP
+		WHERE meet_id = #{meet_id}
+			AND member_id = #{member_id}
+			AND status = 0
+	</update>
+	
+	<update id="rejectMeetParticipant">
+		UPDATE meet_participant
+		SET status = 2,
+			updated_at = SYSTIMESTAMP
+		WHERE meet_id = #{meet_id}
+		 	AND member_id = #{member_id}
+		 	AND status = 0
+	</update>
+	
+	<select id="countMeetApplication" resultType="int">
+		SELECT COUNT(*)
+		FROM meet_participant
+		WHERE meet_id = #{meet_id}
+			AND member_id = #{member_id}
+	</select>
+</mapper>

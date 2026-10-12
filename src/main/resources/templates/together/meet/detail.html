@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout}">
+<head>
+<title>같이 먹어요 상세 · 잇다</title>
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/together-detail.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/together-applications.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/together-message.css}">
+</th:block>
+</head>
+<body>
+	<main layout:fragment="content" class="together-detail container">
+		<nav class="top-nav">
+			<a class="btn-back" th:href="@{/together/meet}"><i
+				class="fa-solid fa-arrow-left" aria-hidden="true"></i> 목록으로 돌아가기</a>
+		</nav>
+		<p class="detail-card" th:if="${meet == null}">게시글을 찾을 수 없습니다.</p>
+		<!-- Flash 메시지를 안전하게 텍스트로 출력하고 JS에서 중앙 모달로 엽니다. -->
+		<dialog class="tg-message-dialog" data-message-dialog
+			th:if="${applyMessage != null or applicationMessage != null}"
+			aria-labelledby="tg-message-title" aria-describedby="tg-message-body">
+			<h2 id="tg-message-title">안내</h2>
+			<div id="tg-message-body" class="tg-message-body">
+				<p th:if="${applyMessage != null}" th:text="${applyMessage}"></p>
+				<p th:if="${applicationMessage != null}" th:text="${applicationMessage}"></p>
+			</div>
+			<form method="dialog"><button class="tg-message-confirm" autofocus>확인</button></form>
+		</dialog>
+		<noscript><p class="ma-feedback" th:if="${applyMessage != null}" th:text="${applyMessage}"></p>
+			<p class="ma-feedback" th:if="${applicationMessage != null}" th:text="${applicationMessage}"></p></noscript>
+		<th:block th:if="${meet != null}">
+			<article class="detail-card">
+				<header>
+					<div class="detail-header-meta">
+						<div class="detail-badges">
+							<span class="badge badge-eat"><i
+								class="fa-solid fa-utensils" aria-hidden="true"></i> 같이 먹어요</span> <span
+								class="badge-status"
+								th:classappend="${meet.meet_status == 0} ? 'active' : ''"
+								th:switch="${meet.meet_status}"><span th:case="0">모집
+									중</span><span th:case="1">모집 마감</span><span th:case="2">모임 완료</span><span
+								th:case="3">모임 취소</span><span th:case="*">상태 미확인</span></span>
+						</div>
+						<div class="post-stats">
+							<span><i class="fa-regular fa-eye" aria-hidden="true"></i>
+								<strong th:text="${meet.view_count}"></strong></span><span><i
+								class="fa-regular fa-clock" aria-hidden="true"></i> <span
+								th:text="${meet.created_at}"></span></span>
+						</div>
+					</div>
+					<h1 class="post-title" th:text="${meet.title}"></h1>
+					<div class="author-box">
+						<div class="author-info">
+							<div class="author-avatar">
+								<i class="fa-solid fa-user" aria-hidden="true"></i>
+							</div>
+							<div class="author-name" th:text="${meet.name}"></div>
+						</div>
+					</div>
+				</header>
+				<div class="erd-info-card">
+					<div class="info-grid">
+						<div class="info-item">
+							<div class="info-icon">
+								<i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+							</div>
+							<div class="info-content">
+								<label>모임 장소</label><span th:text="${meet.location_text}"></span>
+							</div>
+						</div>
+						<div class="info-item">
+							<div class="info-icon">
+								<i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+							</div>
+							<div class="info-content">
+								<label>모임 일시</label><span th:text="${meet.meet_at}"></span>
+							</div>
+						</div>
+						<div class="info-item">
+							<div class="info-icon">
+								<i class="fa-regular fa-hourglass-half" aria-hidden="true"></i>
+							</div>
+							<div class="info-content">
+								<label>신청 마감</label><span
+									th:text="${meet.application_deadline} ?: '별도 마감 없음'"></span>
+							</div>
+						</div>
+					</div>
+					<div class="progress-box">
+						<div class="progress-header">
+							<span><i class="fa-solid fa-users text-brand-orange"
+								aria-hidden="true"></i> 모집 인원 현황</span> <span class="text-brand-orange"><strong
+								th:text="${participantCount != null ? participantCount : '조회 준비 중'}"></strong>
+								/ <span th:text="${meet.max_participants}"></span>명</span>
+						</div>
+						<progress class="meet-progress"
+							th:if="${participantCount != null and meet.max_participants != null and meet.max_participants > 0}"
+							th:value="${participantCount}" th:max="${meet.max_participants}"
+							aria-label="모집 인원 현황"></progress>
+						<p class="connection-note" th:if="${participantCount == null}">참여
+							인원 조회 연결 후 진행률이 표시됩니다.</p>
+					</div>
+				</div>
+				<section class="content-body" aria-label="모임 안내"
+					th:text="${meet.content}"></section>
+				<div class="action-bar">
+					<div class="action-group-left">
+						<form th:if="${isAuthor != true}"
+							th:action="@{/together/meet/{id}/apply(id=${meet.meet_id})}"
+							method="post">
+							<button type="submit" class="btn btn-join">
+								<i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
+								함께하기 신청
+							</button>
+						</form>
+
+						<button type="button" class="btn btn-like" data-pending="좋아요">
+							<i class="fa-regular fa-heart" aria-hidden="true"></i> 좋아요
+						</button>
+					</div>
+					<!-- isAuthor가 미전달이면 디자인 확인용 비활성 버튼. false이면 숨깁니다.
+       버튼 표시와 별개로 실제 요청에서 서버 소유권 검사는 필수입니다. -->
+					<div class="action-group-right"
+						th:if="${isAuthor == null or isAuthor == true}">
+						<button type="button" class="btn btn-secondary"
+							th:disabled="${isAuthor == null}" data-pending="글 수정">
+							<i class="fa-solid fa-pen" aria-hidden="true"></i> 수정
+						</button>
+						<button type="button" class="btn btn-danger"
+							th:disabled="${isAuthor == null}" data-pending="글 삭제">
+							<i class="fa-solid fa-trash-can" aria-hidden="true"></i> 삭제
+						</button>
+					</div>
+				</div>
+			</article>
+			<!-- 작성자 전용. Controller에서 isAuthor를 서버 로그인 ID로 계산하세요.
+                 applications: MEET_PARTICIPANT + MEMBER 조회 목록
+                 (member_id, name, status, created_at). 비작성자에게는 조회/전달하지 않습니다.
+                 applicationActionsReady: 승인/거절 POST 서버 구현 완료 후에만 true.
+                 아래 POST 경로는 새로 구현할 계약이며 현재 기능이 있다는 뜻이 아닙니다. -->
+			<section class="section-card meet-applications"
+				th:if="${isAuthor == true}" aria-labelledby="application-title"
+				data-application-panel>
+				<div class="ma-heading">
+					<h2 class="section-title" id="application-title">
+						<i class="fa-solid fa-user-check text-brand-orange"
+							aria-hidden="true"></i> 참여 신청 관리
+					</h2>
+					<span class="ma-owner-label">작성자 전용</span>
+				</div>
+				<p class="ma-description">신청자를 확인하고 승인 또는 거절해주세요. 승인된 회원만 모집 인원에
+					포함됩니다.</p>
+				<p class="ma-empty" th:if="${applications == null}">신청자 목록 조회 연결
+					전입니다.</p>
+				<p class="ma-empty"
+					th:if="${applications != null and #lists.isEmpty(applications)}">아직
+					참여 신청이 없습니다.</p>
+				<ul class="ma-list">
+					<li class="ma-row" th:each="applicant : ${applications}">
+						<div class="ma-person">
+							<span class="participant-avatar"><i
+								class="fa-solid fa-user" aria-hidden="true"></i></span>
+							<div>
+								<strong th:text="${applicant.name}"></strong>
+								<p class="ma-date">
+									신청 <span th:text="${applicant.created_at}"></span>
+								</p>
+							</div>
+						</div> <span class="ma-status"
+						th:classappend="${applicant.status == 0} ? 'ma-pending' : (${applicant.status == 1} ? 'ma-approved' : '')"
+						th:switch="${applicant.status}"> <span th:case="0">신청
+								대기</span><span th:case="1">승인됨</span><span th:case="2">거절됨</span><span
+							th:case="3">취소됨</span><span th:case="*">상태 미확인</span>
+					</span>
+						<div class="ma-actions" th:if="${applicant.status == 0}">
+							<form method="post" data-application-form data-decision="승인"
+								th:action="@{/together/meet/{meetId}/participants/{memberId}/approve(meetId=${meet.meet_id},memberId=${applicant.member_id})}">
+								<button class="ma-button ma-approve" type="submit"
+									th:disabled="${approvalActionReady != true}"
+									th:attr="aria-label=${applicant.name + '님 신청 승인'}">
+									<i class="fa-solid fa-check" aria-hidden="true"></i> 승인
+								</button>
+							</form>
+							<form method="post" data-application-form data-decision="거절"
+								th:action="@{/together/meet/{meetId}/participants/{memberId}/reject(meetId=${meet.meet_id},memberId=${applicant.member_id})}">
+								<button class="ma-button ma-reject" type="submit"
+									th:disabled="${rejectionActionReady != true}"
+									th:attr="aria-label=${applicant.name + '님 신청 거절'}">
+									<i class="fa-solid fa-xmark" aria-hidden="true"></i> 거절
+								</button>
+							</form>
+						</div>
+					</li>
+				</ul>
+				<p class="ma-description ma-setup"
+					th:if="${approvalActionReady != true or rejectionActionReady != true}">일부 관리 버튼은 서버 처리 연결 후
+					활성화됩니다.</p>
+			</section>
+			<section class="section-card" aria-label="참여자 목록">
+				<h2 class="section-title">
+					<i class="fa-solid fa-user-group text-brand-orange"
+						aria-hidden="true"></i> 현재 함께하는 이웃 (<span
+						class="text-brand-orange"
+						th:text="${participantCount != null ? participantCount : '조회 준비 중'}"></span>)
+				</h2>
+				<p class="connection-note" th:if="${participants == null}">참여자
+					목록 조회 연결 전입니다.</p>
+				<p class="connection-note"
+					th:if="${participants != null and #lists.isEmpty(participants)}">승인된
+					참여자가 없습니다.</p>
+				<div class="participants-grid">
+					<div class="participant-item" th:each="person : ${participants}">
+						<div class="participant-avatar">
+							<i class="fa-solid fa-user" aria-hidden="true"></i>
+						</div>
+						<span class="participant-name" th:text="${person.name}"></span><span
+							class="participant-badge"
+							th:if="${person.member_id == meet.author_id}">방장</span>
+					</div>
+				</div>
+			</section>
+			<section class="section-card" aria-label="댓글">
+				<h2 class="section-title">
+					<i class="fa-solid fa-comments text-brand-orange"
+						aria-hidden="true"></i> 댓글 (<span class="text-brand-orange"
+						th:text="${commentCount != null ? commentCount : '조회 준비 중'}"></span>)
+				</h2>
+				<!-- MEET_COMMENT를 사용하는 댓글 등록 컨트롤러 구현 후 action/method/name을 연결하세요. -->
+				<form class="reply-form" data-pending-comment>
+					<textarea class="reply-textarea" aria-label="댓글 내용"
+						placeholder="이웃과 따뜻한 댓글로 대화를 시작해 보세요. (비방, 욕설은 제한될 수 있습니다.)"
+						maxlength="2000" required></textarea>
+					<div class="reply-submit-row">
+						<button type="submit" class="btn btn-join">
+							<i class="fa-solid fa-paper-plane" aria-hidden="true"></i> 댓글 등록
+						</button>
+					</div>
+				</form>
+				<p class="connection-note" th:if="${comments == null}">댓글 기능 연결
+					전입니다. 입력한 내용은 아직 저장되지 않습니다.</p>
+				<p class="connection-note"
+					th:if="${comments != null and #lists.isEmpty(comments)}">등록된
+					댓글이 없습니다.</p>
+				<div class="reply-list">
+					<article class="reply-item" th:each="comment : ${comments}">
+						<div class="reply-header">
+							<div class="reply-author">
+								<div class="participant-avatar">
+									<i class="fa-solid fa-user" aria-hidden="true"></i>
+								</div>
+								<span th:text="${comment.name}"></span><span
+									th:if="${comment.member_id == meet.author_id}">(작성자)</span>
+							</div>
+							<span class="reply-date" th:text="${comment.created_at}"></span>
+						</div>
+						<p class="reply-content" th:text="${comment.content}"></p>
+					</article>
+				</div>
+			</section>
+		</th:block>
+		<div class="toast-msg" role="status" aria-live="polite"
+			data-detail-toast>
+			<i class="fa-solid fa-circle-info text-brand-orange"
+				aria-hidden="true"></i><span data-detail-toast-text></span>
+		</div>
+	</main>
+	<th:block layout:fragment="script">
+		<script defer th:src="@{/dist/js/together-detail.js}"></script>
+		<script defer th:src="@{/dist/js/together-applications.js}"></script>
+		<script defer th:src="@{/dist/js/together-message.js}"></script>
+	</th:block>
+</body>
+</html>
