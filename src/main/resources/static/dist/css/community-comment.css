@@ -1,0 +1,426 @@
+/* 이전글·다음글 */
+.community-body .community-neighbors {
+    margin-top:24px;
+    padding:16px;
+    border:1px solid #dce3d2;
+    border-radius:10px;
+    color:#303c30;
+}
+
+.community-body .community-neighbors > div {
+    display:flex;
+    gap:14px;
+    padding:7px 0;
+}
+
+.community-body .community-neighbors strong {
+    flex-shrink:0;
+}
+
+.community-body .community-neighbors a {
+    color:#303c30;
+    text-decoration:none;
+    overflow-wrap:anywhere;
+}
+
+/* 댓글 입력 영역 */
+.community-body .reply-session {
+    margin-top:28px;
+    padding-top:24px;
+    border-top:1px solid #dce3d2;
+    color:#252a25;
+}
+
+.community-body .reply-session h2 {
+    margin:0 0 16px;
+    color:#252a25;
+    font-size:20px;
+}
+
+.community-body .reply-session label {
+    display:block;
+    margin-bottom:8px;
+    color:#303c30;
+    font-size:14px;
+}
+
+.community-body .reply-session textarea {
+    display:block;
+    width:100%;
+    min-height:90px;
+    padding:12px;
+    border:1px solid #cbd5c2;
+    border-radius:8px;
+    background:#fffef9;
+    color:#252a25;
+    font:inherit;
+    resize:vertical;
+}
+
+.community-body .reply-session textarea:focus {
+    outline:2px solid #718365;
+    outline-offset:2px;
+}
+
+.community-body .reply-form-buttons {
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:10px;
+}
+
+/* 댓글 목록 */
+.community-body .reply-info {
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:24px 0 12px;
+    color:#4e5c49;
+    font-size:13px;
+}
+
+.community-body .reply-item {
+    padding:18px 0;
+    border-bottom:1px solid #dce3d2;
+}
+
+.community-body .reply-item-header {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:12px;
+    color:#4e5c49;
+    font-size:13px;
+}
+
+.community-body .reply-item-header strong {
+    color:#252a25;
+}
+
+.community-body .reply-item-content {
+    margin:12px 0;
+    color:#252a25;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    line-height:1.7;
+}
+
+.community-body .reply-item-footer {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+}
+
+/* 답글과 수정 입력창 */
+.community-body .reply-answer {
+    margin-top:16px;
+    padding:16px;
+    background:#edf2e4;
+    border-radius:10px;
+}
+
+.community-body .answer-item {
+    padding:12px 0;
+    margin-bottom:12px;
+    border-bottom:1px solid #cbd5c2;
+}
+
+.community-body .reply-edit {
+    margin:12px 0;
+}
+
+.community-body .reply-empty {
+    margin:14px 0;
+    color:#4e5c49;
+    font-size:14px;
+}
+
+.community-body .page-navigation {
+    margin-top:18px;
+}
+
+.community-body .reply-session .d-none {
+    display:none !important;
+}
+
+/* 상세 화면의 바깥 여백 축소 */
+.community-body:has(.reply-session) {
+    padding:24px 24px 32px;
+}
+
+.community-body .content:has(.reply-session) {
+    padding:20px 24px;
+}
+
+.community-body .content:has(.reply-session) .breadcrumb {
+    margin-bottom:8px;
+}
+
+.community-body .content:has(.reply-session) .back-link {
+    margin-bottom:12px;
+}
+
+/* 짧은 게시글 아래의 빈 공간 줄이기 */
+.community-body .content:has(.reply-session) .panel {
+    padding:18px 20px;
+}
+
+.community-body .content:has(.reply-session) .panel .page-heading {
+    margin-bottom:12px;
+    padding-bottom:12px;
+}
+
+.community-body .content:has(.reply-session) .page-heading h1 {
+    margin-bottom:8px;
+    font-size:28px;
+}
+
+.community-body .content:has(.reply-session) .post-content {
+    min-height:80px;
+    padding-top:0;
+    line-height:1.7;
+}
+
+/* 버튼과 이전글·다음글 간격 축소 */
+.community-body .content:has(.reply-session) .post-actions {
+    gap:8px;
+    margin:12px 0;
+}
+
+.community-body .community-neighbors {
+    margin-top:12px;
+    padding:10px 14px;
+}
+
+.community-body .community-neighbors > div {
+    padding:4px 0;
+}
+
+/* 댓글 입력창과 목록을 더 짧게 배치 */
+.community-body .reply-session {
+    margin-top:16px;
+    padding-top:16px;
+}
+
+.community-body .reply-session h2 {
+    margin-bottom:10px;
+}
+
+.community-body .reply-session textarea {
+    min-height:64px;
+    padding:10px;
+}
+
+.community-body .reply-info {
+    margin:14px 0 8px;
+}
+
+.community-body .reply-item {
+    padding:12px 0;
+}
+
+.community-body .reply-item-content {
+    margin:8px 0;
+}
+
+.community-body .reply-item-footer {
+    margin-top:8px;
+}
+
+.community-body .reply-answer {
+    margin-top:10px;
+    padding:12px;
+}
+
+.community-body .answer-item {
+    padding:8px 0;
+    margin-bottom:8px;
+}
+
+.community-body .page-navigation {
+    margin-top:12px;
+}
+
+/* 좋아요 가운데 정렬 */
+.community-body .panel .post-like {
+    display:flex;
+    justify-content:center;
+    padding:16px 0;
+    margin-top:12px;
+    border-top:1px solid #dce3d2;
+}
+
+.community-body .post-like .community-button {
+    gap:8px;
+}
+
+/* 수정·삭제·숨김은 오른쪽 배치 */
+.community-body .content:has(.reply-session) .panel .post-actions {
+    justify-content:flex-end;
+    margin:0 0 12px;
+}
+
+/* 이전글·다음글은 게시글 안에서 구분선만 사용 */
+.community-body .panel .community-neighbors {
+    margin:0;
+    padding:0;
+    border:0;
+    border-top:1px solid #dce3d2;
+    border-radius:0;
+    background:transparent;
+}
+
+.community-body .panel .community-neighbors > div {
+    padding:10px 0;
+}
+
+.community-body .panel .community-neighbors > div + div {
+    border-top:1px solid #e1e5d8;
+}
+
+/* 상세 화면 바깥 여백 축소 */
+.community-body:has(.reply-session) {
+    padding:18px 24px 24px;
+}
+
+.community-body .content:has(.reply-session) {
+    padding:18px 22px;
+}
+
+.community-body .content:has(.reply-session) .breadcrumb {
+    margin-bottom:6px;
+}
+
+.community-body .content:has(.reply-session) .back-link {
+    margin-bottom:10px;
+}
+
+/* 게시글 제목과 본문을 짧게 배치 */
+.community-body .content:has(.reply-session) .panel {
+    padding:16px 18px;
+}
+
+.community-body .content:has(.reply-session) .panel .page-heading {
+    margin-bottom:10px;
+    padding-bottom:10px;
+}
+
+.community-body .content:has(.reply-session) .page-heading h1 {
+    margin:0 0 6px;
+    font-size:26px;
+    line-height:1.3;
+}
+
+.community-body .content:has(.reply-session) .post-content {
+    min-height:48px;
+    padding:0;
+    font-size:15px;
+    line-height:1.7;
+}
+
+/* 좋아요 위 구분선 제거 */
+.community-body .panel .post-like {
+    display:flex;
+    justify-content:center;
+    margin:8px 0;
+    padding:4px 0;
+    border:0;
+}
+
+/* 상세 화면 버튼 크기 축소 */
+.community-body .content:has(.reply-session) .community-button {
+    min-height:34px;
+    padding:6px 12px;
+    border-radius:7px;
+    font-size:13px;
+}
+
+.community-body .content:has(.reply-session) .panel .post-actions {
+    gap:6px;
+    margin:0 0 8px;
+}
+
+/* 이전글·다음글은 얇은 구분선만 표시 */
+.community-body .panel .community-neighbors {
+    margin:0;
+    padding:0;
+    border:0;
+    border-top:1px solid #dce3d2;
+    border-radius:0;
+}
+
+.community-body .panel .community-neighbors > div {
+    gap:12px;
+    padding:7px 0;
+    font-size:14px;
+}
+
+.community-body .panel .community-neighbors > div + div {
+    border-top:1px solid #e1e5d8;
+}
+
+/* 댓글 입력창을 낮추고 등록 버튼을 옆에 배치 */
+.community-body .reply-session {
+    margin-top:14px;
+    padding-top:12px;
+}
+
+.community-body .reply-form {
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:8px 12px;
+    align-items:end;
+}
+
+.community-body .reply-form h2 {
+    grid-column:1 / -1;
+    margin:0;
+    font-size:18px;
+}
+
+.community-body .reply-form > label {
+    grid-column:1 / -1;
+    margin:0;
+    font-size:13px;
+}
+
+.community-body .reply-form > textarea {
+    min-height:58px;
+    height:58px;
+    padding:9px 10px;
+}
+
+.community-body .reply-form > .reply-form-buttons {
+    margin:0;
+}
+
+/* 댓글 한 개가 차지하는 높이 축소 */
+.community-body .reply-info {
+    margin:12px 0 6px;
+}
+
+.community-body .reply-item {
+    padding:10px 0;
+}
+
+.community-body .reply-item-content {
+    margin:6px 0;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.community-body .reply-item-footer {
+    gap:6px;
+    margin-top:6px;
+}
+
+.community-body .reply-answer {
+    margin-top:8px;
+    padding:10px 12px;
+}
+
+.community-body .page-navigation {
+    margin-top:10px;
+}

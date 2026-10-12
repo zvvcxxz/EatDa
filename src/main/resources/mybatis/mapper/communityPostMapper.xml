@@ -45,20 +45,24 @@
         </where>
     </select>
 
-    <!-- 목록에 공개 댓글·답글 수와 좋아요 수 표시 -->
+    <!-- 카드 목록: 본문 앞부분과 댓글·좋아요 수 조회 -->
     <select id="listPost" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
         SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
-            P.TITLE AS title, P.VIEW_COUNT AS viewCount,
+            P.TITLE AS title, DBMS_LOB.SUBSTR(P.CONTENT, 120, 1) AS content, P.VIEW_COUNT AS viewCount,
             TO_CHAR(P.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
             NVL(C.commentCount, 0) AS commentCount, NVL(L.likeCount, 0) AS likeCount
         FROM COMMUNITY_POST P
         LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
-        LEFT OUTER JOIN (
-            SELECT POST_ID, COUNT(*) AS commentCount
-            FROM POST_COMMENT
-            WHERE STATUS = 0
-            GROUP BY POST_ID
-        ) C ON P.POST_ID = C.POST_ID
+		<!-- 공개 댓글과 공개 부모 댓글에 달린 답글만 집계 -->
+		LEFT OUTER JOIN (
+		    SELECT R.POST_ID, COUNT(*) AS commentCount
+		    FROM POST_COMMENT R
+		    LEFT OUTER JOIN POST_COMMENT A
+		        ON R.PARENT_COMMENT_ID = A.COMMENT_ID AND R.POST_ID = A.POST_ID
+		    WHERE R.STATUS = 0
+		        AND (R.PARENT_COMMENT_ID IS NULL OR A.STATUS = 0)
+		    GROUP BY R.POST_ID
+		) C ON P.POST_ID = C.POST_ID
         LEFT OUTER JOIN (
             SELECT POST_ID, COUNT(*) AS likeCount
             FROM POST_LIKE
@@ -162,18 +166,11 @@
         SELECT COUNT(*) FROM POST_LIKE WHERE POST_ID = #{postId}
     </select>
 
-    <!-- 공개 글에만 등록하고 중복 좋아요 제외 -->
-    <insert id="insertPostLike" parameterType="map">
-        INSERT INTO POST_LIKE(POST_ID, MEMBER_ID, CREATED_AT)
-        SELECT P.POST_ID, #{memberId}, SYSTIMESTAMP
-        FROM COMMUNITY_POST P
-        WHERE P.POST_ID = #{postId}
-            AND P.POST_TYPE = 0 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
-            AND NOT EXISTS (
-                SELECT 1 FROM POST_LIKE L
-                WHERE L.POST_ID = P.POST_ID AND L.MEMBER_ID = #{memberId}
-            )
-    </insert>
+    <!-- 좋아요 등록. 중복은 기본키와 컨트롤러에서 처리 -->
+	<insert id="insertPostLike" parameterType="map">
+	    INSERT INTO POST_LIKE(POST_ID, MEMBER_ID, CREATED_AT)
+	    VALUES (#{postId}, #{memberId}, SYSTIMESTAMP)
+	</insert>
 
     <!-- 로그인 회원의 좋아요만 취소 -->
     <delete id="deletePostLike" parameterType="map">

@@ -11,34 +11,49 @@
 <body>
 
 <th:block layout:fragment="css">
+    <!-- 새 커뮤니티 디자인 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    
 </th:block>
 
-<div layout:fragment="content" class="community-body">
-    <div class="app-shell">
+<div layout:fragment="content" class="community-orange">
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 사람과 요리를 이어서</span>
+                <h1 class="hero-title">냉장고를 열고, 한 끼를 잇다.</h1>
+                <p class="hero-sub">오늘의 추천 레시피 공유부터 남은 재료 활용법, 소소한 자취 이야기까지 함께 나누어요.</p>
+            </div>
+        </div>
+    </section>
+<div class="main-wrapper">
 
         <aside class="sidebar">
-            <p class="eyebrow">COMMUNITY</p>
-
-            <nav class="side-nav" aria-label="함께하는 주방 메뉴">
-                <a th:href="@{/community/free}" class="active">
-                    💬 자유 이야기
-                </a>
-                <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
-                <a th:href="@{/community/cooking}">📷 따라 만든 요리</a>
-                <a th:href="@{/community/questions}">🙋 요리 질문</a>
-            </nav>
-
-            <p class="side-message">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋‍♀️ 요리 질문</a>
+                </li>
+            </ul>
+            <div class="sidebar-footer-text">
                 각자의 한 끼가 모여<br>
-                우리의 주방이 됩니다.
-            </p>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
         </aside>
 
-        <div class="content">
-            <div class="page-heading">
+        <div class="content-area">
+            <div class="section-header">
                 <h1 th:text="${pageTitle}">자유 이야기 작성</h1>
-                <p class="meta">나누고 싶은 이야기를 작성해 주세요.</p>
+                <p class="breadcrumb">나누고 싶은 이야기를 작성해 주세요.</p>
             </div>
 
             <p class="write-error"
@@ -48,7 +63,7 @@
             </p>
 
             <!-- 등록·수정에 따라 전송 주소 변경 -->
-            <form class="community-editor"
+            <form class="community-editor detail-container"
                   method="post"
                   th:object="${post}"
                   th:action="${mode == 'write'}
@@ -71,7 +86,7 @@
 
                     <textarea id="content"
                               th:field="*{content}"
-                              rows="14"
+                              rows="10"
                               placeholder="내용을 입력해 주세요."
                               required></textarea>
                 </div>

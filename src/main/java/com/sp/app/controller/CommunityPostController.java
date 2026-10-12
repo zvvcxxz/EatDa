@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +26,11 @@ import com.sp.app.security.LoginMemberUtil;
 import com.sp.app.service.CommunityPostService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/community/free")
 public class CommunityPostController {
 
@@ -45,15 +50,13 @@ public class CommunityPostController {
             return "redirect:/member/login";
         }
 
-        // 정해진 검색 항목만 사용
-        if (!schType.equals("all")
-                && !schType.equals("title")
+        if (!schType.equals("all") && !schType.equals("title")
                 && !schType.equals("content")) {
             schType = "all";
         }
 
         kwd = kwd.trim();
-        int size = 10;
+        int size = 6; // 카드 목록: 3열 2행
 
         Map<String, Object> map = new HashMap<>();
         map.put("schType", schType);
@@ -81,8 +84,6 @@ public class CommunityPostController {
         model.addAttribute("totalPage", totalPage);
         model.addAttribute("schType", schType);
         model.addAttribute("kwd", kwd);
-
-        // 화면에 표시할 페이지 번호 범위
         model.addAttribute("pageStart", Math.max(1, current_page - 2));
         model.addAttribute("pageEnd", Math.min(totalPage, current_page + 2));
 
@@ -93,14 +94,14 @@ public class CommunityPostController {
         return "community/communityPost-list";
     }
 
-    // 상세 조회
+    // 상세와 이전글·다음글 조회
     @GetMapping("/{postId}")
     public String article(
             @PathVariable("postId") long postId,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "schType", defaultValue = "all") String schType,
             @RequestParam(name = "kwd", defaultValue = "") String kwd,
-            Model model) {
+            Model model) throws Exception {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
@@ -118,6 +119,25 @@ public class CommunityPostController {
         if (dto == null) {
             return "redirect:/community/free";
         }
+
+        if (!schType.equals("all") && !schType.equals("title")
+                && !schType.equals("content")) {
+            schType = "all";
+        }
+
+        kwd = kwd.trim();
+
+        // 같은 검색 조건 안에서 이전글·다음글 찾기
+        Map<String, Object> map = new HashMap<>();
+        map.put("postId", postId);
+        map.put("schType", schType);
+        map.put("kwd", kwd);
+
+        model.addAttribute("prevPost", service.findByPrev(map));
+        model.addAttribute("nextPost", service.findByNext(map));
+
+        map.put("memberId", info.getMember_id());
+        model.addAttribute("liked", service.hasPostLike(map) > 0);
 
         model.addAttribute("post", dto);
         model.addAttribute("page", Math.max(1, page));
@@ -169,25 +189,27 @@ public class CommunityPostController {
         CommunityPostDto dto = new CommunityPostDto();
         dto.setTitle(title.trim());
         dto.setContent(content);
-
-        // 작성자는 로그인한 회원으로 설정
         dto.setAuthorId(info.getMember_id());
 
-        if (dto.getTitle().isBlank()
-                || dto.getTitle().length() > 200
-                || content.isBlank()) {
+        model.addAttribute("post", dto);
+        model.addAttribute("mode", "write");
+        model.addAttribute("pageTitle", "자유 이야기 등록");
+        model.addAttribute("activeMenu", "free");
 
-            model.addAttribute("post", dto);
-            model.addAttribute("mode", "write");
-            model.addAttribute("pageTitle", "자유 이야기 등록");
-            model.addAttribute("activeMenu", "free");
+        if (dto.getTitle().isBlank() || dto.getTitle().length() > 200
+                || content.isBlank()) {
             model.addAttribute("error",
                     "제목은 1~200자로 입력하고 내용을 작성해 주세요.");
-
             return "community/communityPost-write";
         }
 
-        service.insertPost(dto);
+        try {
+            service.insertPost(dto);
+        } catch (Exception e) {
+            log.info("writeSubmit : ", e);
+            model.addAttribute("error", "게시글 등록에 실패했습니다.");
+            return "community/communityPost-write";
+        }
 
         return "redirect:/community/free";
     }
@@ -210,7 +232,6 @@ public class CommunityPostController {
             return "redirect:/community/free";
         }
 
-        // 다른 사람의 글은 수정 불가
         if (dto.getAuthorId() != info.getMember_id()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -243,6 +264,7 @@ public class CommunityPostController {
             return "redirect:/community/free";
         }
 
+        // 주소를 직접 입력해도 작성자 확인
         if (dto.getAuthorId() != info.getMember_id()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -251,31 +273,35 @@ public class CommunityPostController {
         dto.setContent(content);
         dto.setAuthorId(info.getMember_id());
 
-        if (dto.getTitle().isBlank()
-                || dto.getTitle().length() > 200
-                || content.isBlank()) {
+        model.addAttribute("post", dto);
+        model.addAttribute("mode", "update");
+        model.addAttribute("pageTitle", "자유 이야기 수정");
+        model.addAttribute("activeMenu", "free");
 
-            model.addAttribute("post", dto);
-            model.addAttribute("mode", "update");
-            model.addAttribute("pageTitle", "자유 이야기 수정");
-            model.addAttribute("activeMenu", "free");
+        if (dto.getTitle().isBlank() || dto.getTitle().length() > 200
+                || content.isBlank()) {
             model.addAttribute("error",
                     "제목은 1~200자로 입력하고 내용을 작성해 주세요.");
-
             return "community/communityPost-write";
         }
 
-        if (service.updatePost(dto) == 0) {
-            return "redirect:/community/free";
+        try {
+            if (service.updatePost(dto) == 0) {
+                return "redirect:/community/free";
+            }
+        } catch (Exception e) {
+            log.info("updateSubmit : ", e);
+            model.addAttribute("error", "게시글 수정에 실패했습니다.");
+            return "community/communityPost-write";
         }
 
         return "redirect:/community/free/" + postId;
     }
 
-    // 작성자 본인의 글 삭제
+    // 본인 게시글 삭제
     @PostMapping("/{postId}/delete")
     public String delete(
-            @PathVariable("postId") long postId) {
+            @PathVariable("postId") long postId) throws Exception {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
@@ -302,11 +328,12 @@ public class CommunityPostController {
         return "redirect:/community/free";
     }
 
-    // 관리자만 게시글 숨김 가능
+    // 관리자 게시글 숨김
     @PostMapping("/{postId}/hide")
     public String hide(
             @PathVariable("postId") long postId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails)
+            throws Exception {
 
         if (userDetails == null) {
             return "redirect:/member/login";
@@ -316,7 +343,6 @@ public class CommunityPostController {
                 .anyMatch(auth ->
                         auth.getAuthority().equals("ROLE_ADMIN"));
 
-        // 버튼을 거치지 않은 요청도 권한 확인
         if (!admin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -324,5 +350,74 @@ public class CommunityPostController {
         service.hidePost(postId);
 
         return "redirect:/community/free";
+    }
+
+    // 좋아요 등록 : AJAX-JSON
+    @PostMapping("/like/{postId}")
+    public ResponseEntity<?> insertPostLike(
+            @PathVariable("postId") long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        if (service.findById(postId) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "조회할 글이 없습니다."));
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("postId", postId);
+        map.put("memberId", userDetails.getMember().getMember_id());
+
+        try {
+            service.insertPostLike(map);
+        } catch (DuplicateKeyException e) {
+            // 중복 요청이면 기존 좋아요 유지
+        } catch (Exception e) {
+            log.info("insertPostLike : ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "좋아요 처리에 실패했습니다."));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "likeCount", service.postLikeCount(postId),
+                "liked", service.hasPostLike(map) > 0));
+    }
+
+    // 좋아요 취소 : AJAX-JSON
+    @DeleteMapping("/like/{postId}")
+    public ResponseEntity<?> deletePostLike(
+            @PathVariable("postId") long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        if (service.findById(postId) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "조회할 글이 없습니다."));
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("postId", postId);
+        map.put("memberId", userDetails.getMember().getMember_id());
+
+        try {
+            service.deletePostLike(map);
+
+            return ResponseEntity.ok(Map.of(
+                    "likeCount", service.postLikeCount(postId),
+                    "liked", service.hasPostLike(map) > 0));
+
+        } catch (Exception e) {
+            log.info("deletePostLike : ", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "좋아요 취소에 실패했습니다."));
+        }
     }
 }

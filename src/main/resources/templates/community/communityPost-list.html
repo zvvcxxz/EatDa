@@ -11,36 +11,49 @@
 <body>
 
 <th:block layout:fragment="css">
+    <!-- 새 커뮤니티 디자인 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    
 </th:block>
 
-<div layout:fragment="content" class="community-body">
-    <div class="app-shell">
+<div layout:fragment="content" class="community-orange">
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 사람과 요리를 이어서</span>
+                <h1 class="hero-title">냉장고를 열고, 한 끼를 잇다.</h1>
+                <p class="hero-sub">오늘의 추천 레시피 공유부터 남은 재료 활용법, 소소한 자취 이야기까지 함께 나누어요.</p>
+            </div>
+        </div>
+    </section>
+<div class="main-wrapper">
 
         <aside class="sidebar">
-            <p class="eyebrow">COMMUNITY</p>
-
-            <nav class="side-nav" aria-label="함께하는 주방 메뉴">
-                <a th:href="@{/community/free}" class="active">
-                    💬 자유 이야기
-                </a>
-                <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
-                <a th:href="@{/community/cooking}">📷 따라 만든 요리</a>
-                <a th:href="@{/community/questions}">🙋 요리 질문</a>
-            </nav>
-
-            <p class="side-message">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋‍♀️ 요리 질문</a>
+                </li>
+            </ul>
+            <div class="sidebar-footer-text">
                 각자의 한 끼가 모여<br>
-                우리의 주방이 됩니다.
-            </p>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
         </aside>
 
-        <div class="content">
-            <div class="page-heading">
-                <h1>자유 이야기</h1>
-                <p class="meta">
-                    요리와 일상 이야기를 자유롭게 나눠보세요.
-                </p>
+        <div class="content-area">
+            <div class="section-header">
+                <div class="breadcrumb">커뮤니티 &gt; <span>자유 이야기</span></div>
+                <a class="btn-write" th:href="@{/community/free/write}">글작성 ✍️</a>
             </div>
 
             <!-- 검색 시 첫 페이지부터 조회 -->
@@ -63,69 +76,47 @@
                     </option>
                 </select>
 
-                <label class="search">
+                <label class="search" style="flex:1;display:flex">
                     <input name="kwd"
                            th:value="${kwd}"
                            placeholder="검색어 입력"
                            aria-label="검색어">
                 </label>
 
-                <button type="submit">검색</button>
+                <button type="submit" class="community-button">검색</button>
 
-                <span class="meta"
+                <span class="result-count"
                       th:text="|총 ${dataCount}개의 이야기|">
                     총 0개의 이야기
                 </span>
             </form>
 
-            <div class="post-actions">
-                <a class="community-button"
-                   th:href="@{/community/free/write}">
-                    글쓰기
-                </a>
-            </div>
-
-            <section class="list">
-                <!-- 조회한 게시글 반복 -->
-                <article class="list-row" th:each="post : ${posts}">
+            <section class="card-grid">
+                <!-- 카드 전체를 누르면 상세로 이동 -->
+                <a class="post-card" th:each="post : ${posts}"
+                   th:href="@{/community/free/{id}(id=${post.postId}, page=${page}, schType=${schType}, kwd=${kwd})}">
                     <div>
-                        <div class="row-title">
-                            <a th:href="@{/community/free/{id}(
-                                    id=${post.postId},
-                                    page=${page},
-                                    schType=${schType},
-                                    kwd=${kwd})}"
-                               th:text="${post.title}">
-                                제목
-                            </a>
-                        </div>
-
-                        <div class="meta">
-                            <span th:text="${post.authorName}">작성자</span>
-                            ·
-                            <span th:text="${post.createdAt}">작성일</span>
-                            ·
-                            <span th:text="|조회 ${post.viewCount}|">
-                                조회 0
-                            </span>
+                        <span class="card-category">자유 이야기</span>
+                        <h3 class="card-title" th:text="${post.title}">게시글 제목</h3>
+                        <p class="card-content-preview" th:text="${post.content}">본문 미리보기</p>
+                        <p class="card-date" th:text="${post.createdAt}">작성일</p>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-author" th:text="${post.authorName}">작성자</span>
+                        <div class="meta-stats">
+                            <span th:text="|👁 ${post.viewCount}|">👁 0</span>
+                            <span th:text="|♡ ${post.likeCount}|">♡ 0</span>
+                            <span th:text="|💬 ${post.commentCount}|">💬 0</span>
                         </div>
                     </div>
-
-                    <span class="meta"
-                          th:text="|댓글 ${post.commentCount}|">
-                        댓글 0
-                    </span>
-                </article>
-
-                <p class="meta" th:if="${posts.isEmpty()}">
-                    게시글이 없습니다.
-                </p>
+                </a>
+                <p class="empty-state" th:if="${posts.isEmpty()}">아직 게시글이 없습니다. 첫 이야기를 남겨보세요.</p>
             </section>
 
             <!-- 페이지 이동 시 검색 조건 유지 -->
             <nav class="pagination"
                  aria-label="페이지 이동"
-                 th:if="${dataCount > 0}">
+                 th:if="${totalPage > 1}">
 
                 <a th:if="${page > 1}"
                    th:href="@{/community/free(

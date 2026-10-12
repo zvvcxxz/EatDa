@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityCommentMapper">
+
+    <!-- 댓글 등록. 답글이면 부모 댓글 번호를 넣음 -->
+    <insert id="insertComment" parameterType="com.sp.app.domain.dto.CommunityCommentDto">
+        INSERT INTO POST_COMMENT(COMMENT_ID, POST_ID, MEMBER_ID, CONTENT, PARENT_COMMENT_ID, STATUS, CREATED_AT, UPDATED_AT)
+        VALUES (SEQ_POST_COMMENT.NEXTVAL, #{postId}, #{memberId}, #{content}, #{parentCommentId, jdbcType=BIGINT}, 0, SYSTIMESTAMP, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 답글을 제외한 공개 댓글 개수 -->
+    <select id="commentCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM POST_COMMENT
+        WHERE POST_ID = #{postId} AND PARENT_COMMENT_ID IS NULL AND STATUS = 0
+    </select>
+
+    <!-- 댓글 목록. 답글 개수도 함께 조회 -->
+    <select id="listComment" parameterType="map" resultType="com.sp.app.domain.dto.CommunityCommentDto">
+        SELECT C.COMMENT_ID AS commentId, C.POST_ID AS postId, C.MEMBER_ID AS memberId,
+            M.NAME AS memberName, C.CONTENT AS content, C.STATUS AS status,
+            TO_CHAR(C.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            NVL(A.answerCount, 0) AS answerCount
+        FROM POST_COMMENT C
+        JOIN MEMBER M ON C.MEMBER_ID = M.MEMBER_ID
+        LEFT OUTER JOIN (
+            SELECT PARENT_COMMENT_ID, COUNT(*) AS answerCount
+            FROM POST_COMMENT
+            WHERE POST_ID = #{postId} AND PARENT_COMMENT_ID IS NOT NULL AND STATUS = 0
+            GROUP BY PARENT_COMMENT_ID
+        ) A ON C.COMMENT_ID = A.PARENT_COMMENT_ID
+        WHERE C.POST_ID = #{postId} AND C.PARENT_COMMENT_ID IS NULL AND C.STATUS = 0
+        ORDER BY C.COMMENT_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <!-- 선택한 댓글에 달린 답글 목록 -->
+    <select id="listCommentAnswer" parameterType="map" resultType="com.sp.app.domain.dto.CommunityCommentDto">
+        SELECT C.COMMENT_ID AS commentId, C.POST_ID AS postId, C.MEMBER_ID AS memberId,
+            M.NAME AS memberName, C.CONTENT AS content, C.PARENT_COMMENT_ID AS parentCommentId,
+            C.STATUS AS status, TO_CHAR(C.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt
+        FROM POST_COMMENT C
+        JOIN MEMBER M ON C.MEMBER_ID = M.MEMBER_ID
+        WHERE C.POST_ID = #{postId} AND C.PARENT_COMMENT_ID = #{parentCommentId} AND C.STATUS = 0
+        ORDER BY C.COMMENT_ID DESC
+    </select>
+
+    <!-- 선택한 댓글의 답글 개수 -->
+    <select id="commentAnswerCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM POST_COMMENT
+        WHERE POST_ID = #{postId} AND PARENT_COMMENT_ID = #{parentCommentId} AND STATUS = 0
+    </select>
+
+    <!-- 작성자와 댓글 상태 확인 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityCommentDto">
+        SELECT COMMENT_ID AS commentId, POST_ID AS postId, MEMBER_ID AS memberId,
+            PARENT_COMMENT_ID AS parentCommentId, STATUS AS status
+        FROM POST_COMMENT
+        WHERE COMMENT_ID = #{commentId}
+    </select>
+
+    <!-- 본인의 공개 댓글만 수정 -->
+    <update id="updateComment" parameterType="com.sp.app.domain.dto.CommunityCommentDto">
+        UPDATE POST_COMMENT SET CONTENT = #{content}, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} AND MEMBER_ID = #{memberId} AND STATUS = 0
+    </update>
+
+    <!-- 본인의 댓글을 삭제 상태로 변경 -->
+    <update id="deleteComment" parameterType="map">
+        UPDATE POST_COMMENT SET STATUS = 2, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} AND MEMBER_ID = #{memberId} AND STATUS = 0
+    </update>
+
+    <!-- 관리자 권한 확인 후 숨김 처리 -->
+    <update id="hideComment" parameterType="map">
+        UPDATE POST_COMMENT SET STATUS = 1, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} AND STATUS = 0
+    </update>
+
+</mapper>
