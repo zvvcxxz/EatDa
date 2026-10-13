@@ -172,5 +172,26 @@
          		AND p.member_id != t.author_id
     	)
     	ORDER BY sort_order ASC, created_at DESC, member_id ASC
-</select>
+	</select>
+	
+	<insert id="insertMeetComment" parameterType="TogetherMeetCommentDto">
+		INSERT INTO meet_comment(
+			comment_id,
+			meet_id,
+			member_id,
+			content,
+			created_at,
+			updated_at,
+			deleted_at
+		)
+		VALUES(
+			SEQ_MEET_COMMENT.NEXTVAL,
+			#{meet_id},
+			#{member_id},
+			#{content},
+			SYSTIMESTAMP,
+			SYSTIMESTAMP,
+			NULL
+		)
+	</insert>
 </mapper>

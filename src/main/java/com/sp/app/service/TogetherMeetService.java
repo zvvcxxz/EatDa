@@ -2,6 +2,7 @@ package com.sp.app.service;
 
 import java.util.List;
 
+import com.sp.app.domain.dto.TogetherMeetCommentDto;
 import com.sp.app.domain.dto.TogetherMeetDto;
 import com.sp.app.domain.dto.TogetherMeetParticipantDto;
 
@@ -25,4 +26,5 @@ public interface TogetherMeetService {
 	
 	public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception; // 현재 함께하는 이웃 : 방장 + 승인된 참여자
 	
+	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이먹어요 댓글 등록
 }

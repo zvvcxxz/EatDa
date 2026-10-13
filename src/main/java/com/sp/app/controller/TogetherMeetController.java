@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sp.app.domain.dto.SessionInfo;
+import com.sp.app.domain.dto.TogetherMeetCommentDto;
 import com.sp.app.domain.dto.TogetherMeetDto;
 import com.sp.app.security.LoginMemberUtil;
 import com.sp.app.service.TogetherMeetService;
@@ -180,5 +181,40 @@ public class TogetherMeetController {
 					"applicationMessage" , "거절 처리 중 오류가 발생했습니다.");
 		}
 		return "redirect:/together/meet/detail/" + meet_id;
+	}
+
+	// 댓글 등록
+	@PostMapping("/together/meet/{meet_id}/comments")
+	public String insertComment(
+			@PathVariable("meet_id") Long meet_id,
+			@ModelAttribute TogetherMeetCommentDto dto,
+			RedirectAttributes redirectAttributes) {
+		
+		SessionInfo info = LoginMemberUtil.getSessionInfo();
+		
+		if(info == null) {
+			return "redirect:/member/login";
+		}
+		
+		try {
+			// 게시글 번호는 주소에서 , 작성자는 로그인 정보에서 설정
+			dto.setMeet_id(meet_id);
+			dto.setMember_id(info.getMember_id());
+			
+			service.insertMeetComment(dto);
+			
+			redirectAttributes.addFlashAttribute(
+					"applyMessage","댓글이 등록 되었습니다.");
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			redirectAttributes.addFlashAttribute(
+					"applyMessage", e.getMessage());
+		} catch (Exception e) {
+			log.error("같이 먹어요 댓글 등록 오류", e);
+			redirectAttributes.addFlashAttribute(
+					"applyMessage", "댓글 등록 중 오류가 발생했습니다.");
+		}
+		
+		return "redirect:/together/meet/detail/" + meet_id;
+		
 	}
 }

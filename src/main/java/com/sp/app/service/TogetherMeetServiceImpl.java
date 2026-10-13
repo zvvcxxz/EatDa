@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sp.app.domain.dto.TogetherMeetCommentDto;
 import com.sp.app.domain.dto.TogetherMeetDto;
 import com.sp.app.domain.dto.TogetherMeetParticipantDto;
 import com.sp.app.mapper.TogetherMeetMapper;
@@ -193,5 +194,29 @@ public class TogetherMeetServiceImpl implements TogetherMeetService {
 			log.error("같이먹어요 참여자 목록 조회 실패", e);
 			throw e;
 		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception {
+		
+		try {
+			if( dto.getContent() == null || dto.getContent().isBlank() ) {
+				throw new IllegalArgumentException("댓글 내용을 입력해주세요.");
+			}
+			
+			TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
+			
+			if( meet == null ) {
+				throw new IllegalArgumentException("게시글이 없습니다.");
+			}
+			
+			mapper.insertMeetComment(dto);
+			
+		} catch (Exception e) {
+			log.error("같이먹어요 댓글 등록 오류", e);
+			throw e;
+		}
+		
 	}
 }

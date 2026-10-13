@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.sp.app.domain.dto.TogetherMeetCommentDto;
 import com.sp.app.domain.dto.TogetherMeetDto;
 import com.sp.app.domain.dto.TogetherMeetParticipantDto;
 
@@ -33,4 +34,8 @@ public interface TogetherMeetMapper {
 	public int countMeetApplication(@Param("meet_id") Long meet_id, @Param("member_id") Long member_id); // 참여 신청 중복 확인
 	
 	public List<TogetherMeetParticipantDto> listAcceptedParticipants(@Param("meet_id") Long meet_id); // 현재 함께하는 이웃 + 승인된 참여자
+	
+	
+	// 같이먹어요 댓글
+	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이 먹어요 댓글 등록
 }
