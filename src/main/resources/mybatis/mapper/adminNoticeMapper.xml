@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.admin.mapper.AdminNoticeMapper">
 
@@ -36,16 +35,31 @@
 		DELETE FROM NOTICE WHERE NOTICE_ID = #{noticeId}
 	</delete>
 	
+	<sql id="where-list">
+		<if test="kwd != null and kwd != ''">
+			<choose>
+				<when test="schType == 'all'">
+					AND (INSTR(n.TITLE, #{kwd}) &gt; 0 OR INSTR(n.CONTENT, #{kwd}) &gt; 0)
+				</when>
+				<when test="schType == 'title'">
+					AND INSTR(n.TITLE, #{kwd}) &gt; 0
+				</when>
+				<when test="schType == 'content'">
+					AND INSTR(n.CONTENT, #{kwd}) &gt; 0
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
 	<select id="dataCount" parameterType="map" resultType="int">
-		SELECT COUNT(*) FROM NOTICE
+		SELECT COUNT(*) FROM NOTICE n
+		<where>
+			<include refid="where-list"/>
+		</where>
 	</select>
 	
 	<select id="listNoticeTop" resultType="com.sp.app.admin.domain.dto.AdminNoticeDto">
-		SELECT n.NOTICE_ID AS noticeId,
-			n.ADMIN_ID AS adminId,
-			m.NAME AS adminName,
-			n.TITLE AS title,
-			n.HIT_COUNT AS hitCount,
+		SELECT n.NOTICE_ID AS noticeId, n.ADMIN_ID AS adminId, m.NAME AS adminName, n.TITLE AS title, n.HIT_COUNT AS hitCount,
 			TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt
 		FROM NOTICE n
 		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
@@ -54,13 +68,7 @@
 	</select>
 	
 	<select id="listNotice" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminNoticeDto">
-		SELECT n.NOTICE_ID AS noticeId,
-			n.ADMIN_ID AS adminId,
-			m.NAME AS adminName,
-			n.TITLE AS title,
-			n.PINNED_YN AS pinnedYn,
-			n.STATUS AS status,
-			n.HIT_COUNT AS hitCount,
+		SELECT n.NOTICE_ID AS noticeId, n.ADMIN_ID AS adminId, m.NAME AS adminName, n.TITLE AS title, n.PINNED_YN AS pinnedYn, n.STATUS AS status, n.HIT_COUNT AS hitCount,
 			TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
 			NVL(f.fileCount, 0) AS fileCount
 		FROM NOTICE n
@@ -70,6 +78,9 @@
 			FROM NOTICE_FILE
 			GROUP BY NOTICE_ID
 		) f ON n.NOTICE_ID = f.NOTICE_ID
+		<where>
+			<include refid="where-list"/>
+		</where>
 		ORDER BY n.PINNED_YN DESC, n.NOTICE_ID DESC
 		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>

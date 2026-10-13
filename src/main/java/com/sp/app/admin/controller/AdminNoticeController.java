@@ -34,6 +34,8 @@ public class AdminNoticeController {
     @GetMapping({"", "/list"})
     public String list(
             @RequestParam(value = "page", defaultValue = "1") int current_page,
+            @RequestParam(value = "schType", defaultValue = "all") String schType, // 💡 검색 조건
+            @RequestParam(value = "kwd", defaultValue = "") String kwd,            // 💡 검색어
             HttpServletRequest req,
             Model model) {
         
@@ -43,6 +45,8 @@ public class AdminNoticeController {
         Map<String, Object> map = new HashMap<>();
         map.put("offset", offset);
         map.put("size", size);
+        map.put("schType", schType); // 💡 Map에 담아서 DB로 전달
+        map.put("kwd", kwd);
 
         List<AdminNoticeDto> topList = service.listNoticeTop();
         List<AdminNoticeDto> list = service.listNotice(map);
@@ -54,7 +58,11 @@ public class AdminNoticeController {
         model.addAttribute("list", list);
         model.addAttribute("page", current_page);
         model.addAttribute("dataCount", dataCount);
+        model.addAttribute("size", size);
         model.addAttribute("total_page", total_page);
+        
+        model.addAttribute("schType", schType);
+        model.addAttribute("kwd", kwd);
 
         return "admin/layout/noticeList"; 
     }
@@ -113,7 +121,7 @@ public class AdminNoticeController {
         model.addAttribute("dto", dto);
         model.addAttribute("listFile", listFile);
         
-        return "admin/main/noticeWrite";
+        return "admin/layout/noticeWrite";
     }
 
     @PostMapping("/update")

@@ -22,23 +22,53 @@
 				<div><h2>공지사항 목록</h2></div>
 				<button type="button" class="custom-btn primary" data-open="notice-dialog">+ 공지 등록</button>
 			</div>
-			<div class="table-wrap">
+            
+            <div class="table-wrap">
 				<table>
-					<thead><tr><th>구분</th><th>제목</th><th>조회수</th><th>작성일</th><th>상태</th><th>관리</th></tr></thead>
+					<thead>
+						<tr>
+							<th>구분</th><th>제목</th><th>첨부</th><th>상태</th><th>작성일</th><th>조회수</th>
+						</tr>
+					</thead>
 					<tbody id="notice-rows">
-					    <tr th:each="dto : ${list}">
-					        <td><span class="custom-badge orange">공지</span></td>
-					        <td class="cell-title" th:text="${dto.title}">제목</td>
-					        
-					        <td th:text="${dto.hitCount}">0</td>
-					        
-					        <td class="muted" th:text="${dto.createdAt}">작성일</td>
-					        <td><span class="custom-badge green">공개</span></td>
-					        <td><button type="button" class="custom-btn secondary small">수정</button></td>
-					    </tr>
+						<tr th:each="dto : ${list}" 
+						    th:onclick="|location.href='@{/admin/notice/article(noticeId=${dto.noticeId})}'|" 
+						    style="cursor: pointer;">
+						    <td>
+						        <span class="custom-badge orange" th:text="${dto.pinnedYn == 'Y' ? '공지' : '일반'}">공지</span>
+						    </td>
+						    <td class="cell-title" th:text="${dto.title}">제목</td>
+						    <td>
+						        <span th:if="${dto.fileCount > 0}" style="color: #89847c; font-size: 16px;">
+						            <i class="bi bi-paperclip"></i> 
+						        </span>
+						    </td>
+						    <td>
+						        <span class="custom-badge green" th:text="${dto.status == 1 ? '공개' : '숨김'}">공개</span>
+						    </td>
+						    <td class="muted" th:text="${dto.createdAt}">작성일</td>
+						    <td th:text="${dto.hitCount}">0</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
+            
+            <!-- 페이징 번호 -->
+            <div class="page-navigation page-navigation-wrap"></div>
+
+            <!-- 검색 -->
+            <div class="search-section">
+                <form name="searchForm" class="form-search">
+                    <select name="schType" class="select-ui">
+                        <option value="all" th:selected="${schType=='all'}">제목+내용</option>
+                        <option value="title" th:selected="${schType=='title'}">제목</option>
+                        <option value="content" th:selected="${schType=='content'}">내용</option>
+                    </select>
+                    <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
+                    <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                </form>
+            </div>
 		</section>
 	</div>
 </th:block>
@@ -49,18 +79,30 @@
 			<h2>공지사항 등록</h2><button type="button" class="close-btn" data-close>×</button>
 		</div>
 		<div class="dialog-body">
-			<!-- 💡 실제 등록 처리를 위해 action 주소 추가 필요 -->
-			<form id="notice-form" class="form-grid" method="post" th:action="@{/admin/notice/write}">
+			<form id="notice-form" class="form-grid" method="post" th:action="@{/admin/notice/write}" enctype="multipart/form-data">
 				<label class="field"><span>제목</span><input type="text" name="title" required></label>
 				<label class="field"><span>내용</span><textarea name="content" required></textarea></label>
+				<label class="field"><span>첨부파일</span><input type="file" name="selectFile" multiple></label>
 				<button type="submit" class="custom-btn primary full">공지 등록</button>
 			</form>
 		</div>
 	</dialog>
 	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
-</th:block>	
+</th:block>
 
 <th:block layout:fragment="script">
+	<script type="text/javascript" th:src="@{/dist/posts/renderPaging.js}"></script>
+    
+    <script type="text/javascript">
+        window.noticeData = {
+            page: '[[${page}]]',
+            size: '[[${size}]]',
+            dataCount: '[[${dataCount}]]',
+            schType: '[[${schType}]]',
+            kwd: '[[${kwd}]]'
+        };
+    </script>
+    
 	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
 </th:block>
 </html>

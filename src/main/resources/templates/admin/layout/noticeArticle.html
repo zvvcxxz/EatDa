@@ -1,26 +1,66 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>공지사항 상세</title>
-</head>
-<body>
-    <h2>공지사항 상세</h2>
-    <div th:text="|제목: ${dto.title}|">제목</div>
-    <div th:text="|작성자: ${dto.adminName} | 등록일: ${dto.createdAt} | 조회수: ${dto.hitCount}|">정보</div>
-    <hr>
-    <div th:text="${dto.content}">내용</div>
-    <hr>
-    
-    <div th:if="${not #lists.isEmpty(listFile)}">
-        <p>첨부파일:</p>
-        <ul>
-            <li th:each="file : ${listFile}" th:text="${file.originalFileName}">파일.jpg</li>
-        </ul>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+      
+<th:block layout:fragment="content">
+    <div class="admin-wrap">
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">NOTICE ARTICLE</p>
+                <h2>공지사항 상세</h2>
+                <p class="subtitle">등록된 공지사항의 내용을 확인합니다.</p>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head article-head-info">
+                <h2 class="article-title" th:text="${dto.title}">공지사항 제목</h2>
+                <div class="article-meta">
+                    <strong>작성자: </strong><span th:text="${dto.adminName}">관리자</span>
+                    <span class="divider">|</span>
+                    <strong>등록일: </strong><span th:text="${dto.createdAt}">2026-10-13</span>
+                    <span class="divider">|</span>
+                    <strong>조회수: </strong><span th:text="${dto.hitCount}">0</span>
+                </div>
+            </div>
+            
+            <div class="panel-body">
+                <div class="article-content" th:text="${dto.content}">
+                    공지사항 내용이 여기에 표시됩니다.
+                </div>
+                
+                <div th:if="${not #lists.isEmpty(listFile)}" class="article-attachments">
+                    <h3>첨부파일</h3>
+                    <div class="tag-list">
+                        <span class="tag-item" th:each="file : ${listFile}">
+                            <i class="bi bi-file-earmark-text" style="color: var(--orange);"></i>
+                            <span th:text="${file.originalFileName}">파일.jpg</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="article-footer">
+                    <div>
+                        <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/list}'|">
+                            <i class="bi bi-list"></i> 목록으로
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="custom-btn primary" th:onclick="|location.href='@{/admin/notice/update(noticeId=${dto.noticeId})}'|">수정</button>
+                        <button type="button" class="custom-btn danger" th:onclick="|if(confirm('이 공지사항을 정말 삭제하시겠습니까?')) location.href='@{/admin/notice/delete(noticeId=${dto.noticeId})}'|">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-    
-    <button type="button" th:onclick="|location.href='@{/admin/notice/update(noticeId=${dto.noticeId})}'|">수정</button>
-    <button type="button" th:onclick="|location.href='@{/admin/notice/delete(noticeId=${dto.noticeId})}'|">삭제</button>
-    <button type="button" th:onclick="|location.href='@{/admin/notice/list}'|">목록</button>
-</body>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
 </html>

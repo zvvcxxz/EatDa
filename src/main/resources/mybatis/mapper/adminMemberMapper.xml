@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.admin.mapper.AdminHomeMapper">
+	<sql id="where-list">
+		<if test="kwd != null and kwd != ''">
+			<choose>
+				<when test="schType == 'loginId'">
+					AND (INSTR(m.LOGIN_ID, #{kwd}) &gt; 0 OR INSTR(m.SNS_ID, #{kwd}) &gt; 0)
+				</when>
+				<when test="schType == 'name'">
+					AND INSTR(m.Name, #{kwd}) &gt; 0
+				</when>
+				<when test="schType == 'email'">
+					AND INSTR(m.EMAIL, #{kwd} &gt; 0
+				</when>
+				<when test="schType == 'phone'">
+					AND INSTR(m.PHONE, #{kwd}) &gt; 0
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<select id="dataCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM MEMBER m
+		<where>
+			<include refid="where-list"/>
+			<if test="status != null and status != ''">
+				AND m.STATUS = #{status}
+			</if>
+			<if test="roleId != null and roleId != ''">
+				AND m.ROLE_ID = #{roleId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="listMember" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
+		SELECT m.MEMEBER_ID AS memberId,
+			   m.LOGIN_ID AS loginId,
+			   m.Name AS name,
+			   m.EMAIL AS email,
+			   m.PHONE AS phone,
+			   TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
+			   m.STATUS AS status,
+			   TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt.
+			   r.ROLE_NAME AS roleName,
+			   m.SNS_PROVIDER AS snsProvider
+		 FROM MEMBER m
+		 JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+		 <where>
+		 		<include refid="where-list"/>
+		 		<if test="status != null and status != ''">
+		 				AND m.STATUS = #{status}
+		 		</if>
+		 		<if test="roleId != null and roleId != ''">
+		 				AND m.ROLE_ID = #{roleId}
+		 		</if>
+		 </where>
+		 ORDER BY m.CREATED_AT DESC
+		 OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+	
+	<select id="findById" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
+			SELECT m.MEMBER_ID AS memberId,
+				   m.LOGIN_ID AS loginId,
+				   m.NAME AS name,
+				   TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
+				   m.EMAIL AS email,
+				   m.PHONE AS phone,
+				   m.ZIP AS zip,
+				   m.ADDR1 AS addr1,
+				   m.ADDR2 AS addr2,
+				   m.STATUS AS status,
+				   TO_CHAR(m.CREATE_AT, 'YYYY-MM-DD') AS createdAt,
+				   TO_CHAR(m.UPDATED_AT, 'YYYY-MM-DD') AS updateAt,
+				   TO_CHAR(m.LAST_LOGIN_AT, 'YYYY-MM-DD HH24:MI') AS lastLoginAt,
+				   m.FAILURE_CNT AS failureCnt,
+				   m.SNS_PROVIDER AS snsProvider,
+				   m.SNS_ID AS snsId,
+				   r.ROLE_NAME AS roleName,
+				   m.ROLE_ID AS roleId
+			 FROM MEMBER m
+			 JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+			 WHERE m.MEMBER_ID = #{memberId}	   
+	</select>
+	
+	<insert id="insertMemberStatusHist" parameterType="com.sp.app.admin.domain.dto.AdminMemberDto">
+			INSERT INTO MEMBER_STATUS_HIST(
+						STATUS_HIST_ID, MEMBER_ID, ADMIN_ID, BEFORE_STATUS, AFTER_STATUS, REASON, START_AT
+			) VALUES (
+				SEQ_MEMBER_STATUS_HIST.NEXTVAL, #{memberId}, #{adminId}, #{beforeStatus}, #{afterStatus}, #{reason}, SYSTIMESTAMP
+			)
+	</insert>
+	
+	<select id="listMemberStatusHist" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
+			SELECT h.STATUS_HIST_ID AS statusHistId,
+				   h.BEFORE_STATUS AS beforeStatus,
+				   h.AFTER_STATUS AS afterStatus,
+				   h.REASON AS reason,
+				   TO_CHAR(h.START_AT, 'YYYY-MM-DD HH24:MI') AS startAt,
+				   a.Name AS adminName
+			FROM MEMBER_STATUS_HIST h
+			LEFT JOIN MEMBER a ON h.ADMIN_ID = a.MEMBER_ID
+			WHERE h.MEMBER_ID = #{memberId}
+			ORDER BY h.STATUS_HIST_ID DESC
+	</select>
+	
+	<update id="updateFailureCountReset" parameterType="Long">
+		UPDATE MEMBER SET FAILURE_CNT = 0 WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+	<update id="updateMember" parameterType="map">
+			UPDATE MEMBER SET
+					NAME = #{name},
+					BIRTH = TO_DATE(#{birth}, 'YYYY-MM-DD'),
+					ROLE_ID = #{roleId},
+					UPDATED_AT = SYSTIMESTAMP
+			WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+	<update id="updateMemberStatus" parameterType="map">
+				UPDATE MEMBER SET STAUTS = #{status}, UPDATED_AT = SYSTIMESTAMP
+				WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+</mapper>

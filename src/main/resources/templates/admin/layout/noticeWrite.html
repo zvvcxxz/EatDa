@@ -1,28 +1,87 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>공지사항 작성</title>
-</head>
-<body>
-    <h2 th:text="${mode == 'update' ? '공지사항 수정' : '공지사항 작성'}">공지사항 작성</h2>
-    
-    <form th:action="@{${mode == 'update' ? '/admin/notice/update' : '/admin/notice/write'}}" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="noticeId" th:value="${dto?.noticeId}">
-        
-        <div>제목: <input type="text" name="title" th:value="${dto?.title}" required></div>
-        <div>상단고정: <input type="checkbox" name="pinnedYn" value="Y" th:checked="${dto?.pinnedYn == 'Y'}"></div>
-        <div>공개여부: 
-            <select name="status">
-                <option value="1" th:selected="${dto?.status == 1}">공개</option>
-                <option value="0" th:selected="${dto?.status == 0}">숨김</option>
-            </select>
-        </div>
-        <div>내용: <textarea name="content" required th:text="${dto?.content}"></textarea></div>
-        <div>첨부파일: <input type="file" name="selectFile" multiple></div>
-        
-        <button type="submit">저장</button>
-        <button type="button" th:onclick="|location.href='@{/admin/notice/list}'|">취소</button>
-    </form>
-</body>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+      
+<th:block layout:fragment="content">
+    <div class="admin-wrap">
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow" th:text="${mode == 'update' ? 'NOTICE UPDATE' : 'NOTICE WRITE'}">NOTICE</p>
+                <h2 th:text="${mode == 'update' ? '공지사항 수정' : '공지사항 등록'}">공지사항</h2>
+                <p class="subtitle" th:text="${mode == 'update' ? '등록된 공지사항의 내용을 수정합니다.' : '서비스 소식을 회원들에게 전해주세요.'}">안내 텍스트</p>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2 th:text="${mode == 'update' ? '내용 수정하기' : '새 글 작성하기'}">작성/수정</h2>
+            </div>
+            
+            <div class="panel-body">
+                <form th:action="@{${mode == 'update' ? '/admin/notice/update' : '/admin/notice/write'}}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="noticeId" th:value="${dto?.noticeId}">
+                    
+                    <div class="field form-section">
+                        <span>제목</span>
+                        <input type="text" name="title" th:value="${dto?.title}" required placeholder="제목을 입력해주세요.">
+                    </div>
+                    
+                    <div class="form-row form-section">
+                        <div class="field">
+                            <span>상단 고정 여부</span>
+                            <label class="check-box-ui">
+                                <input type="checkbox" name="pinnedYn" value="Y" th:checked="${dto?.pinnedYn == 'Y'}">
+                                <span>목록 최상단에 공지로 고정합니다.</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field">
+                            <span>공개 여부</span>
+                            <select name="status" class="select-ui">
+                                <option value="1" th:selected="${dto?.status == 1}">공개 (사용자에게 보임)</option>
+                                <option value="0" th:selected="${dto?.status == 0}">숨김 (관리자만 보임)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="field form-section">
+                        <span>내용</span>
+                        <textarea name="content" required th:text="${dto?.content}" class="textarea-ui" 
+                                  placeholder="공지사항 내용을 상세히 입력해주세요." 
+                                  style="width: 100%; padding: 15px; border: 1px solid #e7e1d9; border-radius: 9px; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div class="field form-section large">
+                        <span>첨부파일 추가</span>
+                        <input type="file" name="selectFile" multiple class="file-ui">
+                    </div>
+                    
+                    <div th:if="${mode == 'update' and not #lists.isEmpty(listFile)}" class="file-list-box">
+                        <h3>현재 등록된 파일</h3>
+                        <div class="tag-list">
+                            <span class="tag-item" th:each="file : ${listFile}">
+                                <i class="bi bi-paperclip" style="color: var(--orange);"></i>
+                                <span th:text="${file.originalFileName}">파일.jpg</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/list}'|">취소</button>
+                        <button type="submit" class="custom-btn primary" th:text="${mode == 'update' ? '수정 완료' : '공지 등록'}">저장버튼</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
 </html>

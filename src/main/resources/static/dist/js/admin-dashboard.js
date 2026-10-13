@@ -74,4 +74,51 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // 공지사항 페이징 및 검색
+    if (window.noticeData) {
+        const data = window.noticeData;
+        let page = Number(data.page) || 1;
+        let pageSize = Number(data.size) || 10;
+        let dataCount = Number(data.dataCount) || 0;
+
+        let url = '/admin/notice/list';
+        let search = data.kwd && data.kwd.trim() !== '';
+        if (search) {
+            url = `/admin/notice/list?schType=${data.schType}&kwd=${encodeURIComponent(data.kwd)}`;
+        }
+
+        let totalPage = Math.ceil(dataCount / pageSize); 
+        
+        // 함수가 정상
+        if (typeof renderPaging === 'function') {
+            let paging = renderPaging(page, totalPage, url);
+            let pageNav = document.querySelector('div.page-navigation');
+            if (pageNav) {
+                pageNav.innerHTML = dataCount === 0 ? '등록된 공지사항이 없습니다.' : paging;
+            }
+        }
+
+        // 검색창 엔터키 이벤트
+        const inputEL = document.querySelector('form[name=searchForm] input[name=kwd]'); 
+        if (inputEL) {
+            inputEL.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    searchList();
+                }
+            });
+        }
+    }
 });
+
+window.searchList = function() {
+    const f = document.searchForm;
+    if (!f || !f.kwd.value.trim()) {
+        return;
+    }
+    
+    const formData = new FormData(f);
+    let params = new URLSearchParams(formData).toString();
+    
+    location.href = '/admin/notice/list?' + params;
+};
