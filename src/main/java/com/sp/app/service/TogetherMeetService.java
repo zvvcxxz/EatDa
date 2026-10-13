@@ -27,4 +27,6 @@ public interface TogetherMeetService {
 	public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception; // 현재 함께하는 이웃 : 방장 + 승인된 참여자
 	
 	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이먹어요 댓글 등록
+	
+	public List<TogetherMeetCommentDto> listMeetComment(Long meet_id) throws Exception; // 같이먹어요 댓글 목록
 }

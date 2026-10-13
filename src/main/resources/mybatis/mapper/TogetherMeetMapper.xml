@@ -194,4 +194,19 @@
 			NULL
 		)
 	</insert>
+	
+	<select id="listMeetComment" resultType="TogetherMeetCommentDto">
+		SELECT 
+			c.comment_id,
+			c.meet_id,
+			c.member_id,
+			m.name,
+			c.content,
+			TO_CHAR(c.created_at, 'YYYY-MM-DD HH24:MI') AS created_at
+		FROM meet_comment c
+		JOIN member m ON c.member_id = m.member_id
+		WHERE c.meet_id = #{meet_id}
+			AND c.deleted_at IS NULL
+		ORDER BY c.created_at ASC, c.comment_id ASC
+	</select>
 </mapper>

@@ -219,4 +219,16 @@ public class TogetherMeetServiceImpl implements TogetherMeetService {
 		}
 		
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TogetherMeetCommentDto> listMeetComment(Long meet_id) throws Exception {
+		
+		try {
+			return mapper.listMeetComment(meet_id);
+		} catch (Exception e) {
+			log.error("같이먹어요 댓글 목록 불러오기 오류" , e);
+			throw e;
+		}
+	}
 }

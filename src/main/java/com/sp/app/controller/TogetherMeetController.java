@@ -77,14 +77,17 @@ public class TogetherMeetController {
 			model.addAttribute("isAuthor", isAuthor);
 			model.addAttribute("participantCount", service.countMeetParticipants(meet_id));
 			model.addAttribute("participants", service.listAcceptedParticipants(meet_id));
-			
+			var comments = service.listMeetComment(meet_id);
+
+			model.addAttribute("comments", comments);
+			model.addAttribute("commentCount", comments.size());
 			if (isAuthor) {
 				
 				  var applications = service.listParticipant(meet_id);
 
 				    log.info("신청자 조회: 글번호={}, 신청자수={}",
 				            meet_id, applications.size());
-				model.addAttribute("applications", service.listParticipant(meet_id));
+				model.addAttribute("applications", applications);
 				model.addAttribute("approvalActionReady" , true);
 				model.addAttribute("rejectionActionReady", true);
 			}
@@ -215,6 +218,5 @@ public class TogetherMeetController {
 		}
 		
 		return "redirect:/together/meet/detail/" + meet_id;
-		
 	}
 }

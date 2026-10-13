@@ -38,4 +38,6 @@ public interface TogetherMeetMapper {
 	
 	// 같이먹어요 댓글
 	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이 먹어요 댓글 등록
+	
+	public List<TogetherMeetCommentDto> listMeetComment(@Param("meet_id") Long meet_id); // 같이 먹어요 댓글 목록
 }
