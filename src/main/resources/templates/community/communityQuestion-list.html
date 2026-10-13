@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head><title>요리 질문 · 잇다</title></head><body>
+<th:block layout:fragment="css">
+    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+</th:block>
+<div layout:fragment="content" class="community-orange community-design" data-view="question-list" th:attr="data-id=${previewId}">
+<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
+<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
+</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
+<div class="ds-heading"><div><p class="ds-eyebrow">ASK THE KITCHEN</p><h2>요리 질문</h2><p>작은 궁금증도 함께 나누면 쉬워져요.</p></div><a class="ds-button primary" data-link="question-write">질문하기 ＋</a></div><div class="ds-toolbar"><select id="questionSearchType" aria-label="검색 항목"><option value="all">제목 + 내용</option><option value="title">제목</option></select><label class="ds-search"><span>⌕</span><input id="questionSearch" placeholder="재료나 조리방법을 검색해 보세요." aria-label="질문 검색"></label></div><section class="ds-paper ds-question-list" id="questionList"></section></section></div>
+<div id="designToast" class="ds-toast" role="status" hidden></div>
+</div>
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/community-design-data.js}"></script>
+    <script th:src="@{/dist/js/community-design.js}"></script>
+</th:block>
+</body></html>

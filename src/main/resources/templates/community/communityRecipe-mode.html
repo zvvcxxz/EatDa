@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head><title>요리모드 · 잇다</title></head><body>
+<th:block layout:fragment="css">
+    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+</th:block>
+<div layout:fragment="content" class="community-orange community-design" data-view="recipe-mode" th:attr="data-id=${previewId}">
+<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
+<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
+</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
+<div class="ds-heading compact"><div><p class="ds-eyebrow">COOKING MODE</p><h2 id="modeTitle">한 단계씩 함께 요리해요.</h2></div><a class="ds-button light" data-link="recipe-detail">요리모드 나가기</a></div><section class="ds-paper ds-mode"><div class="ds-mode-top"><span id="modeStep" class="ds-pill"></span><span id="modeProgressText"></span></div><div class="ds-progress"><span id="modeProgress"></span></div><div class="ds-mode-content"><img id="modeImage" alt="현재 조리 단계 사진"><div><p class="ds-eyebrow" id="modeStepLabel"></p><h3 id="modeDescription"></h3><p class="ds-help">현재 단계를 마친 뒤 다음 단계로 넘어가세요.</p><div id="modeTimer" class="ds-timer" hidden><span id="timerText"></span><button type="button" id="timerStart" class="ds-button light">타이머 시작</button></div></div></div><div class="ds-mode-actions"><button type="button" id="modePrev" class="ds-button light">← 이전 단계</button><button type="button" id="modeNext" class="ds-button primary">다음 단계 →</button><a class="ds-button primary" id="modeFinish" data-link="recipe-detail" hidden>요리 완료 ✓</a></div></section></section></div>
+<div id="designToast" class="ds-toast" role="status" hidden></div>
+</div>
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/community-design-data.js}"></script>
+    <script th:src="@{/dist/js/community-design.js}"></script>
+</th:block>
+</body></html>

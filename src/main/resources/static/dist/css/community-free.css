@@ -587,3 +587,7 @@ body.eatda-layout>.community-orange {flex:1}
 .community-orange .post-nav>div {display:flex;align-items:center;gap:14px;min-width:0}
 .community-orange .section-header h1 {font-size:22px;color:#2c2c2c}
 .community-orange .content-area {min-width:0}
+
+/* 커뮤니티 왼쪽 메뉴 스크롤 고정 */
+@media(min-width:801px){.community-orange .sidebar {position:sticky;top:90px;align-self:start}}
+@media(max-width:800px){.community-orange .sidebar {position:static}}

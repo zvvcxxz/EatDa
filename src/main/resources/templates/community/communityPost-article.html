@@ -14,20 +14,13 @@
 <th:block layout:fragment="css">
     <!-- 새 커뮤니티 디자인 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
     
     
 </th:block>
 
-<div layout:fragment="content" class="community-orange">
-    <section class="hero-banner">
-        <div class="hero-card">
-            <div>
-                <span class="hero-tag">✨ 사람과 요리를 이어서</span>
-                <h1 class="hero-title">냉장고를 열고, 한 끼를 잇다.</h1>
-                <p class="hero-sub">오늘의 추천 레시피 공유부터 남은 재료 활용법, 소소한 자취 이야기까지 함께 나누어요.</p>
-            </div>
-        </div>
-    </section>
+<div layout:fragment="content" class="community-orange community-design">
+    <section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section>
 <div class="main-wrapper">
 
         <aside class="sidebar">
@@ -53,13 +46,15 @@
         </aside>
 
         <div class="content-area">
-            <div class="breadcrumb" style="margin-bottom:8px">자유 이야기 / 상세</div>
-
-            <!-- 목록의 페이지와 검색 조건 유지 -->
-            <a class="community-button" style="align-self:flex-start;margin-bottom:16px"
-               th:href="@{/community/free(page=${page}, schType=${schType}, kwd=${kwd})}">
-                ← 목록으로
-            </a>
+            <div class="ds-heading compact">
+                <div>
+                    <p class="ds-eyebrow">FREE TALK / 상세보기</p>
+                    <h2>자유 이야기</h2>
+                    <p>함께 나누는 요리와 일상의 이야기</p>
+                </div>
+                <a class="ds-button light"
+                   th:href="@{/community/free(page=${page}, schType=${schType}, kwd=${kwd})}">← 목록으로</a>
+            </div>
 
             <article class="detail-container">
 		    <div class="detail-header">

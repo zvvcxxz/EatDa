@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head><title>레시피 작성 · 잇다</title></head><body>
+<th:block layout:fragment="css">
+    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+</th:block>
+<div layout:fragment="content" class="community-orange community-design" data-view="recipe-write" th:attr="data-id=${previewId}">
+<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
+<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
+<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
+</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
+<div class="ds-heading"><div><p class="ds-eyebrow">MY RECIPE</p><h2>나의 레시피를 나눠요.</h2><p>재료와 조리 순서를 차근차근 기록해 주세요.</p></div><a class="ds-button light" data-link="recipes">← 목록으로</a></div><form id="recipeForm" class="ds-paper ds-form"><div class="ds-form-section"><p class="ds-eyebrow">01 · 기본 정보</p><h3>어떤 요리를 만들었나요?</h3><div class="ds-field"><label for="recipeTitle">요리명 <b>*</b></label><input id="recipeTitle" name="title" maxlength="200" placeholder="예: 토마토 바질 파스타" required></div><div class="ds-field"><label for="recipeSummary">레시피 소개</label><textarea id="recipeSummary" name="summary" rows="2" placeholder="맛있게 만드는 나만의 포인트를 알려주세요."></textarea></div><div class="ds-two-col"><div class="ds-field"><label for="recipePhoto">대표 사진</label><label class="ds-photo-upload"><img id="recipePhotoPreview" hidden alt="대표 사진 미리보기"><span>📷<br>완성된 요리 사진 선택</span><input id="recipePhoto" type="file" name="selectFile" accept="image/*" data-preview="recipePhotoPreview"></label></div><div><div class="ds-field"><label for="cookMinutes">조리 시간 · 분</label><input id="cookMinutes" type="number" name="cookMinutes" min="0" placeholder="20"></div><div class="ds-field"><label for="servings">인분</label><input id="servings" type="number" name="servings" min="1" placeholder="2"></div><div class="ds-field"><label for="difficulty">난이도</label><select id="difficulty" name="difficulty"><option value="">선택</option><option>쉬움</option><option>보통</option><option>어려움</option></select></div></div></div></div>
+<div class="ds-form-section"><p class="ds-eyebrow">02 · 재료</p><h3>재료와 분량을 알려주세요.</h3><p class="ds-help">목록에서 재료를 선택하고 필요한 분량을 입력해 주세요.</p><div class="ds-table-label"><span>재료</span><span>분량</span><span>단위</span><span></span></div><div id="ingredientRows"></div><button type="button" id="addIngredient" class="ds-button dashed">＋ 재료 추가</button><div class="ds-field"><label for="otherIngredient">기타 재료 설명</label><input id="otherIngredient" name="otherIngredient" maxlength="100" placeholder="선택 목록에 없는 재료는 설명으로 적어주세요."></div></div>
+<div class="ds-form-section"><p class="ds-eyebrow">03 · 조리 순서</p><h3>한 단계씩 쉽게 알려주세요.</h3><div id="stepRows"></div><button type="button" id="addStep" class="ds-button dashed">＋ 조리 단계 추가</button></div>
+<div class="ds-form-section"><p class="ds-eyebrow">04 · 카테고리와 태그</p><h3>내 레시피를 소개하는 키워드</h3><div class="ds-field"><label>카테고리</label><div id="categoryChoices" class="ds-chips"></div></div><div class="ds-field"><label>태그</label><div id="tagChoices" class="ds-chips"></div></div></div><div class="ds-bottom-actions"><a class="ds-button light" data-link="recipes">취소</a><button class="ds-button primary" type="submit" id="recipeSubmit">레시피 등록</button></div></form></section></div>
+<div id="designToast" class="ds-toast" role="status" hidden></div>
+</div>
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/community-design-data.js}"></script>
+    <script th:src="@{/dist/js/community-design.js}"></script>
+</th:block>
+</body></html>

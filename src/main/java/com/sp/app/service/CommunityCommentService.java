@@ -6,17 +6,17 @@ import java.util.Map;
 import com.sp.app.domain.dto.CommunityCommentDto;
 
 public interface CommunityCommentService {
-    void insertComment(CommunityCommentDto dto) throws Exception;
+    public void insertComment(CommunityCommentDto dto) throws Exception;
 
-    int commentCount(Map<String, Object> map);
-    List<CommunityCommentDto> listComment(Map<String, Object> map);
+    public int commentCount(Map<String, Object> map);
+    public List<CommunityCommentDto> listComment(Map<String, Object> map);
 
-    List<CommunityCommentDto> listCommentAnswer(Map<String, Object> map);
-    int commentAnswerCount(Map<String, Object> map);
+    public List<CommunityCommentDto> listCommentAnswer(Map<String, Object> map);
+    public int commentAnswerCount(Map<String, Object> map);
 
-    CommunityCommentDto findById(long commentId);
+    public CommunityCommentDto findById(long commentId);
 
-    int updateComment(CommunityCommentDto dto) throws Exception;
-    int deleteComment(Map<String, Object> map) throws Exception;
-    int hideComment(Map<String, Object> map) throws Exception;
+    public int updateComment(CommunityCommentDto dto) throws Exception;
+    public int deleteComment(Map<String, Object> map) throws Exception;
+    public int hideComment(Map<String, Object> map) throws Exception;
 }

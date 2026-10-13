@@ -1,0 +1,194 @@
+/* 자유 이야기와 같은 색상, 새 게시판에만 적용 */
+.community-design {--ds-ink:#292724;--ds-muted:#6c6864;--ds-orange:#ed592b;--ds-line:#eee5dd;--ds-soft:#fff3eb;color:var(--ds-ink)}
+.community-design h1,.community-design h2,.community-design h3,.community-design p {margin:0}
+.community-design .main-wrapper {max-width:1280px;grid-template-columns:210px minmax(0,1fr);gap:24px;margin-bottom:28px}
+.community-design .hero-banner {max-width:1280px;margin:20px auto 22px}
+.community-design .hero-card {padding:20px 28px;border-radius:18px}
+.community-design .hero-title {font-size:27px;color:#fff}
+.community-design .hero-sub {font-size:14px;color:#fff}
+.community-design .sidebar {padding:22px 14px;position:sticky;top:90px}
+.community-design .sidebar-item a {font-size:14px;padding:11px 12px}
+.community-design .content-area {min-width:0}
+.community-design .ds-preview {font-size:12px;color:#766357;padding:8px 12px;border:1px dashed #e6d8cc;border-radius:8px;margin-bottom:18px;background:#fffaf5}
+.community-design .ds-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:2px 0 24px}
+.community-design .ds-heading.compact {margin-bottom:18px}
+.community-design .ds-eyebrow {font-size:11px;font-weight:800;letter-spacing:1.8px;color:#a74e31;margin-bottom:6px}
+.community-design .ds-heading h2 {font-size:28px;letter-spacing:-1px;color:var(--ds-ink);margin-bottom:5px;line-height:1.3}
+.community-design .ds-heading p:not(.ds-eyebrow) {font-size:14px;color:var(--ds-muted)}
+.community-design .ds-button {display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #ecdccc;border-radius:10px;padding:10px 16px;background:#fff;color:#4b423b;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;line-height:1.35;min-height:39px}
+.community-design .ds-button.primary {background:var(--ds-orange);border-color:var(--ds-orange);color:#fff;box-shadow:0 4px 10px #ed592b14}
+.community-design .ds-button.light {background:#fff;color:#51473f}
+.community-design .ds-button.dashed {width:100%;border-style:dashed;background:#fffaf5;color:#a24627;margin:12px 0 16px}
+.community-design .ds-button:hover {transform:translateY(-1px);border-color:#dd8569}
+.community-design .ds-button.primary:hover {background:#d84b21}
+.community-design button:disabled,.community-design [aria-disabled=true] {opacity:.45;cursor:not-allowed;transform:none;pointer-events:none}
+.community-design button:focus-visible,.community-design a:focus-visible,.community-design input:focus-visible,.community-design textarea:focus-visible,.community-design select:focus-visible {outline:2px solid #a94b2d;outline-offset:3px}
+.community-design .ds-toolbar {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.community-design .ds-search {display:flex;align-items:center;gap:8px;flex:1;min-width:180px;background:#fff;border:1px solid var(--ds-line);border-radius:10px;padding:9px 13px;color:#a45d43}
+.community-design .ds-search input {width:100%;border:0;outline:none;background:transparent;color:var(--ds-ink);font-size:14px;padding:0}
+.community-design .ds-toolbar select {padding:10px 12px;border:1px solid var(--ds-line);border-radius:10px;background:#fff;color:#554b44;font-size:13px}
+.community-design .ds-count {font-size:12px;color:var(--ds-muted)}
+/* 레시피: 동그란 이미지 타일과 독립된 좋아요·찜 */
+.community-design .ds-recipe-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 22px}
+.community-design .ds-recipe-tile {text-align:center;min-width:0}
+.community-design .ds-dish {position:relative;aspect-ratio:1;border-radius:50%;overflow:hidden;border:8px solid #fff;box-shadow:0 8px 24px #66452912;background:#f5e8d6}
+.community-design .ds-dish img {display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.community-design .ds-dish:hover img {transform:scale(1.06)}
+.community-design .ds-tile-overlay {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#3228209c;opacity:0;transition:opacity .2s}
+.community-design .ds-dish:hover .ds-tile-overlay,.community-design .ds-dish:focus-within .ds-tile-overlay {opacity:1}
+.community-design .ds-tile-overlay a {min-width:126px;border:1px solid #ffffff80;color:#fff;background:#ffffff18;padding:9px 12px;border-radius:30px;font-size:13px;font-weight:700}
+.community-design .ds-tile-overlay a:hover {background:var(--ds-orange);border-color:var(--ds-orange)}
+.community-design .ds-tile-category {display:block;color:#a05236;font-size:11px;font-weight:700;margin:13px 0 5px}
+.community-design .ds-recipe-tile h3 {font-size:16px;color:var(--ds-ink);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.community-design .ds-tile-meta {margin:6px 0 10px;color:var(--ds-muted);font-size:12px}
+.community-design .ds-tile-actions {display:flex;justify-content:center;gap:8px}
+.community-design .ds-toggle {border:1px solid #e9dfd5;border-radius:20px;background:#fff;padding:6px 12px;font-size:12px;color:#64574d;cursor:pointer;font-weight:600}
+.community-design .ds-toggle.active {color:#b23e1b;background:#fff0e7;border-color:#f2b9a6}
+.community-design .ds-toggle.bookmark.active {color:#526438;background:#f2f5eb;border-color:#c8d3b5}
+.community-design .ds-paper {background:#fff;border:1px solid #efe4d9;border-radius:18px;padding:24px;box-shadow:0 5px 18px #66452905}
+.community-design .ds-detail-top {display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:center;margin-bottom:24px}
+.community-design .ds-detail-top>img {width:230px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:7px solid #fff6ec;box-shadow:0 8px 20px #4b352012}
+.community-design .ds-detail-top h2 {font-size:27px;line-height:1.35;margin:10px 0;letter-spacing:-.8px;color:var(--ds-ink)}
+.community-design .ds-description {color:#655d55;font-size:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.community-design .ds-author-line {font-size:12px;color:#746a60;margin:12px 0}
+.community-design .ds-info-badges {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.community-design .ds-pill {display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:20px;background:#fff2e8;color:#975135;font-weight:700}
+.community-design .ds-tags {display:flex;flex-wrap:wrap;gap:7px;margin:10px 0;font-size:12px;color:#9a5d44}
+.community-design .ds-section-title {display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--ds-line);padding-top:20px;margin:24px 0 14px}
+.community-design .ds-section-title h3 {font-size:19px;color:var(--ds-ink)}
+.community-design .ds-section-title>span {font-size:12px;color:var(--ds-muted)}
+.community-design .ds-ingredient-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
+.community-design .ds-ingredient-line {display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #f2ece6;font-size:14px;color:#564b42}
+.community-design .ds-ingredient-line strong {font-weight:600;color:#a25234}
+.community-design .ds-step {display:grid;grid-template-columns:40px minmax(0,1fr) 145px;gap:14px;padding:20px 0;border-bottom:1px solid #f2ece6;align-items:start}
+.community-design .ds-step-number {width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff0e6;color:#b74c24;font-weight:800;font-size:13px}
+.community-design .ds-step p {font-size:14px;color:#50483f;line-height:1.85;white-space:pre-wrap}
+.community-design .ds-step img {width:145px;height:105px;border-radius:10px;object-fit:cover}
+.community-design .ds-bottom-actions {display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:22px}
+/* 작성·수정 폼 */
+.community-design .ds-form h3 {font-size:21px;margin:6px 0 18px;color:var(--ds-ink)}
+.community-design .ds-form-section+.ds-form-section {border-top:1px solid var(--ds-line);padding-top:26px;margin-top:26px}
+.community-design .ds-field {margin-bottom:18px}
+.community-design .ds-field>label,.community-design .ds-answer-form>label {display:block;font-size:13px;color:#4c423a;font-weight:700;margin-bottom:8px}
+.community-design .ds-field b {color:#c14822}
+.community-design input:not([type=checkbox]):not([type=file]),.community-design select,.community-design textarea {font:inherit}
+.community-design .ds-field>input,.community-design .ds-field>textarea,.community-design .ds-field>select,.community-design .ds-answer-form>textarea,.community-design .ds-step-editor textarea {width:100%;border:1px solid #e4ddd5;background:#fff;border-radius:9px;padding:11px 12px;color:#333;resize:vertical;font-size:14px;line-height:1.6}
+.community-design .ds-two-col {display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.community-design .ds-photo-upload {position:relative;display:flex!important;flex-direction:column;justify-content:center;align-items:center;min-height:238px;border:1px dashed #ddb8a4;background:#fff9f3;border-radius:14px;cursor:pointer;overflow:hidden;color:#a2745b!important;text-align:center;font-size:14px!important;line-height:1.8}
+.community-design .ds-photo-upload.wide {min-height:240px}
+.community-design .ds-photo-upload input {position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.community-design .ds-photo-upload img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.community-design .ds-chips {display:flex;flex-wrap:wrap;gap:8px}
+.community-design .ds-chip {position:relative;cursor:pointer}
+.community-design .ds-chip input {position:absolute;opacity:0;width:1px;height:1px}
+.community-design .ds-chip span {display:block;padding:8px 14px;border:1px solid #e8dfd6;border-radius:22px;background:#fff;color:#61564d;font-size:13px}
+.community-design .ds-chip input:checked+span {background:#fff0e6;border-color:#eea180;color:#a84522;font-weight:700}
+.community-design .ds-chip input:focus-visible+span {outline:2px solid #a94b2d;outline-offset:2px}
+.community-design .ds-help {font-size:12px;color:#776c62;line-height:1.7;margin-bottom:12px}
+.community-design .ds-table-label,.community-design .ds-ingredient-row {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(70px,.8fr) minmax(60px,.8fr) 34px;gap:8px;align-items:center}
+.community-design .ds-table-label {font-size:11px;color:#89766a;padding:8px 0}
+.community-design .ds-ingredient-row {margin-bottom:8px}
+.community-design .ds-ingredient-row select,.community-design .ds-ingredient-row input {width:100%;border:1px solid #e4ddd5;border-radius:8px;padding:10px;background:#fff;color:#333;font-size:13px}
+.community-design .ds-icon-button {display:inline-grid;place-items:center;min-width:30px;height:32px;padding:0;border:1px solid #eadfd5;border-radius:7px;background:#fff;color:#8b6551;cursor:pointer}
+.community-design .ds-step-editor {padding:16px;border:1px solid #e9ded3;border-radius:12px;background:#fffdfb;margin-bottom:12px}
+.community-design .ds-step-editor-head {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13px;color:#994b2d;font-weight:800}
+.community-design .ds-step-editor-head>div {display:flex;gap:5px}
+.community-design .ds-step-editor-body {display:grid;grid-template-columns:140px 1fr;gap:14px}
+.community-design .ds-step-editor .ds-photo-upload {min-height:130px;margin:0}
+.community-design .ds-step-editor textarea {min-height:130px}
+.community-design .ds-step-timer {display:flex;gap:8px;align-items:center;color:#75695f;font-size:12px;margin-top:10px}
+.community-design .ds-step-timer input {width:100px;padding:7px;border:1px solid #e4ddd5;border-radius:6px}
+/* 요리모드 */
+.community-design .ds-mode-top {display:flex;justify-content:space-between;align-items:center;color:#736459;font-size:13px}
+.community-design .ds-progress {height:5px;background:#f2e7dd;border-radius:10px;margin:14px 0 24px;overflow:hidden}
+.community-design .ds-progress>span {display:block;height:100%;background:var(--ds-orange);transition:width .2s}
+.community-design .ds-mode-content {display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.community-design .ds-mode-content>img {width:100%;aspect-ratio:1.12;object-fit:cover;border-radius:16px}
+.community-design .ds-mode-content h3 {font-size:25px;line-height:1.65;letter-spacing:-.6px;margin:8px 0 18px;color:#292724}
+.community-design .ds-mode-actions {display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--ds-line);padding-top:20px;margin-top:24px}
+.community-design .ds-timer {display:flex;align-items:center;gap:12px;background:#fff6ee;border-radius:10px;padding:12px;font-weight:700;color:#a65531}
+/* 후기·질문 */
+.community-design .ds-review-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.community-design .ds-review-card {background:#fff;border:1px solid #ede2d7;border-radius:15px;overflow:hidden}
+.community-design .ds-review-card>a {display:block}
+.community-design .ds-review-card img {width:100%;aspect-ratio:1.15;object-fit:cover;display:block}
+.community-design .ds-review-card-content {padding:16px}
+.community-design .ds-review-card h3 {font-size:16px;line-height:1.5;margin:8px 0;color:#333}
+.community-design .ds-review-card p {font-size:12px;color:#76685d;line-height:1.6}
+.community-design .ds-original {display:flex;gap:16px;align-items:center;background:#fff7ef;border:1px solid #f2e3d5;padding:14px;border-radius:12px;margin-bottom:22px}
+.community-design .ds-original img {width:68px;height:68px;object-fit:cover;border-radius:50%;flex-shrink:0}
+.community-design .ds-original p {font-size:11px;color:#986345;margin-bottom:4px}
+.community-design .ds-original strong {font-size:15px;color:#44372d}
+.community-design .ds-original .ds-button {margin-left:auto}
+.community-design .ds-review-photo {width:100%;max-height:420px;object-fit:cover;border-radius:14px;margin:18px 0}
+.community-design .ds-review-text,.community-design .ds-question-text {font-size:15px;line-height:1.9;color:#4c433b;white-space:pre-wrap;overflow-wrap:anywhere}
+.community-design .ds-question-list {padding:8px 22px}
+.community-design .ds-question-row {display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 0;border-bottom:1px solid var(--ds-line)}
+.community-design .ds-question-row:last-child {border-bottom:0}
+.community-design .ds-question-row h3 {font-size:16px;margin-bottom:8px;color:#333}
+.community-design .ds-question-meta {color:#786c60;font-size:12px}
+.community-design .ds-answer-count {flex-shrink:0;border-radius:12px;padding:10px 14px;text-align:center;background:#fff2e8;color:#b1502b;font-size:12px}
+.community-design .ds-answer-count strong {display:block;font-size:22px}
+.community-design .ds-question-title {font-size:25px;line-height:1.4;margin-bottom:12px;color:#292724}
+.community-design .ds-tip {background:#fff6ed;padding:14px;border-radius:10px;color:#8f654b;font-size:13px;line-height:1.7}
+.community-design .ds-answer {padding:16px 0;border-bottom:1px solid var(--ds-line)}
+.community-design .ds-answer-head {display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#645445;margin-bottom:8px}
+.community-design .ds-answer p {font-size:14px;color:#4b4036;line-height:1.8;white-space:pre-wrap}
+.community-design .ds-text-actions {display:flex;gap:12px;justify-content:flex-end;margin-top:8px}
+.community-design .ds-text-actions button {font-size:12px;color:#8a6650;border:0;background:none;padding:2px;cursor:pointer}
+.community-design .ds-answer-form {margin-top:20px;background:#fff9f3;padding:16px;border-radius:12px}
+/* 인기 요리사 */
+.community-design .ds-chef-podium {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:14px}
+.community-design .ds-chef-card {position:relative;text-align:center;padding:26px 18px;border:1px solid #ecdccc;background:#fff;border-radius:18px;box-shadow:0 6px 18px #77533406}
+.community-design .ds-chef-card.first {background:linear-gradient(180deg,#fff5e9,#fff);border-color:#e8bc8b}
+.community-design .ds-rank {position:absolute;left:15px;top:13px;background:#fff1e2;color:#b7792d;padding:5px 10px;border-radius:20px;font-weight:800;font-size:12px}
+.community-design .ds-chef-card img {width:92px;height:92px;border-radius:50%;margin:6px 0 12px}
+.community-design .ds-chef-card h3 {font-size:19px;margin-bottom:6px;color:#333}
+.community-design .ds-chef-card p {font-size:12px;color:#7c6c5f;line-height:1.7;min-height:40px}
+.community-design .ds-chef-stats {display:flex;justify-content:center;gap:24px;border-top:1px solid #efe5da;padding-top:15px;margin-top:15px;font-size:11px;color:#7c6c5f}
+.community-design .ds-chef-stats strong {display:block;font-size:19px;color:#a95a30}
+.community-design .ds-chef-row {display:flex;align-items:center;gap:18px;padding:18px 22px;background:#fff;border:1px solid #efe4d9;border-radius:12px}
+.community-design .ds-chef-row img {width:54px;height:54px;border-radius:50%}
+.community-design .ds-chef-row .ds-chef-stats {margin:0 0 0 auto;padding:0;border:0}
+.community-design .ds-profile {display:flex;align-items:center;gap:22px;margin-bottom:24px}
+.community-design .ds-profile img {width:100px;height:100px;border-radius:50%}
+.community-design .ds-profile h2 {font-size:25px;color:#333;margin:5px 0}
+.community-design .ds-profile p {color:#77695e;font-size:14px}
+.community-design .ds-empty {padding:40px 20px;color:#77695e;text-align:center;background:#fff;border:1px solid var(--ds-line);border-radius:14px}
+.community-design .ds-toast {position:fixed;bottom:26px;left:50%;transform:translateX(-50%);max-width:90vw;padding:12px 22px;background:#40352b;color:#fff;border-radius:10px;z-index:999;font-size:13px;box-shadow:0 8px 22px #0002}
+.community-design [hidden] {display:none!important}
+@media(max-width:1050px){.community-design .main-wrapper{grid-template-columns:180px minmax(0,1fr);gap:18px}.community-design .ds-detail-top{grid-template-columns:170px 1fr;gap:20px}.community-design .ds-detail-top>img{width:170px}.community-design .ds-tile-actions{flex-wrap:wrap}.community-design .ds-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.community-design .main-wrapper{grid-template-columns:1fr}.community-design .sidebar{position:static}.community-design .sidebar-menu{flex-direction:row;flex-wrap:wrap}.community-design .sidebar-footer-text{display:none}.community-design .ds-heading{flex-wrap:wrap}.community-design .ds-recipe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.community-design .ds-paper{padding:20px}.community-design .ds-mode-content h3{font-size:21px}}
+@media(max-width:550px){.community-design .hero-title{font-size:22px}.community-design .hero-sub{font-size:12px}.community-design .ds-heading h2{font-size:24px}.community-design .ds-tile-overlay{opacity:1;background:#33281e55}.community-design .ds-tile-overlay a{min-width:100px;font-size:12px;padding:7px}.community-design .ds-detail-top,.community-design .ds-two-col,.community-design .ds-mode-content{grid-template-columns:1fr}.community-design .ds-detail-top>img{width:190px;margin:auto}.community-design .ds-ingredient-list{grid-template-columns:1fr}.community-design .ds-step{grid-template-columns:30px 1fr}.community-design .ds-step img{grid-column:2;width:100%;height:140px}.community-design .ds-step-editor-body{grid-template-columns:1fr}.community-design .ds-chef-podium,.community-design .ds-review-grid{grid-template-columns:1fr}.community-design .ds-original{flex-wrap:wrap}.community-design .ds-mode-content>img{aspect-ratio:1.6}.community-design .ds-profile,.community-design .ds-chef-row{flex-wrap:wrap}}
+
+/* 게시판 공통 레이아웃: 자유 이야기와 레시피의 크기 통일 */
+.community-orange.community-design .main-wrapper {max-width:1280px;grid-template-columns:210px minmax(0,1fr);gap:24px;margin-bottom:28px}
+.community-orange.community-design .hero-banner {max-width:1280px;margin:20px auto 22px}
+.community-orange.community-design .hero-card {padding:20px 28px;border-radius:18px}
+.community-orange.community-design .hero-title {font-size:27px;color:#fff}
+.community-orange.community-design .hero-sub {font-size:14px;color:#fff}
+.community-orange.community-design .sidebar {padding:22px 14px;position:sticky;top:90px;align-self:start}
+.community-orange.community-design .sidebar-title {font-size:1.05rem;margin-bottom:18px;line-height:1.6}
+.community-orange.community-design .sidebar-item a {font-size:14px;padding:11px 12px;line-height:1.6}
+.community-orange.community-design .sidebar-footer-text {font-size:.82rem;line-height:1.5;margin-top:28px}
+@media(max-width:1050px){.community-orange.community-design .main-wrapper {grid-template-columns:180px minmax(0,1fr);gap:18px}}
+@media(max-width:800px){.community-orange.community-design .main-wrapper {grid-template-columns:1fr}.community-orange.community-design .sidebar {position:static}.community-orange.community-design .sidebar-menu {flex-direction:row;flex-wrap:wrap}.community-orange.community-design .sidebar-footer-text {display:none}}
+@media(max-width:550px){.community-orange.community-design .hero-title {font-size:22px}.community-orange.community-design .hero-sub {font-size:12px}}
+
+/* 후기 작성 화면의 원본 레시피 선택 창 */
+.community-design .ds-original-empty-icon {width:62px;height:62px;display:grid;place-items:center;background:#fff;border-radius:50%;font-size:27px;flex-shrink:0}
+.community-design .ds-original {flex-wrap:wrap}
+.community-design .ds-recipe-picker {width:min(650px,calc(100vw - 32px));max-height:82vh;margin:auto;padding:0;border:1px solid #ebdacb;border-radius:18px;background:#fff;color:#332b25;box-shadow:0 20px 60px #33201030;overflow:hidden}
+.community-design .ds-recipe-picker::backdrop {background:#2f241c66}
+.community-design .ds-picker-heading {display:flex;justify-content:space-between;align-items:center;gap:14px;padding:22px 24px 18px;border-bottom:1px solid #eee5dd}
+.community-design .ds-picker-heading h3 {font-size:20px;line-height:1.4;color:#332b25}
+.community-design .ds-picker-body {padding:18px 24px 22px}
+.community-design .ds-picker-list {max-height:48vh;overflow:auto;margin-top:12px;padding-right:4px}
+.community-design .ds-picker-row {display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:13px 0;border:0;border-bottom:1px solid #eee5dd;background:#fff;cursor:pointer;font:inherit;color:#332b25}
+.community-design .ds-picker-row:hover {background:#fff8f1}
+.community-design .ds-picker-row img {width:62px;height:62px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.community-design .ds-picker-recipe-text {display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.community-design .ds-picker-recipe-text strong {font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.community-design .ds-picker-recipe-text small {font-size:12px;color:#7b695a}
+.community-design .ds-picker-select {padding:6px 10px;border-radius:16px;background:#fff0e5;color:#a24f2a;font-size:12px;font-weight:700;flex-shrink:0}
+@media(max-width:550px){.community-design .ds-picker-heading,.community-design .ds-picker-body {padding:16px}.community-design .ds-picker-heading h3 {font-size:18px}.community-design .ds-picker-row {gap:10px}.community-design .ds-picker-row img {width:50px;height:50px}}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<th:block th:fragment="header">
+	<div class="container-fluid py-2 px-5 wow fadeIn header-top" data-wow-delay="0.1s">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col d-none d-md-flex contact-info">
+					<i class="bi bi-telephone-inbound-fill"></i>&nbsp;<span>+82-1234-5678</span>
+				</div>
+				
+				<div class="col">
+					<div class="d-flex justify-content-end header-top-links">
+						<th:block sec:authorize="isAnonymous()">
+							<a href="javascript:dialogLogin()" title="로그인"><i class="bi bi-lock"></i></a>
+							<a th:href="@{/member/account}" title="회원가입"><i class="bi bi-person-plus"></i></a>
+						</th:block>
+						<th:block sec:authorize="isAuthenticated()">
+							<a th:href="@{/member/logout}" title="로그아웃"><i class="bi bi-unlock"></i></a>
+							<th:block sec:authorize="hasAnyRole('ADMIN', 'EMP')">
+								<a th:href="@{/admin}" title="관리자"><i class="bi bi-gear"></i></a>
+							</th:block>
+						</th:block>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="header" class="header d-flex align-items-center sticky-top">
+		<div class="container position-relative d-flex align-items-center justify-content-between">
+			<a th:href="@{/}" class="logo d-flex align-items-center me-auto me-xl-0">
+				<span class="sitename">SPRING</span><span class="dot">.</span>
+			</a>
+			
+			<nav id="navmenu" class="navmenu">
+				<ul>
+					<li><a th:href="@{/}">홈</a></li>
+					<li><a href="#">소개</a></li>
+					<li class="dropdown">
+						<a href="#"><span>강좌</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+						<ul>
+							<li><a th:href="@{/}">프로그래밍</a></li>
+							<li><a th:href="@{/}">데이터베이스</a></li>
+							<li><a th:href="@{/}">웹 프로그래밍</a></li>
+							<li><a th:href="@{/}">데이터분석 및 AI</a></li>
+							<li><a th:href="@{/}">클라우드 및 기타</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a th:href="@{/}">질문과 답변</a></li>
+						</ul>
+					</li>
+					<li><a href="#">블로그</a></li>
+					<li class="dropdown">
+						<a href="#"><span>서비스</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+						<ul>
+							<li><a th:href="@{/}">맛집정보</a></li>
+							<li><a th:href="@{/}">레시피</a></li>
+							<li><a th:href="@{/}">관광정보</a></li>
+							<li><a th:href="@{/}">날씨</a></li>
+							<li><a th:href="@{/}">지역별날씨</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="#"><span>커뮤니티</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+						<ul>
+							<li><a th:href="@{/}">방명록</a></li>
+							<li><a th:href="@{/}">자유 게시판</a></li>
+							<li><a th:href="@{/}">답변형 게시판</a></li>
+							<li><a th:href="@{/}">포토 갤러리</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a th:href="@{/}">채팅</a></li>
+						</ul>	
+					</li>
+					<li class="dropdown">
+						<a href="#"><span>고객센터</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+						<ul>
+							<li><a th:href="@{/}">자주하는질문</a></li>
+							<li><a th:href="@{/}">공지사항</a></li>
+							<li><a th:href="@{/}">1:1문의</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a th:href="@{/}">이벤트</a></li>
+						</ul>	
+					</li>
+				</ul>
+				<i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+			</nav>
+			
+			<div class="d-flex align-items-center header-right">
+				<div class="header-account-links">
+					<a href="#" title="알림"><i class="bi bi-bell"></i></a>
+				</div>
+				<th:block sec:authorize="isAuthenticated()">
+					<div class="header-avatar" th:with="avatar=${#authentication.principal.member.avatar}">
+						<img th:if="${not #strings.isEmpty(avatar)}"
+							th:src="@{/uploads/member/{filename}(filename=${avatar})}"
+	             			th:onerror="this.onerror=null; this.src=this.dataset.img"
+	     					th:data-img="|@{/dist/images/avatar.png}|"
+	             			class="avatar-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+	             			
+						<img th:if="${#strings.isEmpty(avatar)}"
+							th:src="@{/dist/images/avatar.png}"
+	             			class="avatar-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+	             			
+						<ul class="dropdown-menu">
+							<li><a th:href="@{/}" class="dropdown-item">사진첩</a></li>
+							<li><a th:href="@{/}" class="dropdown-item">일정관리</a></li>
+							<li><a th:href="@{/}" class="dropdown-item">쪽지함</a></li>
+							<li><a th:href="@{/}" class="dropdown-item">메일</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a th:href="@{/}" class="dropdown-item">정보수정</a></li>
+						</ul>
+					</div>
+				</th:block>
+			</div>
+		</div>
+	</div>
+</th:block>
+	
+</html>
