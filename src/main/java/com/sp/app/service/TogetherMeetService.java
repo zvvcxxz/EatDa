@@ -22,4 +22,7 @@ public interface TogetherMeetService {
 	public int approveMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception; // 참여 신청 승인
 	
 	public int rejectMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception; // 참여 신청 거절
+	
+	public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception; // 현재 함께하는 이웃 : 방장 + 승인된 참여자
+	
 }

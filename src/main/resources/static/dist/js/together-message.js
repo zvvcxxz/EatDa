@@ -1,19 +1,20 @@
 (() => {
     'use strict';
+    // 신청 결과 알림
     const toast = document.querySelector('[data-message-dialog]');
     if (!toast) return;
-    // 배경을 가리지 않는 비차단 알림입니다.
     toast.setAttribute('role', 'status');
     toast.setAttribute('aria-live', 'polite');
     toast.setAttribute('aria-atomic', 'true');
     toast.removeAttribute('aria-labelledby');
     toast.removeAttribute('aria-describedby');
     toast.querySelector('[autofocus]')?.removeAttribute('autofocus');
-    // 포커스를 옮기지 않고 알림만 표시합니다.
+    // 알림 표시
     toast.setAttribute('open', '');
     requestAnimationFrame(() => requestAnimationFrame(() => {
         toast.classList.add('tg-toast-visible');
     }));
+    // 3.5초 뒤 알림 닫기
     const duration = 3500;
     window.setTimeout(() => {
         toast.classList.remove('tg-toast-visible');

@@ -1,4 +1,4 @@
-/* 기존 data-message-dialog HTML을 비차단 중앙 토스트로 표시합니다. */
+
 dialog.tg-message-dialog {
     position: fixed;
     inset: 50% auto auto 50%;
@@ -58,4 +58,4 @@ dialog.tg-message-dialog.tg-toast-visible {
     dialog.tg-message-dialog { padding: 18px 22px; border-radius: 24px; }
     .tg-message-dialog .tg-message-body { font-size: 15px; }
 }
-/* 사용자 요청에 따라 이 알림에만 공통 모션 감소 규칙을 재정의합니다. */
+

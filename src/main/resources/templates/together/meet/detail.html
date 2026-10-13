@@ -12,12 +12,14 @@
 </head>
 <body>
 	<main layout:fragment="content" class="together-detail container">
+		<!-- 목록으로 이동 -->
 		<nav class="top-nav">
 			<a class="btn-back" th:href="@{/together/meet}"><i
 				class="fa-solid fa-arrow-left" aria-hidden="true"></i> 목록으로 돌아가기</a>
 		</nav>
 		<p class="detail-card" th:if="${meet == null}">게시글을 찾을 수 없습니다.</p>
-		<!-- Flash 메시지를 안전하게 텍스트로 출력하고 JS에서 중앙 모달로 엽니다. -->
+		
+		<!-- 신청 결과 알림 -->
 		<dialog class="tg-message-dialog" data-message-dialog
 			th:if="${applyMessage != null or applicationMessage != null}"
 			aria-labelledby="tg-message-title" aria-describedby="tg-message-body">
@@ -31,6 +33,7 @@
 		<noscript><p class="ma-feedback" th:if="${applyMessage != null}" th:text="${applyMessage}"></p>
 			<p class="ma-feedback" th:if="${applicationMessage != null}" th:text="${applicationMessage}"></p></noscript>
 		<th:block th:if="${meet != null}">
+			<!-- 모임 상세 정보 -->
 			<article class="detail-card">
 				<header>
 					<div class="detail-header-meta">
@@ -88,6 +91,7 @@
 							</div>
 						</div>
 					</div>
+					<!-- 방장 포함 참여 인원 -->
 					<div class="progress-box">
 						<div class="progress-header">
 							<span><i class="fa-solid fa-users text-brand-orange"
@@ -107,6 +111,7 @@
 					th:text="${meet.content}"></section>
 				<div class="action-bar">
 					<div class="action-group-left">
+						<!-- 작성자는 참여 신청 숨김 -->
 						<form th:if="${isAuthor != true}"
 							th:action="@{/together/meet/{id}/apply(id=${meet.meet_id})}"
 							method="post">
@@ -120,8 +125,8 @@
 							<i class="fa-regular fa-heart" aria-hidden="true"></i> 좋아요
 						</button>
 					</div>
-					<!-- isAuthor가 미전달이면 디자인 확인용 비활성 버튼. false이면 숨깁니다.
-       버튼 표시와 별개로 실제 요청에서 서버 소유권 검사는 필수입니다. -->
+					
+					<!-- 작성자 수정 / 삭제 버튼 -->
 					<div class="action-group-right"
 						th:if="${isAuthor == null or isAuthor == true}">
 						<button type="button" class="btn btn-secondary"
@@ -135,11 +140,8 @@
 					</div>
 				</div>
 			</article>
-			<!-- 작성자 전용. Controller에서 isAuthor를 서버 로그인 ID로 계산하세요.
-                 applications: MEET_PARTICIPANT + MEMBER 조회 목록
-                 (member_id, name, status, created_at). 비작성자에게는 조회/전달하지 않습니다.
-                 applicationActionsReady: 승인/거절 POST 서버 구현 완료 후에만 true.
-                 아래 POST 경로는 새로 구현할 계약이며 현재 기능이 있다는 뜻이 아닙니다. -->
+			
+			<!-- 작성자 전용 - 신청 승인 / 거절 -->
 			<section class="section-card meet-applications"
 				th:if="${isAuthor == true}" aria-labelledby="application-title"
 				data-application-panel>
@@ -198,6 +200,7 @@
 					th:if="${approvalActionReady != true or rejectionActionReady != true}">일부 관리 버튼은 서버 처리 연결 후
 					활성화됩니다.</p>
 			</section>
+			<!-- 현재 함께하는 이웃 - 방장 + 승인된 참여자 -->
 			<section class="section-card" aria-label="참여자 목록">
 				<h2 class="section-title">
 					<i class="fa-solid fa-user-group text-brand-orange"
@@ -221,13 +224,14 @@
 					</div>
 				</div>
 			</section>
+			<!-- 댓글 영역 - 아직 연결 전 -->
 			<section class="section-card" aria-label="댓글">
 				<h2 class="section-title">
 					<i class="fa-solid fa-comments text-brand-orange"
 						aria-hidden="true"></i> 댓글 (<span class="text-brand-orange"
 						th:text="${commentCount != null ? commentCount : '조회 준비 중'}"></span>)
 				</h2>
-				<!-- MEET_COMMENT를 사용하는 댓글 등록 컨트롤러 구현 후 action/method/name을 연결하세요. -->
+				
 				<form class="reply-form" data-pending-comment>
 					<textarea class="reply-textarea" aria-label="댓글 내용"
 						placeholder="이웃과 따뜻한 댓글로 대화를 시작해 보세요. (비방, 욕설은 제한될 수 있습니다.)"

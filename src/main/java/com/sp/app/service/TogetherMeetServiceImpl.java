@@ -182,4 +182,16 @@ public class TogetherMeetServiceImpl implements TogetherMeetService {
 			throw e;
 		}
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception {
+		
+		try {
+			return mapper.listAcceptedParticipants(meet_id);
+		} catch (Exception e) {
+			log.error("같이먹어요 참여자 목록 조회 실패", e);
+			throw e;
+		}
+	}
 }

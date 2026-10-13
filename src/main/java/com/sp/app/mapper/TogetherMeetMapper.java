@@ -30,5 +30,7 @@ public interface TogetherMeetMapper {
 	
 	public int rejectMeetParticipant(@Param("meet_id") Long meet_id, @Param("member_id") Long member_id); // 참여 신청 거절
 	
-	public int countMeetApplication(@Param("meet_id") Long meet_id, @Param("member_id") Long member_id);
+	public int countMeetApplication(@Param("meet_id") Long meet_id, @Param("member_id") Long member_id); // 참여 신청 중복 확인
+	
+	public List<TogetherMeetParticipantDto> listAcceptedParticipants(@Param("meet_id") Long meet_id); // 현재 함께하는 이웃 + 승인된 참여자
 }

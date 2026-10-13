@@ -137,4 +137,40 @@
 		WHERE meet_id = #{meet_id}
 			AND member_id = #{member_id}
 	</select>
+	
+	<select id="listAcceptedParticipants"
+        	resultType="TogetherMeetParticipantDto">
+    	SELECT meet_id, member_id, name, status
+    	FROM (
+        	<!-- 방장 -->
+        	SELECT
+            	t.meet_id,
+            	m.member_id,
+            	m.name,
+            	1 AS status,
+            	t.created_at AS created_at,
+            	0 AS sort_order
+        	FROM meal_meeting t
+        	JOIN member m ON t.author_id = m.member_id
+        	WHERE t.meet_id = #{meet_id}
+
+        UNION ALL
+
+        <!-- 승인된 참여자: 방장 중복 제외 -->
+        	SELECT
+            	p.meet_id,
+            	p.member_id,
+            	m.name,
+            	p.status,
+            	p.created_at AS created_at,
+            	1 AS sort_order
+        	FROM meet_participant p
+        	JOIN member m ON p.member_id = m.member_id
+        	JOIN meal_meeting t ON p.meet_id = t.meet_id
+        	WHERE p.meet_id = #{meet_id}
+          		AND p.status = 1
+         		AND p.member_id != t.author_id
+    	)
+    	ORDER BY sort_order ASC, created_at DESC, member_id ASC
+</select>
 </mapper>

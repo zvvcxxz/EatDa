@@ -75,6 +75,8 @@ public class TogetherMeetController {
 			model.addAttribute("meet", dto);
 			model.addAttribute("isAuthor", isAuthor);
 			model.addAttribute("participantCount", service.countMeetParticipants(meet_id));
+			model.addAttribute("participants", service.listAcceptedParticipants(meet_id));
+			
 			if (isAuthor) {
 				
 				  var applications = service.listParticipant(meet_id);
