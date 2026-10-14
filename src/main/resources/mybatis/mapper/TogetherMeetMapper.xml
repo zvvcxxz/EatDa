@@ -209,4 +209,21 @@
 			AND c.deleted_at IS NULL
 		ORDER BY c.created_at ASC, c.comment_id ASC
 	</select>
+	
+	<update id="updateMeet" parameterType="TogetherMeetDto">
+		UPDATE meal_meeting t
+		SET title = #{title},
+			content = #{content},
+			location_text = #{location_text},
+			meet_at = TO_TIMESTAMP(#{meet_at}, 'YYYY-MM-DD"T"HH24:MI'),
+			application_deadline = TO_TIMESTAMP(
+				#{application_deadline, jdbcType=VARCHAR},'YYYY-MM-DD"T"HH24:MI'
+			),
+			max_participants = #{max_participants},
+			updated_at = SYSTIMESTAMP  
+		WHERE meet_id = #{meet_id}
+			AND author_id = #{author_id}
+			AND status = 0
+			AND deleted_at IS NULL
+	</update>
 </mapper>

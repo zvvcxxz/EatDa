@@ -12,6 +12,8 @@ public interface TogetherMeetService {
 	
 	public List<TogetherMeetDto> listMeet() throws Exception; // 글 목록
 	
+	public int updateMeet(TogetherMeetDto dto) throws Exception; // 글 수정
+	
 	public TogetherMeetDto findMeetById(Long meet_id) throws Exception; // 글 상세보기 
 	
 	public int countMeetParticipants(Long meet_id) throws Exception; // 글 상세보기 - 참여 현황

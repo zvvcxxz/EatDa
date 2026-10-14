@@ -231,4 +231,44 @@ public class TogetherMeetServiceImpl implements TogetherMeetService {
 			throw e;
 		}
 	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int updateMeet(TogetherMeetDto dto) throws Exception {
+		
+		try {
+			TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
+		
+			if(meet == null) {
+			throw new IllegalArgumentException("게시글이 없습니다.");
+			}
+		
+			if(dto.getAuthor_id() == null || !Objects.equals(meet.getAuthor_id(), dto.getAuthor_id())) {
+			throw new IllegalStateException("글 작성자만 수정할 수 있습니다.");
+			}
+		
+			if(dto.getTitle() == null || dto.getTitle().isBlank() || dto.getContent() == null || dto.getContent().isBlank()) {
+				throw new IllegalArgumentException("제목과 내용을 입력해주세요.");
+			}
+		
+			int participantCount = mapper.countMeetParticipants(dto.getMeet_id());
+		
+			if (dto.getMax_participants() == null || dto.getMax_participants() < participantCount) {
+			throw new IllegalArgumentException(
+					"최대 인원은 현재 참여 인원보다 적을 수 없습니다.");
+			}
+		
+			int count = mapper.updateMeet(dto);
+		
+			if(count != 1) {
+				throw new IllegalStateException("게시글을 수정하지 못했습니다.");
+			}
+		
+			return count;
+		
+		} catch (Exception e) {
+			log.error("같이먹어요 글 수정 오류" , e);
+			throw e;
+		}
+	}
 }

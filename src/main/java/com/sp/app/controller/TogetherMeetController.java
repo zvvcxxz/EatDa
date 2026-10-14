@@ -39,7 +39,7 @@ public class TogetherMeetController {
 	}
 
 	@PostMapping("/together/meet/write")
-	public String writeSubmit(@ModelAttribute TogetherMeetDto dto) throws Exception {
+	public String writeSubmit(@ModelAttribute TogetherMeetDto dto,RedirectAttributes redirectAttributes) throws Exception {
 
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -51,6 +51,8 @@ public class TogetherMeetController {
 			dto.setMeet_status(0);
 
 			service.insertMeet(dto);
+			redirectAttributes.addFlashAttribute(
+			        "message", "게시글이 등록되었습니다.");
 
 		} catch (Exception e) {
 			log.error("같이먹어요 글 작성 오류.", e);
@@ -97,6 +99,69 @@ public class TogetherMeetController {
 		}
 
 		return "together/meet/detail";
+	}
+	
+	@GetMapping("/together/meet/{meet_id}/edit")
+	public String edit(@PathVariable("meet_id") Long meet_id, Model model,
+					RedirectAttributes redirectAttributes) throws Exception {
+		SessionInfo info = LoginMemberUtil.getSessionInfo();
+		
+		if(info == null) {
+			return "redirect:/member/login";
+		}
+		
+		TogetherMeetDto dto = service.findMeetById(meet_id);
+		
+		if(dto == null) {
+			return "redirect:/together/meet";
+		}
+		
+		if(!Objects.equals(dto.getAuthor_id(), info.getMember_id())) {
+			redirectAttributes.addFlashAttribute(
+					"applyMessage", "글 작성자만 수정할 수 있습니다.");
+			
+			return "redirect:/together/meet/detail" + meet_id;
+		}
+		
+		model.addAttribute("meet", dto);
+		
+		return "together/meet/edit";
+	}
+	
+	@PostMapping("/together/meet/{meet_id}/edit")
+	public String editSubmit(@PathVariable("meet_id") Long meet_id, 
+					@ModelAttribute TogetherMeetDto dto,
+					RedirectAttributes redirectAttributes) {
+		
+		SessionInfo info = LoginMemberUtil.getSessionInfo();
+		
+		if(info == null) {
+			return "redirect:/member/login";
+		}
+		
+		try {
+			// 폼에서 받은 번호 대신 서버에서 설정
+			dto.setMeet_id(meet_id);
+			dto.setAuthor_id(info.getMember_id());
+			
+			service.updateMeet(dto);
+			
+			redirectAttributes.addFlashAttribute(
+					"message" , "게시글을 수정했습니다.");
+			
+			return "redirect:/together/meet";
+			
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			redirectAttributes.addFlashAttribute(
+					"applyMessage",e.getMessage());
+		} catch (Exception e) {
+			log.error("같이 먹어요 글 수정 오류" , e);
+			redirectAttributes.addFlashAttribute(
+					"applyMessage" , "글 수정 중 오류가 발생했습니다.");
+		}
+		
+		return "redirect:/together/meet/" + meet_id + "/edit";
+		
 	}
 
 	@PostMapping("/together/meet/{meet_id}/apply")

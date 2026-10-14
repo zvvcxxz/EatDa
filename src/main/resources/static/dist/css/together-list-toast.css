@@ -1,0 +1,45 @@
+/* 목록 - 등록 / 수정 결과 알림 */
+.together-page .tg-result-toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(32px, env(safe-area-inset-bottom));
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: max-content;
+    max-width: min(620px, calc(100vw - 32px));
+    padding: 20px 30px;
+    box-sizing: border-box;
+    border-radius: 28px;
+    background: #2c2523;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.6;
+    box-shadow: 0 14px 40px rgb(0 0 0 / 22%);
+    opacity: 0;
+    transform: translate(-50%, 55px) scale(.94);
+    pointer-events: none;
+}
+.together-page .tg-result-toast i { color: #ff6b35; flex-shrink: 0; font-size: 20px; }
+.together-page .tg-result-toast span { overflow-wrap: anywhere; }
+.together-page .tg-result-toast.is-visible {
+    animation: tg-result-in .65s both !important;
+}
+.together-page .tg-result-toast.is-leaving {
+    animation: tg-result-out .3s both !important;
+}
+@keyframes tg-result-in {
+    0% { opacity: 0; transform: translate(-50%, 55px) scale(.94); }
+    55% { opacity: 1; transform: translate(-50%, -8px) scale(1.025); }
+    78% { opacity: 1; transform: translate(-50%, 3px) scale(.995); }
+    100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+@keyframes tg-result-out {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, 20px); }
+}
+@media (max-width: 480px) {
+    .together-page .tg-result-toast { font-size: 14px; padding: 17px 22px; bottom: max(20px, env(safe-area-inset-bottom)); }
+}

@@ -7,12 +7,17 @@
 
 <th:block layout:fragment="css">
 	<link rel="stylesheet" th:href="@{/dist/css/together.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}">
 </th:block>
 </head>
 <body>
 	<main layout:fragment="content" class="together-page">
-		<p th:if="${message != null}" th:text="${message}" class="tg-message"
-			role="status"></p>
+		<!-- 등록 / 수정 결과 알림 -->
+		<div class="tg-result-toast" data-list-result-toast role="status"
+			aria-live="polite" aria-atomic="true" th:if="${message != null}">
+			<i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+			<span th:text="${message}"></span>
+		</div>
 		<section class="tg-hero">
 			<div class="tg-eyebrow">
 				<i class="fa-solid fa-utensils" aria-hidden="true"></i> 잇다 Together
@@ -24,9 +29,6 @@
 		</section>
 
 		
-		<!-- 등록 결과 안내 -->
-		<p class="tg-message" role="status" th:if="${message != null}"
-			th:text="${message}"></p>
 		<div class="tg-toolbar">
 			<nav class="tg-tabs" aria-label="Together 게시판">
 				<a class="tg-tab is-active" aria-current="page"
@@ -130,6 +132,7 @@
 	</main>
 	<th:block layout:fragment="script">
 		<script defer th:src="@{/dist/js/together.js}"></script>
+		<script defer th:src="@{/dist/js/together-list-toast.js}"></script>
 	</th:block>
 </body>
 </html>

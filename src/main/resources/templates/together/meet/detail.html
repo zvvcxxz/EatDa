@@ -134,14 +134,13 @@
 					</div>
 
 					<!-- 작성자 수정 / 삭제 버튼 -->
-					<div class="action-group-right"
-						th:if="${isAuthor == null or isAuthor == true}">
-						<button type="button" class="btn btn-secondary"
-							th:disabled="${isAuthor == null}" data-pending="글 수정">
-							<i class="fa-solid fa-pen" aria-hidden="true"></i> 수정
-						</button>
-						<button type="button" class="btn btn-danger"
-							th:disabled="${isAuthor == null}" data-pending="글 삭제">
+					<div class="action-group-right" th:if="${isAuthor == true}">
+						<a class="btn btn-secondary"
+							th:href="@{/together/meet/{id}/edit(id=${meet.meet_id})}"> <i
+							class="fa-solid fa-pen" aria-hidden="true"></i> 수정
+						</a>
+
+						<button type="button" class="btn btn-danger" data-pending="글 삭제">
 							<i class="fa-solid fa-trash-can" aria-hidden="true"></i> 삭제
 						</button>
 					</div>
