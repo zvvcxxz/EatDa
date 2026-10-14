@@ -2,67 +2,205 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
+<th:block th:fragment="fridgeDialogs">
+
+    <!-- Vue 1. 재료 등록 모달 -->
+    <div v-if="isModalOpen" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🥕 냉장고 재료 등록</h3>
+                <button type="button" class="btn-close" @click="closeModal">✕</button>
+            </div>
+
+            <!-- 1) 선택된 재료 목록 -->
+            <section class="form-section">
+                <div class="section-title-bar">
+                    <label class="section-label">선택된 재료</label>
+                    <span class="count-badge">총 {{ selectedIngredients.length }}개</span>
+                </div>
+                <div class="selected-ingredients-container">
+                    <div v-if="selectedIngredients.length === 0" class="empty-hint">
+                        아래 검색창에서 검색하거나 카테고리 타일을 눌러 재료를 추가해 주세요.
+                    </div>
+                    <div v-else class="selected-ingredients-list">
+                        <div v-for="item in selectedIngredients" :key="item.ingredientId || item.id" class="selected-ingredient-card">
+                            <div class="selected-ingredient-header">
+                                <span class="ingredient-name-tag">{{ item.ingredientName }}</span>
+                                <button type="button" class="btn-remove-chip" @click="removeIngredient(item.ingredientId || item.id)">✕</button>
+                            </div>
+                            <div class="ingredient-input-grid">
+                                <div class="input-field">
+                                    <label class="input-sublabel">수량</label>
+                                    <input type="number" v-model.number="item.quantity" placeholder="예: 2" step="0.1" min="0">
+                                </div>
+                                <div class="input-field">
+                                    <label class="input-sublabel">단위</label>
+                                    <input type="text" v-model="item.unit" placeholder="예: 개, g">
+                                </div>
+                                <div class="input-field">
+                                    <label class="input-sublabel">유통기한(선택)</label>
+                                    <input type="date" v-model="item.expiresOn">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2) 한글 즉시 인식 검색창 -->
+            <section class="form-section ingredient-search-wrapper">
+                <label class="section-label">재료 검색 (동의어 지원)</label>
+                <div class="search-input-box">
+                    <input type="text"
+                           :value="keyword"
+                           @input="onSearchInput($event)"
+                           placeholder="재료명을 입력하세요 (예: 계란, 달걀, 당근, 고춧가루)">
+
+                    <!-- 연관 검색 드롭다운 -->
+                    <ul v-if="searchResults.length > 0" class="autocomplete-list">
+                        <li v-for="ingredient in searchResults"
+                            :key="ingredient.ingredientId || ingredient.id"
+                            @click="selectIngredient(ingredient)">
+                            <span class="search-item-name">{{ ingredient.ingredientName }}</span>
+                            <span v-if="ingredient.defaultUnit" class="search-item-unit">
+                                기본단위: {{ ingredient.defaultUnit }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 3) 카테고리 타일 -->
+            <section class="form-section">
+                <label class="section-label">카테고리별 재료 찾기</label>
+                <div class="category-tiles">
+                    <button type="button"
+                            v-for="cat in categoryList"
+                            :key="cat.code"
+                            class="category-tile"
+                            :class="{ active: selectedCategory === cat.code }"
+                            @click="selectCategory(cat.code)">
+                        {{ cat.label }}
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4) 카테고리별 재료 동적 타일 목록 -->
+            <section v-if="categoryIngredients.length > 0" class="form-section">
+                <label class="section-label sub-info">클릭하여 담기/해제</label>
+                <div class="category-ingredients-grid">
+                    <button type="button"
+                            v-for="item in categoryIngredients"
+                            :key="item.ingredientId || item.id"
+                            class="ingredient-tile-btn"
+                            :class="{ selected: isIngredientSelected(item.ingredientId || item.id) }"
+                            @click="toggleIngredient(item)">
+                        <span class="tile-check" v-if="isIngredientSelected(item.ingredientId || item.id)">✓</span>
+                        <span>{{ item.ingredientName }}</span>
+                    </button>
+                </div>
+            </section>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" @click="closeModal">취소</button>
+                <button type="button" class="btn btn-primary" :disabled="selectedIngredients.length === 0" @click="submitIngredients">
+                    냉장고에 등록하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 2. 재료 수정 모달 -->
+    <div v-if="isEditModalOpen" class="modal-overlay">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>✏️ {{ editForm.ingredientName }} 수정</h3>
+                <button type="button" class="btn-close" @click="closeEditModal">✕</button>
+            </div>
+
+            <div class="edit-form-body">
+                <div class="input-field">
+                    <label class="input-sublabel">수량</label>
+                    <input type="number" v-model.number="editForm.quantity" class="form-control" placeholder="수량 입력" step="0.1" min="0">
+                </div>
+                <div class="input-field">
+                    <label class="input-sublabel">단위</label>
+                    <input type="text" v-model="editForm.unit" class="form-control" placeholder="단위 (예: 개, g, ml)">
+                </div>
+                <div class="input-field">
+                    <label class="input-sublabel">유통기한(선택)</label>
+                    <input type="date" v-model="editForm.expiresOn" class="form-control">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" @click="closeEditModal">취소</button>
+                <button type="button" class="btn btn-primary" @click="submitEdit">수정 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 3. 보유 재료 기반 맞춤 레시피 추천 모달 -->
+    <div v-if="isRecommendModalOpen" class="modal-overlay">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>🍳 내 냉장고 맞춤 레시피 추천</h3>
+                <button type="button" class="btn-close" @click="closeRecommendModal">✕</button>
+            </div>
+
+            <div v-if="isLoadingRecommendations" class="loading-box">
+                <div class="spinner"></div>
+                <p>보유 재료와 유통기한 가중치를 계산하여 레시피를 찾고 있습니다...</p>
+            </div>
+
+            <div v-else-if="recommendedRecipes.length === 0" class="empty-hint">
+                냉장고 속 재료로 추천할 수 있는 레시피가 없어요. 재료를 더 추가해 보세요!
+            </div>
+
+            <div v-else class="recommend-recipe-grid">
+                <article v-for="recipe in recommendedRecipes" :key="recipe.recipeId || recipe.id" class="recommend-recipe-card">
+                    <div class="recipe-thumb-box">
+                        <img :src="recipe.thumbnailUrl || recipe.mainPhoto || '/dist/images/itda-logo.png'" 
+                             :alt="recipe.recipeTitle || recipe.title"
+                             onerror="this.src='https://via.placeholder.com/300x200?text=EatDa+Recipe'">
+                        <span class="match-score-badge" v-if="recipe.matchRate || recipe.score || recipe.matchCount">
+                            🎯 {{ Math.round(recipe.matchRate || recipe.score || 80) }}% 일치
+                        </span>
+                    </div>
+                    <div class="recipe-info-box">
+                        <h4 class="recipe-title">
+                            <a :href="'/recipe/detail/' + (recipe.recipeId || recipe.id)">
+                                {{ recipe.recipeTitle || recipe.title || recipe.name }}
+                            </a>
+                        </h4>
+                        
+                        <div class="ingredient-match-details">
+                            <div v-if="recipe.matchingIngredients && recipe.matchingIngredients.length > 0">
+                                <span class="tag-title match">보유 재료</span>
+                                <div class="chip-group">
+                                    <span class="recipe-ing-chip match" v-for="ing in recipe.matchingIngredients" :key="ing">{{ ing }}</span>
+                                </div>
+                            </div>
+                            <div v-if="recipe.missingIngredients && recipe.missingIngredients.length > 0" class="mt-2">
+                                <span class="tag-title missing">부족한 재료</span>
+                                <div class="chip-group">
+                                    <span class="recipe-ing-chip missing" v-for="ing in recipe.missingIngredients" :key="ing">{{ ing }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" @click="closeRecommendModal">닫기</button>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
 <th:block th:fragment="dialogs">
-    <!-- 냉장고 재료 등록 / 수정 다이얼로그 -->
-    <dialog id="ingredientDialog" class="app-dialog">
-        <form id="ingredientForm">
-            <div class="dialog-header">
-                <h2 id="ingredientDialogTitle">재료 추가</h2>
-                <button type="button" class="icon-button" data-close-dialog aria-label="닫기">×</button>
-            </div>
-
-            <input type="hidden" id="fridgeItemId">
-
-            <div id="ingredientSearchArea">
-                <label for="ingredientCategory">표준 재료 카테고리</label>
-                <select id="ingredientCategory">
-                    <option value="">전체</option>
-                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">채소</option>
-                </select>
-
-                <div class="autocomplete">
-                    <label for="ingredientSearch">표준 재료 검색</label>
-                    <input id="ingredientSearch" type="search" autocomplete="off" placeholder="재료명 입력 후 검색 결과에서 선택">
-                    <div id="ingredientSuggestions" class="suggestions" aria-label="표준 재료 검색 결과" hidden></div>
-                </div>
-            </div>
-
-            <p class="selected-value" id="selectedIngredient" aria-live="polite">선택한 재료가 없습니다.</p>
-
-            <div class="form-grid">
-                <div>
-                    <label for="ingredientQuantity">보유 수량</label>
-                    <input id="ingredientQuantity" type="number" min="0.001" step="0.001" required>
-                </div>
-                <div>
-                    <label for="ingredientUnit">단위</label>
-                    <select id="ingredientUnit" required>
-                        <option value="EA">개</option>
-                        <option value="G">g</option>
-                        <option value="KG">kg</option>
-                        <option value="ML">ml</option>
-                        <option value="L">L</option>
-                        <option value="PACK">팩</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="registeredDate">등록일</label>
-                    <input id="registeredDate" type="date" required th:attr="data-server-today=${serverToday}">
-                </div>
-                <div>
-                    <label for="expiryDate">유통기한 <small>선택</small></label>
-                    <input id="expiryDate" type="date">
-                </div>
-            </div>
-
-            <p class="form-error" id="ingredientError" role="alert"></p>
-
-            <div class="dialog-footer">
-                <button type="button" class="btn btn-light" data-close-dialog>취소</button>
-                <button type="submit" class="btn btn-primary">저장</button>
-            </div>
-        </form>
-    </dialog>
 
     <!-- 쪽지 작성 다이얼로그 -->
     <dialog id="composeDialog" class="app-dialog">

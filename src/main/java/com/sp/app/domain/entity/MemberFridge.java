@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +18,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,31 +26,19 @@ import lombok.NoArgsConstructor;
 @Table(name = "MEMBER_FRIDGE")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class MemberFridge {
 
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.SEQUENCE,
-        generator = "member_fridge_seq"
-    )
-    @SequenceGenerator(
-        name = "member_fridge_seq",
-        sequenceName = "SEQ_MEMBER_FRIDGE",
-        allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MEMBER_FRIDGE")
+    @SequenceGenerator(name = "SEQ_MEMBER_FRIDGE", sequenceName = "SEQ_MEMBER_FRIDGE", allocationSize = 1)
     @Column(name = "FRIDGE_ITEM_ID")
-    private Long fridgeItemId;
+    private Long id;
 
     @Column(name = "MEMBER_ID", nullable = false)
     private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "INGREDIENT_ID",
-        nullable = false
-    )
+    @JoinColumn(name = "INGREDIENT_ID", nullable = false)
     private MyIngredient ingredient;
 
     @Column(name = "QUANTITY", precision = 12, scale = 3)
@@ -63,9 +53,28 @@ public class MemberFridge {
     @Column(name = "MEMO", length = 300)
     private String memo;
 
-    @Column(name = "CREATED_AT", nullable = false)
+    @CreationTimestamp
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "UPDATED_AT", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Builder
+    public MemberFridge(Long memberId, MyIngredient ingredient, BigDecimal quantity, String unit, LocalDate expiresOn, String memo) {
+        this.memberId = memberId;
+        this.ingredient = ingredient;
+        this.quantity = quantity;
+        this.unit = unit != null ? unit : (ingredient != null ? ingredient.getDefaultUnit() : null);
+        this.expiresOn = expiresOn;
+        this.memo = memo;
+    }
+    
+    public void updateDetails(BigDecimal quantity, String unit, LocalDate expiresOn, String memo) {
+        this.quantity = quantity;
+        this.unit = unit;
+        this.expiresOn = expiresOn;
+        this.memo = memo;
+    }
 }

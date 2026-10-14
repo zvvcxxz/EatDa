@@ -1,23 +1,24 @@
-//"use strict";
+"use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("kitchenApp");
     if (!app) return;
 
-    const apiBase = app.dataset.apiBase;
-    const kitchenUrl = app.dataset.kitchenUrl;
+    const apiBase = app.dataset.apiBase || "";
+    const kitchenUrl = app.dataset.kitchenUrl || "/kitchen";
 
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
     const $ = (id) => document.getElementById(id);
 
-    let selectedIngredientId = null;
     let selectedRecipientId = null;
     let toastTimer;
 
+    // 토스트 알림 헬퍼
     function toast(message) {
         const element = $("toast");
+        if (!element) return;
         element.textContent = message;
         element.hidden = false;
 
@@ -27,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3500);
     }
 
+    // 공통 API 요청 헬퍼
     async function request(path, options = {}) {
         const headers = new Headers(options.headers);
         headers.set("Accept", "application/json");
@@ -37,8 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const method = (options.method || "GET").toUpperCase();
 
-        if (!["GET", "HEAD", "OPTIONS"].includes(method)
-            && csrfToken && csrfHeader) {
+        if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken && csrfHeader) {
             headers.set(csrfHeader, csrfToken);
         }
 
@@ -49,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
             credentials: "same-origin"
         });
 
-        // 인증 만료 시 HTML 로그인 페이지가 반환될 수 있으므로 구분
         if (response.redirected) {
             throw new Error("로그인 상태를 확인한 후 다시 시도해 주세요.");
         }
@@ -62,16 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error("로그인이 필요합니다.");
-            }
-            if (response.status === 403) {
-                throw new Error("접근 권한이 없거나 인증 정보가 만료되었습니다.");
-            }
-
-            throw new Error(
-                data?.message || data?.detail || "요청 처리 중 오류가 발생했습니다."
-            );
+            if (response.status === 401) throw new Error("로그인이 필요합니다.");
+            if (response.status === 403) throw new Error("접근 권한이 없거나 인증 정보가 만료되었습니다.");
+            throw new Error(data?.message || data?.detail || "요청 처리 중 오류가 발생했습니다.");
         }
 
         if (response.status !== 204 && !contentType.includes("json")) {
@@ -81,24 +74,29 @@ document.addEventListener("DOMContentLoaded", () => {
         return data;
     }
 
+    // 폼 제출 락 헬퍼
     async function submitWithLock(form, errorElement, callback) {
+        if (!form) return;
         const button = form.querySelector('[type="submit"]');
-        if (button.disabled) return;
+        if (button && button.disabled) return;
 
-        button.disabled = true;
-        errorElement.textContent = "";
+        if (button) button.disabled = true;
+        if (errorElement) errorElement.textContent = "";
 
         try {
             await callback();
         } catch (error) {
-            errorElement.textContent = error.message;
+            if (errorElement) errorElement.textContent = error.message;
         } finally {
-            button.disabled = false;
+            if (button) button.disabled = false;
         }
     }
 
+    // 다이얼로그 닫기
     function closeDialog(dialog) {
-        dialog.close();
+        if (dialog && typeof dialog.close === 'function') {
+            dialog.close();
+        }
     }
 
     document.querySelectorAll("[data-close-dialog]").forEach((button) => {
@@ -107,18 +105,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    /**
-     * 검색 결과는 일반 버튼 목록으로 제공한다.
-     * Tab으로 결과 버튼에 이동하고 Enter로 선택할 수 있다.
-     * API 반환값: { items: [{ id, name }] }
-     */
-    function createAutocomplete({
-        input,
-        container,
-        getPath,
-        onSelect,
-        onInvalidate
-    }) {
+    // 검색 자동완성 헬퍼 (쪽지 수신자 검색용)
+    function createAutocomplete({ input, container, getPath, onSelect, onInvalidate }) {
+        if (!input || !container) {
+            return { clear: () => {}, schedule: () => {} };
+        }
+
         let timer;
         let controller;
         let sequence = 0;
@@ -140,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function schedule() {
             clear();
-            onInvalidate();
+            if (typeof onInvalidate === 'function') onInvalidate();
 
             const keyword = input.value.trim();
             if (!keyword) return;
@@ -152,9 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showText("검색 중입니다.");
 
                 try {
-                    const data = await request(getPath(keyword), {
-                        signal: controller.signal
-                    });
+                    const data = await request(getPath(keyword), { signal: controller.signal });
 
                     if (currentSequence !== sequence) return;
 
@@ -182,8 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     container.hidden = false;
                 } catch (error) {
-                    if (error.name !== "AbortError"
-                        && currentSequence === sequence) {
+                    if (error.name !== "AbortError" && currentSequence === sequence) {
                         showText(error.message);
                     }
                 }
@@ -192,189 +181,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         input.addEventListener("input", schedule);
         input.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                clear();
-            }
+            if (event.key === "Escape") clear();
         });
 
         return { clear, schedule };
     }
 
-    const ingredientAutocomplete = createAutocomplete({
-        input: $("ingredientSearch"),
-        container: $("ingredientSuggestions"),
-
-        getPath(keyword) {
-            const params = new URLSearchParams({ keyword });
-            const categoryId = $("ingredientCategory").value;
-
-            if (categoryId) params.set("categoryId", categoryId);
-
-            return `/standard-ingredients?${params.toString()}`;
-        },
-
-        onSelect(item) {
-            selectedIngredientId = item.id;
-            $("selectedIngredient").textContent = `선택한 재료: ${item.name}`;
-        },
-
-        onInvalidate() {
-            selectedIngredientId = null;
-            $("selectedIngredient").textContent = "검색 결과에서 재료를 선택해 주세요.";
-        }
-    });
-
-    $("ingredientCategory").addEventListener(
-        "change",
-        ingredientAutocomplete.schedule
-    );
-
+    // ==================== [1. 쪽지 회원 검색 기능] ====================
     const recipientAutocomplete = createAutocomplete({
         input: $("recipientSearch"),
         container: $("recipientSuggestions"),
-
         getPath(keyword) {
             return `/members?${new URLSearchParams({ keyword })}`;
         },
-
         onSelect(item) {
             selectedRecipientId = item.id;
-            $("selectedRecipient").textContent = `받는 회원: ${item.name}`;
+            const target = $("selectedRecipient");
+            if (target) target.textContent = `받는 회원: ${item.name}`;
         },
-
         onInvalidate() {
             selectedRecipientId = null;
-            $("selectedRecipient").textContent = "검색 결과에서 수신자를 선택해 주세요.";
+            const target = $("selectedRecipient");
+            if (target) target.textContent = "검색 결과에서 수신자를 선택해 주세요.";
         }
     });
 
-    function openIngredientDialog(item = null) {
-        $("ingredientForm").reset();
-        ingredientAutocomplete.clear();
-
-        selectedIngredientId = item?.ingredientId ?? null;
-
-        $("fridgeItemId").value = item?.id ?? "";
-        $("ingredientDialogTitle").textContent = item ? "재료 수정" : "재료 추가";
-        $("ingredientSearchArea").hidden = Boolean(item);
-
-        // 수정 시 표준 재료를 다른 재료로 바꾸지 않는다.
-        $("selectedIngredient").textContent = item
-            ? `선택한 재료: ${item.name}`
-            : "선택한 재료가 없습니다.";
-
-        $("ingredientQuantity").value = item?.quantity ?? "";
-        $("ingredientUnit").value = item?.unit ?? "EA";
-
-        const registeredDate = $("registeredDate");
-        registeredDate.value = item?.registered || registeredDate.dataset.serverToday;
-
-        $("expiryDate").value = item?.expiry ?? "";
-        $("ingredientError").textContent = "";
-
-        $("ingredientDialog").showModal();
-    }
-
-    $("addIngredientButton")?.addEventListener("click", () => {
-        openIngredientDialog();
-    });
-
-    $("ingredientDialog").addEventListener("close", () => {
-        ingredientAutocomplete.clear();
-    });
-
-    $("ingredientForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        submitWithLock(
-            event.currentTarget,
-            $("ingredientError"),
-            async () => {
-                if (!selectedIngredientId) {
-                    throw new Error("표준 재료 검색 결과에서 재료를 선택해 주세요.");
-                }
-
-                const quantity = Number($("ingredientQuantity").value);
-                const registeredDate = $("registeredDate").value;
-                const expiryDate = $("expiryDate").value || null;
-
-                if (!Number.isFinite(quantity) || quantity <= 0) {
-                    throw new Error("수량은 0보다 큰 값이어야 합니다.");
-                }
-
-                if (!registeredDate) {
-                    throw new Error("등록일을 입력해 주세요.");
-                }
-
-                if (expiryDate && expiryDate < registeredDate) {
-                    throw new Error("유통기한은 등록일보다 빠를 수 없습니다.");
-                }
-
-                const id = $("fridgeItemId").value;
-
-                const payload = {
-                    quantity,
-                    unit: $("ingredientUnit").value,
-                    registeredDate,
-                    expiryDate
-                };
-
-                // 신규 등록에만 표준 재료 ID 전달
-                if (!id) {
-                    payload.ingredientId = selectedIngredientId;
-                }
-
-                await request(id ? `/fridge/${encodeURIComponent(id)}` : "/fridge", {
-                    method: id ? "PUT" : "POST",
-                    body: JSON.stringify(payload)
-                });
-
-                location.reload();
-            }
-        );
-    });
-
-    $("tagForm")?.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const form = event.currentTarget;
-        const button = form.querySelector('[type="submit"]');
-        if (button.disabled) return;
-
-        button.disabled = true;
-
-        try {
-            const tagIds = [...form.querySelectorAll('input[name="tagIds"]:checked')]
-                .map((input) => Number(input.value));
-
-            await request("/tags", {
-                method: "PUT",
-                body: JSON.stringify({ tagIds })
-            });
-
-            toast("관심 태그를 저장했습니다.");
-        } catch (error) {
-            toast(error.message);
-        } finally {
-            button.disabled = false;
-        }
-    });
-
+    // 쪽지 작성 모달 열기
     $("composeMessageButton")?.addEventListener("click", () => {
-        $("messageForm").reset();
+        const form = $("messageForm");
+        if (form) form.reset();
         recipientAutocomplete.clear();
         selectedRecipientId = null;
 
-        $("selectedRecipient").textContent = "수신자를 선택해 주세요.";
-        $("messageError").textContent = "";
-        $("composeDialog").showModal();
+        if ($("selectedRecipient")) $("selectedRecipient").textContent = "수신자를 선택해 주세요.";
+        if ($("messageError")) $("messageError").textContent = "";
+        $("composeDialog")?.showModal();
     });
 
-    $("composeDialog").addEventListener("close", () => {
+    $("composeDialog")?.addEventListener("close", () => {
         recipientAutocomplete.clear();
     });
 
-    $("messageForm").addEventListener("submit", (event) => {
+    // 쪽지 전송
+    $("messageForm")?.addEventListener("submit", (event) => {
         event.preventDefault();
 
         submitWithLock(
@@ -385,8 +234,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("검색 결과에서 수신자를 선택해 주세요.");
                 }
 
-                const title = $("messageTitle").value.trim();
-                const content = $("messageContent").value.trim();
+                const title = $("messageTitle")?.value.trim();
+                const content = $("messageContent")?.value.trim();
 
                 if (!title || !content) {
                     throw new Error("제목과 내용을 입력해 주세요.");
@@ -406,6 +255,34 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
+    // ==================== [2. 관심 태그 관리] ====================
+    $("tagForm")?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+        const button = form.querySelector('[type="submit"]');
+        if (button && button.disabled) return;
+
+        if (button) button.disabled = true;
+
+        try {
+            const tagIds = [...form.querySelectorAll('input[name="tagIds"]:checked')]
+                .map((input) => Number(input.value));
+
+            await request("/tags", {
+                method: "PUT",
+                body: JSON.stringify({ tagIds })
+            });
+
+            toast("관심 태그를 저장했습니다.");
+        } catch (error) {
+            toast(error.message);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    // ==================== [3. 기타 공통 액션 처리 (레시피, 알림 등)] ====================
     function navigateToInternalUrl(path) {
         if (!path) {
             toast("관련 콘텐츠가 삭제되었거나 더 이상 열람할 수 없습니다.");
@@ -413,9 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const url = new URL(path, location.origin);
-
-        if (url.origin !== location.origin
-            || !["http:", "https:"].includes(url.protocol)) {
+        if (url.origin !== location.origin || !["http:", "https:"].includes(url.protocol)) {
             throw new Error("잘못된 이동 주소입니다.");
         }
 
@@ -427,16 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = encodeURIComponent(button.dataset.id || "");
 
         switch (action) {
-            case "edit-ingredient":
-                openIngredientDialog(button.dataset);
-                break;
-
-            case "delete-ingredient":
-                if (!confirm("이 재료를 냉장고에서 삭제할까요?")) return;
-                await request(`/fridge/${id}`, { method: "DELETE" });
-                location.reload();
-                break;
-
             case "delete-recipe":
                 if (!confirm("레시피를 삭제할까요? 삭제 후에는 복구할 수 없습니다.")) return;
                 await request(`/recipes/${id}`, { method: "DELETE" });
@@ -454,10 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
 
             case "open-notification": {
-                const data = await request(`/notifications/${id}/read`, {
-                    method: "PATCH"
-                });
-
+                const data = await request(`/notifications/${id}/read`, { method: "PATCH" });
                 button.classList.remove("unread");
 
                 if (data?.targetUrl) {
@@ -470,25 +332,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             case "open-message": {
-                // 상세 GET과 읽음 상태 변경을 분리
                 const data = await request(`/messages/${id}`);
+                await request(`/messages/${id}/read`, { method: "PATCH" });
 
-                await request(`/messages/${id}/read`, {
-                    method: "PATCH"
-                });
+                if ($("detailMessageTitle")) $("detailMessageTitle").textContent = data.title;
+                if ($("detailMessageMeta")) {
+                    $("detailMessageMeta").textContent = `${data.senderNickname} → ${data.recipientNickname} · ${data.createdAtText}`;
+                }
+                if ($("detailMessageContent")) $("detailMessageContent").textContent = data.content;
 
-                $("detailMessageTitle").textContent = data.title;
-                $("detailMessageMeta").textContent =
-                    `${data.senderNickname} → ${data.recipientNickname} · ${data.createdAtText}`;
-                $("detailMessageContent").textContent = data.content;
-
-                $("messageDetailDialog").showModal();
+                $("messageDetailDialog")?.showModal();
                 break;
             }
 
             case "delete-message":
                 if (!confirm("내 쪽지함에서 이 쪽지를 삭제할까요?")) return;
-
                 await request(`/messages/${id}`, { method: "DELETE" });
                 location.reload();
                 break;
@@ -510,8 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 쪽지 상세를 닫은 후 서버의 최신 읽음 상태 표시
-    $("messageDetailDialog").addEventListener("close", () => {
+    $("messageDetailDialog")?.addEventListener("close", () => {
         const url = new URL(kitchenUrl, location.origin);
         url.search = location.search;
         location.assign(url.href);

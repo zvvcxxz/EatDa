@@ -11,8 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,17 +18,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "INGREDIENT_ALIAS")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class MyIngredientAlias {
-	
-	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-        generator = "ingredient_alias_seq")
-    @SequenceGenerator( name = "ingredient_alias_seq",
-        sequenceName = "SEQ_INGREDIENT_ALIAS", allocationSize = 1)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INGREDIENT_ALIAS")
+    @SequenceGenerator(name = "SEQ_INGREDIENT_ALIAS", sequenceName = "SEQ_INGREDIENT_ALIAS", allocationSize = 1)
     @Column(name = "ALIAS_ID")
-    private Long aliasId;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INGREDIENT_ID", nullable = false)
@@ -40,6 +34,5 @@ public class MyIngredientAlias {
     private String aliasName;
 
     @Column(name = "ACTIVE_YN", nullable = false, length = 1)
-    private String activeYn;
-
+    private String activeYn = "Y";
 }

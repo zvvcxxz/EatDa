@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sp.app.mapper.MyRecipeMapper">
+
+    <!-- 1. 레시피 기본 정보 조회 (단건) -->
+    <select id="findRecipeDetailById" resultType="com.sp.app.domain.dto.MyRecipeDto">
+        SELECT 
+            r.RECIPE_ID AS recipeId,
+            r.AUTHOR_ID AS authorId,
+            m.NAME AS authorName,
+            m.PROFILE_URL AS authorProfileUrl,
+            r.SOURCE_TYPE AS sourceType,
+            r.EXTERNAL_KEY AS externalKey,
+            r.TITLE AS title,
+            r.SUMMARY AS summary,
+            r.THUMBNAIL_URL AS thumbnailUrl,
+            r.COOK_MINUTES AS cookMinutes,
+            r.DIFFICULTY AS difficulty,
+            r.SERVINGS AS servings,
+            r.STATUS AS status,
+            r.OTHER_INGREDIENT AS otherIngredient,
+            r.PUBLISHED_AT AS publishedAt,
+            r.CREATED_AT AS createdAt,
+            r.UPDATED_AT AS updatedAt,
+            (SELECT COUNT(*) FROM RECIPE_LIKE rl WHERE rl.RECIPE_ID = r.RECIPE_ID) AS likeCount,
+            (SELECT COUNT(*) FROM RECIPE_BOOKMARK rb WHERE rb.RECIPE_ID = r.RECIPE_ID) AS bookmarkCount,
+            (SELECT COUNT(*) FROM RECIPE_REVIEW rr WHERE rr.RECIPE_ID = r.RECIPE_ID) AS reviewCount
+        FROM RECIPE r
+        LEFT JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+        WHERE r.RECIPE_ID = #{recipeId}
+          AND r.DELETED_AT IS NULL
+    </select>
+
+    <!-- 2. 레시피 재료 목록 조회 -->
+    <select id="selectRecipeIngredients" resultType="com.sp.app.domain.dto.MyRecipeDto$IngredientItem">
+        SELECT 
+            ri.INGREDIENT_ID AS ingredientId,
+            i.INGREDIENT_NAME AS ingredientName,
+            i.INGREDIENT_TYPE AS ingredientType,
+            ri.AMOUNT AS amount,
+            ri.UNIT AS unit,
+            ri.REQUIRED_YN AS requiredYn,
+            ri.SORT_ORDER AS sortOrder,
+            ri.NOTE AS note
+        FROM RECIPE_INGREDIENT ri
+        JOIN INGREDIENT i ON ri.INGREDIENT_ID = i.INGREDIENT_ID
+        WHERE ri.RECIPE_ID = #{recipeId}
+        ORDER BY ri.SORT_ORDER ASC
+    </select>
+
+    <!-- 3. 조리 단계 목록 조회 -->
+    <select id="selectRecipeSteps" resultType="com.sp.app.domain.dto.MyRecipeDto$StepItem">
+        SELECT 
+            STEP_ID AS stepId,
+            STEP_NO AS stepNo,
+            DESCRIPTION AS description,
+            IMAGE_URL AS imageUrl,
+            TIMER_SECONDS AS timerSeconds
+        FROM RECIPE_STEP
+        WHERE RECIPE_ID = #{recipeId}
+        ORDER BY STEP_NO ASC
+    </select>
+
+    <!-- 4. 카테고리 목록 조회 -->
+    <select id="selectCategoriesByRecipeId" resultType="com.sp.app.domain.dto.MyRecipeDto$CategoryItem">
+        SELECT 
+            c.CATEGORY_ID AS categoryId,
+            c.CATEGORY_CODE AS categoryCode,
+            c.CATEGORY_NAME AS categoryName
+        FROM RECIPE_CATEGORY rc
+        JOIN CATEGORY c ON rc.CATEGORY_ID = c.CATEGORY_ID
+        WHERE rc.RECIPE_ID = #{recipeId}
+          AND c.ACTIVE_YN = 'Y'
+    </select>
+
+    <!-- 5. 태그 목록 조회 -->
+    <select id="selectRecipeTags" resultType="com.sp.app.domain.dto.MyRecipeDto$TagItem">
+        SELECT 
+            t.TAG_ID AS tagId,
+            t.TAG_NAME AS tagName,
+            t.TAG_GROUP AS tagGroup
+        FROM RECIPE_TAG rt
+        JOIN TAG t ON rt.TAG_ID = t.TAG_ID
+        WHERE rt.RECIPE_ID = #{recipeId}
+          AND t.ACTIVE_YN = 'Y'
+    </select>
+
+    <!-- 6. 따라 만든 후기 목록 조회 -->
+    <select id="selectRecipeReviews" resultType="com.sp.app.domain.dto.MyRecipeDto$ReviewItem">
+        SELECT 
+            rv.REVIEW_ID AS reviewId,
+            rv.MEMBER_ID AS memberId,
+            m.NAME AS reviewerName,
+            m.PROFILE_URL AS reviewerProfileUrl,
+            rv.TITLE AS title,
+            rv.CONTENT AS content,
+            rv.IMAGE_URL AS imageUrl,
+            rv.CREATED_AT AS createdAt
+        FROM RECIPE_REVIEW rv
+        JOIN MEMBER m ON rv.MEMBER_ID = m.MEMBER_ID
+        WHERE rv.RECIPE_ID = #{recipeId}
+        ORDER BY rv.CREATED_AT DESC
+    </select>
+
+    <!-- 7. 내 냉장고 임박 재료 가중치 기반 레시피 추천 쿼리 -->
+    <select id="findRecommendedRecipes" resultType="com.sp.app.domain.dto.MyRecipeRecommendDto">
+        SELECT * FROM (
+            SELECT 
+                r.RECIPE_ID AS recipeId,
+                r.TITLE AS title,
+                r.THUMBNAIL_URL AS thumbnailUrl,
+                
+                COUNT(ri.INGREDIENT_ID) AS totalMatchCount,
+                
+                SUM(
+                    CASE 
+                        WHEN mf.EXPIRES_ON IS NOT NULL 
+                         AND mf.EXPIRES_ON &lt;= TRUNC(SYSDATE) + 3 
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ) AS urgentMatchCount,
+                
+                (
+                    COUNT(ri.INGREDIENT_ID) * 1.0 + 
+                    SUM(
+                        CASE 
+                            WHEN mf.EXPIRES_ON IS NOT NULL 
+                             AND mf.EXPIRES_ON &lt;= TRUNC(SYSDATE) + 3 
+                            THEN 1 
+                            ELSE 0 
+                        END
+                    ) * 2.5
+                ) AS matchScore
+                
+            FROM RECIPE r
+            JOIN RECIPE_INGREDIENT ri ON r.RECIPE_ID = ri.RECIPE_ID
+            JOIN MEMBER_FRIDGE mf ON ri.INGREDIENT_ID = mf.INGREDIENT_ID AND mf.MEMBER_ID = #{memberId}
+            WHERE r.DELETED_AT IS NULL
+              AND (r.STATUS = 0 OR r.STATUS IS NULL)
+            GROUP BY r.RECIPE_ID, r.TITLE, r.THUMBNAIL_URL, r.CREATED_AT
+            ORDER BY matchScore DESC, urgentMatchCount DESC, r.CREATED_AT DESC
+        )
+        WHERE ROWNUM &lt;= #{limit}
+    </select>
+
+</mapper>

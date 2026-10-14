@@ -2,34 +2,35 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
-      
+<head>
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</head>
+<body>
 <th:block layout:fragment="content">
-	<div class="section bg-light">
-		<div class="container">
+	<div class="page-container">
+		<div class="common-card complete-card" data-aos="fade-up" data-aos-delay="200">
+			
+			<div class="common-header">
+				<h1><i class="bi bi-exclamation-triangle"></i> 접근 <span>제한</span></h1>
+			</div>
 
-			<div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-				<div class="col-md-5">
-					<div class="bg-white box-shadow mt-5 mb-5 p-5">
-						<h3 class="text-center pt-3 text-danger"><i class="bi bi-exclamation-triangle"></i> 경고 !</h3>
+			<hr class="common-divider">
 
-						<div class="my-5">
-							<div class="text-center">
-								<p class="mb-1"><strong>해당 정보를 접근 할 수 있는 권한 이 없습니다.</strong></p>
-								<p>메인화면으로 이동하시기 바랍니다.</p>
-							</div>
-						</div>
-	                    
-						<div>
-							<button type="button" class="btn-accent btn-lg w-100" th:onclick="|location.href='@{/}'|">
-								메인화면으로 이동 <i class="bi bi-arrow-counterclockwise"></i>
-							</button>	                    
-						</div>
-					</div>
-				</div>
+			<div class="message-area" style="margin: 30px 0;">
+				<p class="text-center" style="margin: 0;">
+					<strong>해당 정보에 접근할 수 있는 권한이 없습니다.</strong><br>
+					메인화면으로 이동하시기 바랍니다.
+				</p>
+			</div>
+            
+			<div>
+				<button type="button" class="btn-submit" th:onclick="|location.href='@{/}'|">
+					메인화면으로 이동 <i class="bi bi-arrow-counterclockwise"></i>
+				</button>	                    
 			</div>
 
 		</div>
 	</div>
 </th:block>
-
+</body>
 </html>

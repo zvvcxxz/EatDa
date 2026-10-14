@@ -4,104 +4,130 @@
       layout:decorate="~{mykitchen/mykitchenLayout}">
 <head>
     <title>내 냉장고 - 나의 주방</title>
+    <!-- Vue 3 & Axios CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- 외부 CSS 링크 -->
+    <link rel="stylesheet" th:href="@{/css/mykitchen/myfridge.css}">
 </head>
 <body>
 
 <th:block layout:fragment="kitchenContent">
-    <section class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>우리 집 냉장고</h2>
-                <p class="muted">등록일과 유통기한을 따로 확인하세요.</p>
-            </div>
-            <button type="button" class="btn btn-primary" id="addIngredientButton">
-                + 재료 추가
-            </button>
-        </div>
-
-        <form method="get" th:action="@{/kitchen}" class="toolbar">
-            <input type="hidden" name="tab" value="fridge">
-
-            <label class="sr-only" for="fridgeKeyword">보유 재료 검색</label>
-            <input id="fridgeKeyword" name="keyword" type="search"
-                   placeholder="보유한 재료를 검색하세요" th:value="${keyword}">
-
-            <label class="sr-only" for="fridgeStatus">재료 상태</label>
-            <select id="fridgeStatus" name="status">
-                <option value="" th:selected="${status == ''}">전체 재료</option>
-                <option value="OLD" th:selected="${status == 'OLD'}">오래된 재료</option>
-                <option value="EXPIRING" th:selected="${status == 'EXPIRING'}">유통기한 임박</option>
-                <option value="EXPIRED" th:selected="${status == 'EXPIRED'}">유통기한 경과</option>
-            </select>
-
-            <button class="btn btn-dark" type="submit">검색</button>
-        </form>
-
-        <div class="chip-row" aria-label="재료 카테고리">
-            <a class="chip" th:classappend="${categoryId == null} ? 'selected'"
-               th:href="@{/kitchen(tab='fridge', keyword=${keyword}, status=${status})}">전체</a>
-            <a class="chip" th:each="category : ${categories}" th:text="${category.name}"
-               th:classappend="${category.id == categoryId} ? 'selected'"
-               th:href="@{/kitchen(tab='fridge', categoryId=${category.id}, keyword=${keyword}, status=${status})}">채소</a>
-        </div>
-
-        <div class="empty-state" th:if="${#lists.isEmpty(fridgeItems)}">
-            <span aria-hidden="true">🧺</span>
-            <h3>표시할 재료가 없어요</h3>
-            <p>새 재료를 등록하거나 검색 조건을 변경해 주세요.</p>
-        </div>
-
-        <div class="ingredient-grid">
-            <article class="ingredient-card" th:each="item : ${fridgeItems}">
-                <div class="card-top">
-                    <span class="category-label" th:text="${item.categoryName}">채소</span>
-                    <div class="badge-group">
-                        <span class="badge badge-old" th:if="${item.old}">오래된 재료</span>
-                        <span class="badge badge-warning" th:if="${item.expiring}">유통기한 임박</span>
-                        <span class="badge badge-danger" th:if="${item.expired}">유통기한 경과</span>
-                    </div>
+    <div id="fridgeApp" v-cloak>
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>우리 집 냉장고</h2>
+                    <p class="muted">최근 등록된 순으로 최대 30개의 재료를 보여줍니다.</p>
                 </div>
-
-                <h3>
-                    <a th:href="@{/kitchen(tab='recommendations', fridgeItemId=${item.id})}"
-                       th:text="${item.ingredientName}">당근</a>
-                </h3>
-
-                <p class="quantity">
-                    <strong th:text="${item.quantity}">2</strong>
-                    <span th:text="${item.unitLabel}">개</span>
-                </p>
-
-                <dl class="date-list">
-                    <div>
-                        <dt>등록일</dt>
-                        <dd th:text="${item.registeredDate}">2026-01-01</dd>
-                    </div>
-                    <div>
-                        <dt>유통기한</dt>
-                        <dd th:text="${item.expiryDate ?: '미입력'}">미입력</dd>
-                    </div>
-                </dl>
-
-                <div class="card-actions">
-                    <button type="button" class="btn btn-light btn-small"
-                            data-action="edit-ingredient"
-                            th:attr="data-id=${item.id}, data-ingredient-id=${item.ingredientId}, data-name=${item.ingredientName}, data-quantity=${item.quantity}, data-unit=${item.unit}, data-registered=${item.registeredDate}, data-expiry=${item.expiryDate}">수정</button>
-                    <button type="button" class="btn btn-danger-light btn-small"
-                            data-action="delete-ingredient" th:attr="data-id=${item.id}">삭제</button>
-                </div>
-            </article>
-        </div>
-
-        <div class="recommend-banner">
-            <div>
-                <h3>냉장고 속 재료로 무엇을 만들까요?</h3>
-                <p>보유 재료가 많이 일치하는 레시피를 찾아드립니다.</p>
+                <button type="button" class="btn btn-primary" id="addIngredientButton" @click="openAddModal">
+                    + 재료 추가
+                </button>
             </div>
-            <a th:if="${summary?.ingredientCount > 0}" class="btn btn-primary" th:href="@{/kitchen(tab='recommendations')}">내 재료로 레시피 찾기</a>
-            <button th:if="${summary?.ingredientCount == 0}" class="btn btn-primary" disabled>먼저 재료를 등록해 주세요</button>
-        </div>
-    </section>
+
+            <!-- 보유한 재료 검색 & 필터 툴바 -->
+            <div class="toolbar">
+                <label class="sr-only" for="fridgeKeyword">보유 재료 검색</label>
+                <input id="fridgeKeyword" v-model="filterKeyword" @keyup.enter="applyFilter" type="search"
+                       placeholder="보유한 재료를 검색하세요">
+
+                <label class="sr-only" for="fridgeStatus">재료 상태</label>
+                <select id="fridgeStatus" v-model="filterStatus" @change="applyFilter">
+                    <option value="">전체 재료</option>
+                    <option value="OLD">오래된 재료</option>
+                    <option value="EXPIRING">유통기한 임박</option>
+                    <option value="EXPIRED">유통기한 경과</option>
+                </select>
+
+                <button class="btn btn-dark" type="button" @click="applyFilter">검색</button>
+            </div>
+
+            <!-- 카테고리 칩 필터 -->
+            <div class="chip-row" aria-label="재료 카테고리">
+                <button type="button" class="chip" :class="{ selected: selectedFilterCategory === null }"
+                        @click="filterByCategory(null)">전체</button>
+                <button type="button" class="chip" v-for="cat in categoryList" :key="cat.code"
+                        :class="{ selected: selectedFilterCategory === cat.code }"
+                        @click="filterByCategory(cat.code)">
+                    {{ cat.label }}
+                </button>
+            </div>
+
+            <!-- 재료 목록이 없을 때 -->
+            <div class="empty-state" v-if="fridgeItems.length === 0">
+                <span aria-hidden="true">🧺</span>
+                <h3>표시할 재료가 없어요</h3>
+                <p>새 재료를 등록하거나 검색 조건을 변경해 주세요.</p>
+            </div>
+
+            <!-- Vue v-for 동적 카드 목록 (3줄 제한 + 페이징) -->
+            <div class="ingredient-grid" v-if="fridgeItems.length > 0">
+                <article class="ingredient-card" v-for="item in visibleFridgeItems" :key="item.fridgeItemId">
+                    <div class="card-top">
+                        <span class="category-label">
+                            <span class="category-emoji">{{ getCategoryEmoji(item.categoryName) }}</span>
+                            <span>{{ item.categoryName }}</span>
+                        </span>
+                        <div class="badge-group">
+                            <span class="speech-bubble expired" v-if="item.expired">유통기한 지남!</span>
+                            <span class="speech-bubble expiring" v-else-if="item.expiring">임박! (D-{{ item.dDay }})</span>
+                        </div>
+                    </div>
+
+                    <h3 class="ingredient-title">
+                        {{ getIngredientEmoji(item.ingredientName, item.categoryName) }} {{ item.ingredientName }}
+                    </h3>
+
+                    <p class="quantity">
+                        <strong>{{ item.quantity }}</strong>
+                        <span>{{ item.unit }}</span>
+                    </p>
+
+                    <dl class="date-list">
+                        <div>
+                            <dt>등록일</dt>
+                            <dd>{{ item.registeredDate }}</dd>
+                        </div>
+                        <div>
+                            <dt>유통기한(선택)</dt>
+                            <dd>{{ item.expiresOn ? item.expiresOn : '미입력' }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="card-actions">
+                        <button type="button" class="btn btn-light btn-small" @click="openEditModal(item)">수정</button>
+                        <button type="button" class="btn btn-danger-light btn-small" @click="deleteFridgeItem(item.fridgeItemId)">삭제</button>
+                    </div>
+                </article>
+            </div>
+
+            <!-- 3줄 초과 시 더보기 버튼 -->
+            <div class="load-more-container" v-if="fridgeItems.length > visibleLimit">
+                <button type="button" class="btn-load-more" @click="loadMore">
+                    ➕ 더보기 ({{ visibleFridgeItems.length }} / {{ fridgeItems.length }})
+                </button>
+            </div>
+
+            <!-- 레시피 추천 배너 -->
+            <div class="recommend-banner">
+                <div>
+                    <h3>냉장고 속 재료로 무엇을 만들까요?</h3>
+                    <p>보유 재료가 많이 일치하는 레시피를 찾아드립니다.</p>
+                </div>
+                <button v-if="fridgeItems.length > 0" type="button" class="btn btn-primary" @click="openRecommendModal">
+                    🍳 내 재료로 레시피 찾기
+                </button>
+                <button v-else type="button" class="btn btn-primary" disabled>먼저 재료를 등록해 주세요</button>
+            </div>
+        </section>
+
+        <!-- 모달 프래그먼트 포함 -->
+        <th:block th:replace="~{mykitchen/mydialogs :: fridgeDialogs}"></th:block>
+    </div>
+
+    <!-- 외부 Vue JS 스크립트 -->
+    <script th:src="@{/js/mykitchen/myfridge.js}"></script>
 </th:block>
 
 </body>

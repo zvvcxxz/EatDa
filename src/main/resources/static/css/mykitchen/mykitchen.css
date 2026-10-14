@@ -1,15 +1,15 @@
 :root {
-    --primary: #f59e0b;
-    --primary-dark: #d97706;
-    --primary-light: #fef3c7;
-    --background: #fdfbf7;
+    --primary: #d99e32;
+    --primary-dark: #b57e1b;
+    --primary-light: #fcf3df;
+    --background: #fcfaf6;
     --surface: #ffffff;
-    --text: #332a1e;
-    --muted: #8c7e6c;
-    --border: #f3eae0;
-    --danger: #e11d48;
+    --text: #2b261f;
+    --muted: #857868;
+    --border: #f0e8dc;
+    --danger: #d93838;
     --radius: 18px;
-    --shadow: 0 6px 24px rgba(180, 130, 40, 0.06);
+    --shadow: 0 6px 24px rgba(160, 120, 50, 0.06);
 }
 
 * {
@@ -55,7 +55,7 @@ button:disabled {
 }
 
 :focus-visible {
-    outline: 3px solid #fbbf24;
+    outline: 3px solid #e5b352;
     outline-offset: 3px;
 }
 
@@ -145,7 +145,7 @@ small {
     width: 66px;
     height: 66px;
     margin: 0 auto 12px;
-    background: #fef08a;
+    background: #f7e8c3;
     border-radius: 50%;
     font-size: 34px;
 }
@@ -167,7 +167,7 @@ small {
     gap: 12px;
     padding: 13px 12px;
     border-radius: 12px;
-    color: #6a5e4d;
+    color: #615647;
     font-size: 14px;
 }
 
@@ -292,19 +292,19 @@ small {
 }
 
 .btn-light {
-    color: #5c503f;
-    background: #faf5eb;
+    color: #594e3f;
+    background: #f8f3ea;
     border-color: var(--border);
 }
 
 .btn-dark {
     color: #fff;
-    background: #4a3b2c;
+    background: #42382c;
 }
 
 .btn-danger-light {
     color: var(--danger);
-    background: #fff0f0;
+    background: #fdf0f0;
 }
 
 .btn-small {
@@ -320,7 +320,7 @@ textarea {
     padding: 11px 13px;
     color: var(--text);
     background: white;
-    border: 1px solid #ebdccb;
+    border: 1px solid #e8decb;
     border-radius: 10px;
 }
 
@@ -365,13 +365,13 @@ label {
     border: 1px solid var(--border);
     border-radius: 30px;
     background: #fff;
-    color: #6d6050;
+    color: #665b4c;
     font-size: 13px;
 }
 
 .chip.selected {
     color: var(--primary-dark);
-    border-color: #fcd34d;
+    border-color: #e3bd72;
     background: var(--primary-light);
     font-weight: 700;
 }
@@ -418,18 +418,18 @@ label {
 }
 
 .badge-old {
-    color: #7b6341;
-    background: #f7eedb;
+    color: #705835;
+    background: #f7ebd4;
 }
 
 .badge-warning {
-    color: #ae701c;
-    background: #fff0d7;
+    color: #a86b19;
+    background: #fef0d8;
 }
 
 .badge-danger {
-    color: #b64343;
-    background: #ffebeb;
+    color: #b83d3d;
+    background: #fde8e8;
 }
 
 .badge-success {
@@ -489,7 +489,7 @@ label {
 
 .recommend-banner p {
     margin-bottom: 0;
-    color: #785e2f;
+    color: #70582d;
     font-size: 13px;
 }
 
@@ -504,7 +504,7 @@ label {
     place-items: center;
     aspect-ratio: 16 / 10;
     overflow: hidden;
-    background: #fcf6e8;
+    background: #fbf5e6;
 }
 
 .recipe-image img {
@@ -528,7 +528,7 @@ label {
 .match-info {
     margin-bottom: 16px;
     padding: 12px;
-    background: #fcf8f0;
+    background: #faf5e8;
     border-radius: 10px;
     font-size: 12px;
 }
@@ -563,7 +563,7 @@ label {
 }
 
 .empty-state h3 {
-    color: #63533e;
+    color: #5c4e3b;
 }
 
 .notification-list,
@@ -585,8 +585,8 @@ label {
 }
 
 .notification-item.unread {
-    background: #fefce8;
-    border-color: #fef08a;
+    background: #fdf8eb;
+    border-color: #f5e4bd;
 }
 
 .notification-dot {
@@ -594,7 +594,7 @@ label {
     height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #e2d7c5;
+    background: #ded2bf;
 }
 
 .unread .notification-dot {
@@ -637,8 +637,8 @@ label {
 .tag-choice span {
     display: block;
     padding: 12px 20px;
-    color: #6b5c49;
-    background: #fdfaf3;
+    color: #665a4a;
+    background: #fcf8f0;
     border: 1px solid var(--border);
     border-radius: 30px;
 }
@@ -646,11 +646,11 @@ label {
 .tag-choice input:checked + span {
     color: var(--primary-dark);
     background: var(--primary-light);
-    border-color: #fcd34d;
+    border-color: #e8c783;
 }
 
 .tag-choice input:focus-visible + span {
-    outline: 3px solid #fbbf24;
+    outline: 3px solid #e5b352;
     outline-offset: 3px;
 }
 
@@ -734,7 +734,7 @@ label {
     margin-top: 20px;
     padding: 18px;
     border-radius: 10px;
-    background: #fdfaf3;
+    background: #fcf8f0;
 }
 
 .preserve-lines {
@@ -764,14 +764,14 @@ label {
     max-width: 50px;
     height: 180px;
     margin: 10px auto;
-    background: #fef3c7;
+    background: #f8efe0;
     border-radius: 8px;
     overflow: hidden;
 }
 
 .chart-bar {
     width: 100%;
-    background: #f59e0b;
+    background: #d99e32;
     border-radius: 8px 8px 0 0;
 }
 
@@ -803,12 +803,12 @@ label {
     background: #fff;
     border: 0;
     border-radius: 18px;
-    box-shadow: 0 20px 70px rgba(60, 40, 10, 0.15);
+    box-shadow: 0 20px 70px rgba(50, 35, 10, 0.15);
     overflow-y: auto;
 }
 
 .app-dialog::backdrop {
-    background: rgba(40, 30, 10, 0.42);
+    background: rgba(35, 25, 10, 0.42);
 }
 
 .dialog-header,
@@ -836,7 +836,7 @@ label {
     width: 32px;
     height: 32px;
     padding: 0;
-    background: #faf2e4;
+    background: #f7eee0;
     border: 0;
     border-radius: 50%;
     font-size: 22px;
@@ -920,7 +920,7 @@ label {
     max-width: calc(100% - 32px);
     padding: 13px 22px;
     color: white;
-    background: #4a3a2a;
+    background: #3d3224;
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
 }

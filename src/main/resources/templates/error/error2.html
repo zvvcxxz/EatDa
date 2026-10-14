@@ -2,36 +2,34 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layout/layout}">
-
+<head>
+    <link rel="stylesheet" th:href="@{/css/member/common.css}" />
+</head>
+<body>
 <th:block layout:fragment="content">
-	<div class="section bg-light">
-		<div class="container">
+	<div class="page-container">
+		<div class="common-card complete-card" data-aos="fade-up" data-aos-delay="200">
+			
+			<div class="common-header">
+				<h1 th:text="${title}">알림</h1>
+			</div>
 
-			<div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-				<div class="col-md-5">
-					<div class="bg-white box-shadow mt-5 mb-5 p-5">
-						<h3 class="text-center pt-3">[[${title}]]</h3>
-						<hr class="mt-4">
-						
-						<div class="my-5">
-							<div class="text-center">
-								<p class="text-center">
-									[(${message})]
-								</p>
-							</div>
-						</div>
-	                    
-						<div>
-							<button type="button" class="btn-accent btn-lg w-100" th:onclick="|location.href='@{/}'|">
-								메인화면으로 이동 <i class="bi bi-arrow-counterclockwise"></i>
-							</button>
-						</div>
-					</div>
-				</div>
+			<hr class="common-divider">
+
+			<div class="message-area" style="margin: 30px 0;">
+				<p class="text-center" style="margin: 0;">
+					[(${message})]
+				</p>
+			</div>
+            
+			<div>
+				<button type="button" class="btn-submit" th:onclick="|location.href='@{/}'|">
+					메인화면으로 이동 <i class="bi bi-arrow-counterclockwise"></i>
+				</button>
 			</div>
 
 		</div>
 	</div>
 </th:block>
-
+</body>
 </html>
