@@ -49,7 +49,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public void insertMember(MemberDto dto) throws Exception {
 		try {
-			// 프로필 사진 업로드 처리
+			// 프사 업로드
 			if(dto.getSelectFile() != null && !dto.getSelectFile().isEmpty()) {
 				String saveFilename = storageService.uploadFileToServer(dto.getSelectFile(), uploadPath);
 				dto.setProfile_photo(saveFilename);
@@ -59,9 +59,9 @@ public class MemberServiceImpl implements MemberService {
 			String encPassword = bcryptEncoder.encode(dto.getPassword());
 			dto.setPassword(encPassword);
 						
-			// 기본 권한 설정 (1: ADMIN, 2: USER - DB ROLE_ID 기준)
+			// 기본 권한 설정
 			if(dto.getRole_id() == 0) {
-				dto.setRole_id(2L); // 기본 일반 회원 권한
+				dto.setRole_id(2L);
 			}
 			
 			mapper.insertMember(dto);
@@ -242,8 +242,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public void deleteMember(Map<String, Object> map) throws Exception {
 		try {
-			// 상태값을 탈퇴/비활성(STATUS = 3 또는 0)으로 변경하는 소프트 삭제 방식
-			map.put("status", 3); // 3: 탈퇴 상태
+			map.put("status", 3);
 			mapper.updateMemberStatus(map);			
 			
 			String filename = (String)map.get("filename");

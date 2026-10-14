@@ -19,7 +19,7 @@ public class AdminMemberDto {
 	private Long roleId;
 	private Integer failureCnt;
 	private String lastLoginAt;
-	private String naem;
+	private String name;
 	private String birth;
 	private Integer receiveEmail;
 	private String zip;

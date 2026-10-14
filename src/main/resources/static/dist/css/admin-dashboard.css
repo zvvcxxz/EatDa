@@ -1,8 +1,6 @@
 ﻿@charset "UTF-8";
 
-/* =========================
-   기본 변수 설정 (주황색 테마)
-========================= */
+/* 기본 변수 설정 (주황색 테마) */
 :root {
     --orange: #ff7849;
     --orange-dark: #e96135;
@@ -193,6 +191,22 @@ dialog::backdrop { background: rgba(37, 29, 21, .42); }
 .page-navigation .active,
 .page-navigation span:not([class]),
 .page-navigation a[style*="font-weight: bold"] {background: var(--orange-soft) !important; color: var(--orange-dark) !important; border-color: var(--orange-soft) !important; font-weight: 800 !important; }
-
 .page-navigation .disabled,
 .page-navigation span[disabled] {color: #c9c5c0; background: #faf8f5; pointer-events: none; }
+
+/* 회원 관리 탭 전용 스타일 */
+.custom-tabs { display: flex; gap: 20px; border-bottom: 2px solid var(--border-dash); margin-top: 10px; width: 100%;}
+.custom-tabs button { background: none; border: none; padding: 10px 5px; font-size: 16px; font-weight: 600; color: var(--muted-dash); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.custom-tabs button:hover { color: var(--text-dash); }
+.custom-tabs button.active { color: var(--orange-dark); border-bottom: 3px solid var(--orange-dark); }
+
+/* 회원 관리 목록 & 상세 프로필 스타일 */
+.list-header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 20px; }
+.list-header-tools .total-count { font-size: 14px; font-weight: 500; color: var(--muted-dash); }
+.list-header-tools .search-tools { display: flex; gap: 8px; }
+.profile-wrap { padding: 0 20px; }
+.profile-grid { display: grid; grid-template-columns: 120px 1fr 120px 1fr; gap: 15px; background: #fcfbfa; padding: 25px; border: 1px solid var(--border-dash); border-radius: 12px; font-size: 14px; align-items: center;}
+.profile-grid strong { color: var(--muted-dash); }
+.profile-footer { display: flex; justify-content: space-between; margin-top: 25px; }
+.profile-footer .btn-group { display: flex; gap: 8px; }
+.history-title { font-size: 16px; font-weight: 700; margin: 40px 0 15px 0; }

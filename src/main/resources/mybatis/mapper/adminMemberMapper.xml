@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sp.app.admin.mapper.AdminHomeMapper">
+<mapper namespace="com.sp.app.admin.mapper.AdminMemberMapper">
 	<sql id="where-list">
 		<if test="kwd != null and kwd != ''">
 			<choose>
@@ -36,30 +36,30 @@
 	</select>
 	
 	<select id="listMember" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
-		SELECT m.MEMEBER_ID AS memberId,
-			   m.LOGIN_ID AS loginId,
-			   m.Name AS name,
-			   m.EMAIL AS email,
-			   m.PHONE AS phone,
-			   TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
-			   m.STATUS AS status,
-			   TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt.
-			   r.ROLE_NAME AS roleName,
-			   m.SNS_PROVIDER AS snsProvider
-		 FROM MEMBER m
-		 JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
-		 <where>
-		 		<include refid="where-list"/>
-		 		<if test="status != null and status != ''">
-		 				AND m.STATUS = #{status}
-		 		</if>
-		 		<if test="roleId != null and roleId != ''">
-		 				AND m.ROLE_ID = #{roleId}
-		 		</if>
-		 </where>
-		 ORDER BY m.CREATED_AT DESC
-		 OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-	</select>
+			SELECT m.MEMBER_ID AS memberId, 
+			       m.LOGIN_ID AS loginId, 
+			       m.NAME AS name, 
+			       m.EMAIL AS email, 
+			       m.PHONE AS phone, 
+			       TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
+			       m.STATUS AS status, 
+			       TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
+			       r.ROLE_NAME AS roleName,
+			       m.SNS_PROVIDER AS snsProvider
+			FROM MEMBER m
+			JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
+			<where>
+				<include refid="where-list"/>
+				<if test="status != null and status != ''">
+					AND m.STATUS = #{status}
+				</if>
+				<if test="roleId != null and roleId != ''">
+					AND m.ROLE_ID = #{roleId}
+				</if>
+			</where> 
+			ORDER BY m.CREATED_AT DESC
+			OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+		</select>
 	
 	<select id="findById" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
 			SELECT m.MEMBER_ID AS memberId,
@@ -72,7 +72,7 @@
 				   m.ADDR1 AS addr1,
 				   m.ADDR2 AS addr2,
 				   m.STATUS AS status,
-				   TO_CHAR(m.CREATE_AT, 'YYYY-MM-DD') AS createdAt,
+				   TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
 				   TO_CHAR(m.UPDATED_AT, 'YYYY-MM-DD') AS updateAt,
 				   TO_CHAR(m.LAST_LOGIN_AT, 'YYYY-MM-DD HH24:MI') AS lastLoginAt,
 				   m.FAILURE_CNT AS failureCnt,

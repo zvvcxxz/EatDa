@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div>
+				<p class="eyebrow">MEMBER MANAGEMENT</p>
+				<h2>회원 관리</h2>
+				<p class="subtitle">서비스에 가입한 회원들의 정보와 상태를 관리해요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head" style="flex-direction: column; align-items: flex-start; padding-bottom: 0; border-bottom: none;">
+				<div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                    <div><h2>회원 목록</h2></div>
+                </div>
+                <div class="custom-tabs" id="myTab">
+                    <button class="active" data-role="">전체 회원</button>
+                    <button data-role="1">일반 회원</button>
+                    <button data-role="2">관리자</button>
+                </div>
+			</div>
+            
+			<div id="nav-content" style="padding-top: 20px;">
+                <div style="text-align:center; padding: 50px; color: var(--muted-dash);">데이터를 불러오는 중입니다...</div>
+            </div>
+		</section>
+	</div>
+    
+    <form name="memberSearchForm" style="display:none;">
+        <input type="hidden" name="schType" value="loginId">
+        <input type="hidden" name="kwd" value="">
+        <input type="hidden" name="status" value="">
+        <input type="hidden" name="roleId" value="">
+    </form>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+    <script th:src="@{/dist/js/admin-member.js}"></script>
+</th:block>
+</html>

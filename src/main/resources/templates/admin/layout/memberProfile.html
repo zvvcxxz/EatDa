@@ -1,0 +1,97 @@
+<input type="hidden" id="csrf_header" th:value="${_csrf?.headerName}" />
+<input type="hidden" id="csrf_token" th:value="${_csrf?.token}" />
+
+<div class="profile-wrap">
+    <div class="profile-grid">
+        <strong>회원번호</strong> <span th:text="${dto.memberId}"></span>
+        <strong>가입유형</strong> <span th:text="${dto.snsProvider != null ? dto.snsProvider + ' 연동' : '일반 로컬가입'}"></span>
+        <strong>아이디</strong> <span th:text="${dto.loginId != null ? dto.loginId : dto.snsId}"></span>
+        <strong>권한</strong>
+        <span>
+            <span class="custom-badge orange" th:if="${dto.roleName == '관리자'}" th:text="${dto.roleName}">관리자</span>
+            <span th:if="${dto.roleName != '관리자'}" th:text="${dto.roleName}">일반회원</span>
+        </span>
+        <strong>이름</strong> <span th:text="${dto.name}"></span>
+        <strong>생년월일</strong> <span th:text="${dto.birth}"></span>
+        <strong>이메일</strong> <span th:text="${dto.email}"></span>
+        <strong>연락처</strong> <span th:text="${dto.phone}"></span>
+        <strong>가입일</strong> <span th:text="${dto.createdAt}"></span>
+        <strong>최근 로그인</strong> <span th:text="${dto.lastLoginAt}"></span>
+        <strong>계정 상태</strong>
+        <span>
+            <span class="custom-badge green" th:if="${dto.status == 1}">정상</span>
+            <span class="custom-badge danger" th:if="${dto.status == 0}">정지</span>
+            <span style="font-size: 12px; color: #f03e3e; margin-left: 8px;" th:if="${dto.failureCnt > 0}">(비번 실패 [[${dto.failureCnt}]]회)</span>
+        </span>
+    </div>
+    
+    <div class="profile-footer">
+        <button type="button" class="custom-btn secondary" th:onclick="|listMember(${page})|"><i class="bi bi-list"></i> 목록으로</button>
+        <div class="btn-group">
+            <button type="button" class="custom-btn primary" data-open="memberUpdateDialog">정보 수정</button>
+            <button type="button" class="custom-btn danger" data-open="memberStatusDialog">상태 변경</button>
+        </div>
+    </div>
+    
+    <h3 class="history-title">상태 변경 이력</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>변경 일시</th><th>변경 전</th><th>변경 후</th><th>사유</th><th>처리자</th></tr></thead>
+            <tbody>
+                <tr th:each="hist : ${listStatus}">
+                    <td class="muted" th:text="${hist.startAt}"></td>
+                    <td th:text="${hist.beforeStatus == '1' ? '정상' : '정지'}"></td>
+                    <td th:text="${hist.afterStatus == '1' ? '정상' : '정지'}"></td>
+                    <td class="cell-title" th:text="${hist.reason}"></td>
+                    <td th:text="${hist.adminName}">관리자</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(listStatus)}">
+                    <td colspan="5" style="text-align: center; padding: 20px;">상태 변경 이력이 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<dialog id="memberUpdateDialog">
+    <div class="dialog-head">
+        <h2>회원 정보 수정</h2><button type="button" class="close-btn" data-close>×</button>
+    </div>
+    <div class="dialog-body">
+        <form id="memberUpdateForm" class="form-grid">
+            <input type="hidden" name="memberId" th:value="${dto.memberId}">
+            <label class="field"><span>이름</span><input type="text" name="name" th:value="${dto.name}"></label>
+            <label class="field"><span>생년월일</span><input type="date" name="birth" th:value="${dto.birth}"></label>
+            <label class="field"><span>권한</span>
+                <select name="roleId" class="select-ui">
+                    <option value="1" th:selected="${dto.roleId == 1}">일반회원</option>
+                    <option value="2" th:selected="${dto.roleId == 2}">관리자</option>
+                </select>
+            </label>
+            <button type="button" class="custom-btn primary full" th:onclick="|updateMemberOk(${page})|">수정 완료</button>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="memberStatusDialog">
+    <div class="dialog-head">
+        <h2>계정 상태 변경</h2><button type="button" class="close-btn" data-close>×</button>
+    </div>
+    <div class="dialog-body">
+        <form id="memberStatusForm" class="form-grid">
+            <input type="hidden" name="memberId" th:value="${dto.memberId}">
+            <input type="hidden" name="beforeStatus" th:value="${dto.status}">
+            <label class="field">
+                <span>변경할 상태</span>
+                <select name="afterStatus" class="select-ui">
+                    <option value="1" th:selected="${dto.status == 1}">정상 (잠금 해제)</option>
+                    <option value="0" th:selected="${dto.status == 0}">정지 (블랙리스트)</option>
+                </select>
+            </label>
+            <label class="field">
+                <span>사유</span>
+                <textarea name="reason" rows="3" style="padding: 10px; border: 1px solid #e7e1d9; border-radius: 9px;"></textarea>
+            </label>
+            <button type="button" class="custom-btn danger full" th:onclick="|updateStatusOk(${page})|">상태 변경 확정</button>
+        </form>
+    </div>

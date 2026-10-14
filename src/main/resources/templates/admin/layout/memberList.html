@@ -1,0 +1,59 @@
+<!-- 상단 검색 및 통계 영역 (여기서부터 파일 시작!) -->
+<div class="list-header-tools">
+    <span class="total-count">
+        총 <strong>[[${dataCount}]]</strong>명 (<strong>[[${page}]]</strong> / [[${total_page}]] 페이지)
+    </span>
+    
+    <div class="search-tools">
+        <select id="statusFilter" class="select-ui" style="width: 110px;">
+            <option value="" th:selected="${status == ''}">전체 상태</option>
+            <option value="1" th:selected="${status == '1'}">정상(활성)</option>
+            <option value="0" th:selected="${status == '0'}">정지(잠금)</option>
+        </select>
+        <select id="searchType" class="select-ui" style="width: 100px;">
+            <option value="loginId" th:selected="${schType == 'loginId'}">아이디</option>
+            <option value="name" th:selected="${schType == 'name'}">이름</option>
+        </select>
+        <input type="text" id="keyword" class="search-input" th:value="${kwd}" placeholder="검색어 입력" onkeypress="if(event.keyCode==13) searchList();">
+        <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
+        <button type="button" class="custom-btn secondary" onclick="resetList()"><i class="bi bi-arrow-clockwise"></i></button>
+    </div>
+</div>
+
+<!-- 테이블 영역 -->
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>번호</th><th>아이디</th><th>이름</th><th>권한</th><th>가입일</th><th>상태</th></tr>
+        </thead>
+        <tbody>
+            <!-- 💡 여기서 반복문(th:each)이 돌면서 dto가 생깁니다 -->
+            <tr th:each="dto, stat : ${list}" th:onclick="|profile(${dto.memberId}, ${page})|" style="cursor: pointer;">
+                <td th:text="${dataCount - (page-1) * size - stat.index}">1</td>
+                <td class="cell-title" th:text="${dto.loginId != null ? dto.loginId : dto.snsId}">admin123</td>
+                <td th:text="${dto.name}">홍길동</td>
+                <td>
+                    <span class="custom-badge orange" th:if="${dto.roleName == '관리자'}" th:text="${dto.roleName}">관리자</span>
+                    <span th:if="${dto.roleName != '관리자'}" th:text="${dto.roleName}">일반회원</span>
+                </td>
+                <td class="muted" th:text="${dto.createdAt}">2026-10-14</td>
+                <td>
+                    <span class="custom-badge green" th:if="${dto.status == 1}">정상</span>
+                    <span class="custom-badge danger" th:if="${dto.status == 0}">정지</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p class="empty" th:if="${#lists.isEmpty(list)}" style="display: block;">검색 결과가 없습니다.</p>
+
+<!-- 페이징 영역 -->
+<div class="page-navigation page-navigation-wrap" th:if="${dataCount > 0}">
+    <a th:if="${page > 1}" th:onclick="|listMember(${page - 1})|">이전</a>
+    <span th:each="p : ${#numbers.sequence(1, total_page)}" 
+          th:text="${p}" 
+          th:classappend="${p == page} ? 'active' : ''" 
+          th:onclick="|listMember(${p})|">1</span>
+    <a th:if="${page < total_page}" th:onclick="|listMember(${page + 1})|">다음</a>
+</div>
