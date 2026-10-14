@@ -1,25 +1,256 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>모두의 레시피 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>모두의 레시피 · 잇다</title>
+</head>
+
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="recipe-list" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading"><div><p class="ds-eyebrow">OUR RECIPES</p><h2>모두의 레시피</h2><p>누군가의 한 끼가, 오늘 나의 레시피가 돼요.</p></div><a class="ds-button primary" data-link="recipe-write">레시피 작성 ＋</a></div>
-<div class="ds-toolbar"><label class="ds-search"><span>⌕</span><input id="recipeSearch" placeholder="요리명 또는 작성자 검색" aria-label="레시피 검색"></label><select id="recipeCategory" aria-label="카테고리"><option value="">모든 카테고리</option><option>한식</option><option>양식</option><option>간식</option></select><span id="recipeCount" class="ds-count"></span></div>
-<div id="recipeTiles" class="ds-recipe-grid"></div><div id="recipeEmpty" class="ds-empty" hidden>검색 결과가 없습니다.</div></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+                <h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1>
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋 요리 질문</a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow">OUR RECIPES</p>
+                    <h2>모두의 레시피</h2>
+                    <p>누군가의 한 끼가, 오늘 나의 레시피가 돼요.</p>
+                </div>
+
+                <a class="ds-button primary"
+                   th:href="@{/community/recipes/write}">
+                    레시피 작성 ＋
+                </a>
+            </div>
+
+            <!-- 검색하면 첫 페이지부터 조회 -->
+            <form class="ds-toolbar" method="get"
+                  th:action="@{/community/recipes}">
+
+                <select name="schType" aria-label="검색 항목">
+                    <option value="all" th:selected="${schType == 'all'}">
+                        전체
+                    </option>
+                    <option value="title" th:selected="${schType == 'title'}">
+                        요리명
+                    </option>
+                    <option value="summary" th:selected="${schType == 'summary'}">
+                        소개
+                    </option>
+                    <option value="author" th:selected="${schType == 'author'}">
+                        작성자
+                    </option>
+                </select>
+
+                <label class="ds-search">
+                    <span aria-hidden="true">⌕</span>
+                    <input name="kwd" th:value="${kwd}"
+                           placeholder="검색어를 입력하세요."
+                           aria-label="검색어">
+                </label>
+
+                <!-- DB에서 조회한 카테고리 -->
+                <select name="categoryId" aria-label="카테고리">
+                    <option value="0">모든 카테고리</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.categoryName}"
+                            th:selected="${category.categoryId == categoryId}">
+                        카테고리
+                    </option>
+                </select>
+
+                <button type="submit" class="ds-button light">검색</button>
+
+                <span class="ds-count"
+                      th:text="|총 ${dataCount}개의 레시피|">
+                    총 0개의 레시피
+                </span>
+            </form>
+
+            <!-- 샘플 대신 실제 레시피 목록 반복 -->
+            <div class="ds-recipe-grid">
+                <article class="ds-recipe-tile"
+                         th:each="recipe : ${recipes}">
+
+                    <div class="ds-dish">
+                        <img th:src="${!#strings.isEmpty(recipe.thumbnailUrl)}
+                                     ? @{${recipe.thumbnailUrl}}
+                                     : @{/dist/images/noimage.png}"
+                             th:alt="${recipe.title}">
+
+                        <div class="ds-tile-overlay">
+                            <a th:href="@{/community/recipes/{id}(
+                                         id=${recipe.recipeId},
+								         page=${page},
+								         schType=${schType},
+								         kwd=${kwd},
+								         categoryId=${categoryId})}">
+                                📄 전체보기
+                            </a>
+                            <a th:href="@{/community/recipes/{id}/mode(
+                                        id=${recipe.recipeId})}">
+                                🍳 요리모드
+                            </a>
+                        </div>
+                    </div>
+
+                    <span class="ds-tile-category">
+                        회원 레시피
+                        <th:block th:if="${!#strings.isEmpty(recipe.difficulty)}">
+                            · <span th:text="${recipe.difficulty}">쉬움</span>
+                        </th:block>
+                    </span>
+
+                    <h3>
+                        <a th:href="@{/community/recipes/{id}(
+                                    id=${recipe.recipeId},
+							        page=${page},
+							        schType=${schType},
+							        kwd=${kwd},
+							        categoryId=${categoryId})}"
+                           th:text="${recipe.title}">
+                            요리명
+                        </a>
+                    </h3>
+
+                    <div class="ds-tile-meta">
+                        <span th:text="${recipe.authorName}">작성자</span>
+                        <span th:if="${recipe.cookMinutes != null}"
+                              th:text="| · ${recipe.cookMinutes}분|">
+                            · 20분
+                        </span>
+                        <span th:if="${recipe.servings != null}"
+                              th:text="| · ${recipe.servings}인분|">
+                            · 2인분
+                        </span>
+                    </div>
+
+                    <!-- 본인의 선택 여부로 버튼 표시 -->
+                    <div class="ds-tile-actions">
+                        <button type="button" class="ds-toggle"
+                                th:classappend="${likedRecipeIds.contains(recipe.recipeId)}
+                                                ? 'active' : ''"
+                                data-recipe-action="like"
+                                th:attr="data-selected=${likedRecipeIds.contains(recipe.recipeId)},
+                                         aria-pressed=${likedRecipeIds.contains(recipe.recipeId)},
+                                         data-url=@{/community/recipes/like/{id}(id=${recipe.recipeId})}">
+                            <span class="action-label"
+                                  th:text="${likedRecipeIds.contains(recipe.recipeId)}
+                                           ? '♥ 좋아요' : '♡ 좋아요'">
+                                ♡ 좋아요
+                            </span>
+                            <span class="action-count"
+                                  th:text="${recipe.likeCount}">0</span>
+                        </button>
+
+                        <button type="button" class="ds-toggle bookmark"
+                                th:classappend="${bookmarkedRecipeIds.contains(recipe.recipeId)}
+                                                ? 'active' : ''"
+                                data-recipe-action="bookmark"
+                                th:attr="data-selected=${bookmarkedRecipeIds.contains(recipe.recipeId)},
+                                         aria-pressed=${bookmarkedRecipeIds.contains(recipe.recipeId)},
+                                         data-url=@{/community/recipes/bookmark/{id}(id=${recipe.recipeId})}">
+                            <span class="action-label"
+                                  th:text="${bookmarkedRecipeIds.contains(recipe.recipeId)}
+                                           ? '✓ 찜' : '＋ 찜'">
+                                ＋ 찜
+                            </span>
+                            <span class="action-count"
+                                  th:text="${recipe.bookmarkCount}">0</span>
+                        </button>
+                    </div>
+                </article>
+            </div>
+
+            <div class="ds-empty" th:if="${recipes.isEmpty()}">
+                조건에 맞는 레시피가 없습니다.
+            </div>
+
+            <!-- 페이지를 이동해도 검색 조건 유지 -->
+            <nav class="pagination" aria-label="레시피 페이지"
+                 th:if="${dataCount > 0 and totalPage > 1}">
+
+                <a th:if="${page > 1}"
+                   th:href="@{/community/recipes(
+                            page=${page - 1}, schType=${schType},
+                            kwd=${kwd}, categoryId=${categoryId})}">
+                    이전
+                </a>
+
+                <a th:each="num : ${#numbers.sequence(pageStart, pageEnd)}"
+                   th:href="@{/community/recipes(
+                            page=${num}, schType=${schType},
+                            kwd=${kwd}, categoryId=${categoryId})}"
+                   th:classappend="${num == page} ? 'current' : ''"
+                   th:text="${num}">
+                    1
+                </a>
+
+                <a th:if="${page < totalPage}"
+                   th:href="@{/community/recipes(
+                            page=${page + 1}, schType=${schType},
+                            kwd=${kwd}, categoryId=${categoryId})}">
+                    다음
+                </a>
+            </nav>
+        </section>
+    </div>
+
+    <div id="recipeToast" class="ds-toast" role="status" hidden></div>
 </div>
+
 <th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
+    <!-- 목록은 샘플 JS를 불러오지 않음 -->
+    <script th:src="@{/dist/js/util-async.js}"></script>
+    <script th:src="@{/dist/js/community-recipe.js}"></script>
 </th:block>
-</body></html>
+
+</body>
+</html>

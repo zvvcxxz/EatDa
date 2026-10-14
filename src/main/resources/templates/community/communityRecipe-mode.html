@@ -1,23 +1,427 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>요리모드 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>요리모드 · 잇다</title>
+</head>
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        .community-design .cooking-title {
+            color:#26221f;
+            font-size:26px;
+            font-weight:700;
+            margin-bottom:8px;
+        }
+        .community-design .cooking-count {
+            color:#755c4d;
+            font-size:14px;
+            margin-bottom:14px;
+        }
+        .community-design .cooking-progress {
+            width:100%;
+            height:8px;
+            margin-bottom:24px;
+            accent-color:#ed8754;
+        }
+        .community-design .cooking-stage {
+            display:grid;
+            grid-template-columns:minmax(0,1fr) 280px;
+            gap:24px;
+            align-items:start;
+            min-height:250px;
+        }
+        .community-design .cooking-stage[hidden] {
+            display:none;
+        }
+        .community-design .cooking-stage.without-photo {
+            grid-template-columns:1fr;
+        }
+        .community-design .cooking-stage h3 {
+            color:#a54d28;
+            font-size:20px;
+            margin-bottom:16px;
+        }
+        .community-design .cooking-description {
+            color:#292522;
+            font-size:20px;
+            line-height:1.8;
+            white-space:pre-wrap;
+            overflow-wrap:anywhere;
+        }
+        .community-design .cooking-photo {
+            width:100%;
+            height:230px;
+            object-fit:cover;
+            border-radius:14px;
+        }
+        .community-design .cooking-timer {
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:10px;
+            margin-top:24px;
+            padding:16px;
+            border:1px solid #efdfd1;
+            border-radius:12px;
+            background:#fff6ed;
+        }
+        .community-design .cooking-clock {
+            color:#292522;
+            font-size:24px;
+            font-weight:700;
+            min-width:80px;
+        }
+        .community-design .cooking-timer-message {
+            color:#694e3e;
+            font-size:13px;
+        }
+        .community-design .cooking-navigation {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            border-top:1px solid #efdfd1;
+            padding-top:20px;
+            margin-top:24px;
+        }
+        .community-design .cooking-navigation button:disabled {
+            opacity:.45;
+            cursor:default;
+        }
+        .community-design .cooking-empty {
+            color:#333;
+            padding:30px 0;
+            text-align:center;
+        }
+        @media(max-width:800px) {
+            .community-design .cooking-stage {
+                grid-template-columns:1fr;
+            }
+            .community-design .cooking-photo {
+                max-width:400px;
+            }
+        }
+    </style>
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="recipe-mode" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading compact"><div><p class="ds-eyebrow">COOKING MODE</p><h2 id="modeTitle">한 단계씩 함께 요리해요.</h2></div><a class="ds-button light" data-link="recipe-detail">요리모드 나가기</a></div><section class="ds-paper ds-mode"><div class="ds-mode-top"><span id="modeStep" class="ds-pill"></span><span id="modeProgressText"></span></div><div class="ds-progress"><span id="modeProgress"></span></div><div class="ds-mode-content"><img id="modeImage" alt="현재 조리 단계 사진"><div><p class="ds-eyebrow" id="modeStepLabel"></p><h3 id="modeDescription"></h3><p class="ds-help">현재 단계를 마친 뒤 다음 단계로 넘어가세요.</p><div id="modeTimer" class="ds-timer" hidden><span id="timerText"></span><button type="button" id="timerStart" class="ds-button light">타이머 시작</button></div></div></div><div class="ds-mode-actions"><button type="button" id="modePrev" class="ds-button light">← 이전 단계</button><button type="button" id="modeNext" class="ds-button primary">다음 단계 →</button><a class="ds-button primary" id="modeFinish" data-link="recipe-detail" hidden>요리 완료 ✓</a></div></section></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+                <h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1>
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋 요리 질문</a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading compact">
+                <div>
+                    <p class="ds-eyebrow">COOKING MODE</p>
+                    <h2>한 단계씩 따라 만들어요.</h2>
+                    <p>이전·다음 버튼으로 조리 순서를 확인해 주세요.</p>
+                </div>
+
+                <a class="ds-button light"
+                   th:href="@{/community/recipes/{id}(id=${recipe.recipeId})}">
+                    ← 레시피 전체보기
+                </a>
+            </div>
+
+            <article class="ds-paper">
+                <h2 class="cooking-title" th:text="${recipe.title}"></h2>
+
+                <th:block th:if="${!#lists.isEmpty(recipeSteps)}">
+                    <p id="stepCount" class="cooking-count"
+                       th:text="${'1 / ' + #lists.size(recipeSteps) + ' 단계'}">
+                    </p>
+
+                    <progress id="cookingProgress"
+                              class="cooking-progress"
+                              value="1"
+                              th:max="${#lists.size(recipeSteps)}">
+                    </progress>
+
+                    <!-- DB에서 가져온 단계 중 하나씩 표시 -->
+                    <section class="cooking-stage"
+                             th:each="step, state : ${recipeSteps}"
+                             th:attr="hidden=${!state.first}"
+                             th:classappend="${#strings.isEmpty(step.imageUrl)}
+                                             ? 'without-photo' : ''">
+
+                        <div>
+                            <h3 th:text="${'STEP ' + step.stepNo}"></h3>
+
+                            <p class="cooking-description"
+                               th:text="${step.description}"></p>
+
+                            <div class="cooking-timer"
+                                 th:if="${step.timerSeconds != null
+                                         and step.timerSeconds > 0}"
+                                 th:attr="data-seconds=${step.timerSeconds}">
+
+                                <span>⏱</span>
+
+                                <span class="cooking-clock">00:00</span>
+
+                                <button type="button"
+                                        class="ds-button primary"
+                                        data-timer-start>
+                                    시작
+                                </button>
+
+                                <button type="button"
+                                        class="ds-button light"
+                                        data-timer-reset>
+                                    초기화
+                                </button>
+
+                                <span class="cooking-timer-message"
+                                      role="status">
+                                    준비
+                                </span>
+                            </div>
+                        </div>
+
+                        <img class="cooking-photo"
+                             th:if="${!#strings.isEmpty(step.imageUrl)}"
+                             th:src="@{${step.imageUrl}}"
+                             th:alt="${'조리 단계 ' + step.stepNo}">
+                    </section>
+
+                    <div class="cooking-navigation">
+                        <button id="previousStep" type="button"
+                                class="ds-button light" disabled>
+                            ← 이전 단계
+                        </button>
+
+                        <button id="nextStep" type="button"
+                                class="ds-button primary">
+                            다음 단계 →
+                        </button>
+
+                        <a id="finishCooking" class="ds-button primary"
+                           hidden
+                           th:href="@{/community/recipes/{id}(id=${recipe.recipeId})}">
+                            완료 · 전체보기
+                        </a>
+                    </div>
+                </th:block>
+
+                <p class="cooking-empty"
+                   th:if="${#lists.isEmpty(recipeSteps)}">
+                    등록된 조리 단계가 없습니다.
+                </p>
+            </article>
+        </section>
+    </div>
 </div>
+
 <th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stages = Array.from(
+                document.querySelectorAll('.cooking-stage')
+            );
+
+            if (stages.length === 0) return;
+
+            const previousButton = document.getElementById('previousStep');
+            const nextButton = document.getElementById('nextStep');
+            const finishLink = document.getElementById('finishCooking');
+            const progress = document.getElementById('cookingProgress');
+            const stepCount = document.getElementById('stepCount');
+
+            let currentStep = 0;
+
+            // 단계마다 남은 시간을 따로 보관
+            const timers = Array.from(
+                document.querySelectorAll('.cooking-timer')
+            ).map(function(element) {
+                const seconds = Number(element.dataset.seconds);
+
+                return {
+                    element: element,
+                    originalSeconds: seconds,
+                    remaining: seconds,
+                    endTime: null,
+                    intervalId: null
+                };
+            });
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const rest = seconds % 60;
+
+                return String(minutes).padStart(2, '0')
+                    + ':' + String(rest).padStart(2, '0');
+            }
+
+            function updateClock(timer) {
+                timer.element.querySelector('.cooking-clock').textContent =
+                    formatTime(timer.remaining);
+            }
+
+            function pauseTimer(timer) {
+                if (timer.intervalId === null) return;
+
+                timer.remaining = Math.max(
+                    0,
+                    Math.ceil((timer.endTime - Date.now()) / 1000)
+                );
+
+                clearInterval(timer.intervalId);
+                timer.intervalId = null;
+                timer.endTime = null;
+
+                updateClock(timer);
+
+                timer.element.querySelector('[data-timer-start]')
+                    .textContent = '시작';
+
+                timer.element.querySelector('.cooking-timer-message')
+                    .textContent = timer.remaining === 0
+                        ? '시간이 다 됐어요!'
+                        : '일시정지';
+            }
+
+            timers.forEach(function(timer) {
+                const startButton = timer.element.querySelector(
+                    '[data-timer-start]'
+                );
+
+                const resetButton = timer.element.querySelector(
+                    '[data-timer-reset]'
+                );
+
+                const message = timer.element.querySelector(
+                    '.cooking-timer-message'
+                );
+
+                updateClock(timer);
+
+                startButton.addEventListener('click', function() {
+                    if (timer.intervalId !== null) {
+                        pauseTimer(timer);
+                        return;
+                    }
+
+                    if (timer.remaining === 0) {
+                        timer.remaining = timer.originalSeconds;
+                    }
+
+                    timer.endTime = Date.now() + timer.remaining * 1000;
+                    startButton.textContent = '일시정지';
+                    message.textContent = '진행 중';
+
+                    timer.intervalId = setInterval(function() {
+                        timer.remaining = Math.max(
+                            0,
+                            Math.ceil((timer.endTime - Date.now()) / 1000)
+                        );
+
+                        updateClock(timer);
+
+                        if (timer.remaining === 0) {
+                            clearInterval(timer.intervalId);
+                            timer.intervalId = null;
+                            timer.endTime = null;
+
+                            startButton.textContent = '다시 시작';
+                            message.textContent = '시간이 다 됐어요!';
+                        }
+                    }, 250);
+                });
+
+                resetButton.addEventListener('click', function() {
+                    pauseTimer(timer);
+
+                    timer.remaining = timer.originalSeconds;
+                    updateClock(timer);
+
+                    startButton.textContent = '시작';
+                    message.textContent = '준비';
+                });
+            });
+
+            function showStep() {
+                stages.forEach(function(stage, index) {
+                    stage.hidden = index !== currentStep;
+                });
+
+                stepCount.textContent =
+                    (currentStep + 1) + ' / ' + stages.length + ' 단계';
+
+                progress.value = currentStep + 1;
+                previousButton.disabled = currentStep === 0;
+
+                const lastStep = currentStep === stages.length - 1;
+
+                nextButton.hidden = lastStep;
+                finishLink.hidden = !lastStep;
+            }
+
+            // 다른 단계로 이동하면 진행 중인 타이머를 멈춤
+            function moveStep(direction) {
+                timers.forEach(pauseTimer);
+
+                currentStep = Math.max(
+                    0,
+                    Math.min(currentStep + direction, stages.length - 1)
+                );
+
+                showStep();
+            }
+
+            previousButton.addEventListener('click', function() {
+                moveStep(-1);
+            });
+
+            nextButton.addEventListener('click', function() {
+                moveStep(1);
+            });
+
+            showStep();
+        });
+    </script>
 </th:block>
-</body></html>
+
+</body>
+</html>

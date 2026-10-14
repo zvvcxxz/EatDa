@@ -145,7 +145,7 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 return 0;
             }
 
-            // 회원이 작성한 본인 레시피만 수정
+            // 본인이 작성한 회원 레시피만 수정
             if (!"MEMBER".equals(original.getSourceType())
                     || dto.getAuthorId() == null
                     || !Objects.equals(original.getAuthorId(), dto.getAuthorId())) {
@@ -159,9 +159,11 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
             dto.setSourceType(original.getSourceType());
             dto.setExternalKey(original.getExternalKey());
 
-            // 새 대표 사진이 없으면 기존 사진 유지
-            dto.setThumbnailUrl(original.getThumbnailUrl());
+            // 삭제를 선택했으면 사진 주소를 비움
+            dto.setThumbnailUrl(dto.isDeleteThumbnail()
+                    ? null : original.getThumbnailUrl());
 
+            // 새 사진을 선택했으면 새 사진으로 변경
             if (dto.getSelectFile() != null
                     && !dto.getSelectFile().isEmpty()) {
 
@@ -172,7 +174,6 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 dto.setThumbnailUrl("/uploads/community/recipes/" + filename);
             }
 
-            // 수정 화면에서 전달한 단계 번호로 기존 사진 확인
             List<CommunityRecipeStepDto> originalSteps =
                     mapper.listRecipeStep(dto.getRecipeId());
 
@@ -182,8 +183,10 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 imageMap.put(step.getStepId(), step.getImageUrl());
             }
 
+            // 단계 사진도 삭제 여부에 따라 유지하거나 비움
             for (CommunityRecipeStepDto step : steps) {
-                step.setImageUrl(imageMap.get(step.getStepId()));
+                step.setImageUrl(step.isDeleteImage()
+                        ? null : imageMap.get(step.getStepId()));
             }
 
             int result = mapper.updateRecipe(dto);
@@ -192,7 +195,6 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 throw new IllegalStateException("레시피를 수정하지 못했습니다.");
             }
 
-            // 기존 연결 데이터를 지우고 수정한 내용으로 다시 저장
             mapper.deleteRecipeCategory(dto.getRecipeId());
             mapper.deleteRecipeTag(dto.getRecipeId());
             mapper.deleteRecipeIngredient(dto.getRecipeId());
@@ -448,5 +450,31 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
         }
 
         return result;
+    }
+
+    @Override
+    public CommunityRecipeDto findByPrev(Map<String, Object> map) {
+        CommunityRecipeDto dto = null;
+
+        try {
+            dto = mapper.findByPrev(map);
+        } catch (Exception e) {
+            log.info("findByPrev : ", e);
+        }
+
+        return dto;
+    }
+
+    @Override
+    public CommunityRecipeDto findByNext(Map<String, Object> map) {
+        CommunityRecipeDto dto = null;
+
+        try {
+            dto = mapper.findByNext(map);
+        } catch (Exception e) {
+            log.info("findByNext : ", e);
+        }
+
+        return dto;
     }
 }

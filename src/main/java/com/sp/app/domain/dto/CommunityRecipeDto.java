@@ -12,6 +12,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommunityRecipeDto {
+	// 등록·수정 화면에서 입력한 재료와 조리 단계
+	private List<CommunityRecipeIngredientDto> ingredients;
+	private List<CommunityRecipeStepDto> steps;
+	
     private long recipeId;            // 레시피 번호
     private Long authorId;            // API 레시피는 작성자가 없을 수 있음
     private String authorName;
@@ -48,4 +52,7 @@ public class CommunityRecipeDto {
 
     private boolean canEdit;
     private boolean canDelete;
+    
+    // 대표 사진 삭제 여부
+    private boolean deleteThumbnail;
 }

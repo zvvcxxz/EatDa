@@ -20,6 +20,10 @@ public interface CommunityRecipeMapper {
     public int dataCount(Map<String, Object> map);
     public List<CommunityRecipeDto> listRecipe(Map<String, Object> map);
     public CommunityRecipeDto findById(long recipeId);
+    
+    // 검색 조건에 맞는 이전글·다음글
+    public CommunityRecipeDto findByPrev(Map<String, Object> map);
+    public CommunityRecipeDto findByNext(Map<String, Object> map);
 
     // 레시피 기본 정보 저장
     public void insertRecipe(CommunityRecipeDto dto) throws SQLException;

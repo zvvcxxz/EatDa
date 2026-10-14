@@ -19,4 +19,7 @@ public class CommunityRecipeStepDto {
     private MultipartFile selectFile; // 단계 사진 업로드
 
     private Integer timerSeconds;    // 타이머 시간(초). 없으면 null
+    
+    // 단계 사진 삭제 여부
+    private boolean deleteImage;
 }

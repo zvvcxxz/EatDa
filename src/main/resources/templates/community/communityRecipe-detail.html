@@ -1,24 +1,401 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>레시피 전체보기 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>레시피 상세보기 · 잇다</title>
+</head>
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        .community-design .recipe-actions {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:16px;
+        }
+        .community-design .recipe-photo-empty {
+            width:230px;
+            aspect-ratio:1;
+            display:grid;
+            place-items:center;
+            border-radius:50%;
+            background:#fff2e8;
+            color:#815441;
+            font-size:18px;
+        }
+        .community-design .recipe-extra {
+            margin-top:14px;
+            color:#50483f;
+            font-size:14px;
+            white-space:pre-wrap;
+            overflow-wrap:anywhere;
+        }
+        .community-design .ds-step p {
+            overflow-wrap:anywhere;
+        }
+        .community-design .recipe-step-time {
+            margin-top:8px;
+            font-size:12px;
+            color:#765b4b;
+        }
+        .community-design .recipe-delete-form {
+            margin:0;
+        }
+        @media(max-width:550px) {
+            .community-design .recipe-photo-empty {
+                width:190px;
+                margin:auto;
+            }
+        }
+        
+        .community-design .recipe-neighbors {
+		    border-top:1px solid #eadfd5;
+		    border-bottom:1px solid #eadfd5;
+		    margin-top:24px;
+		}
+		
+		.community-design .recipe-neighbor-row {
+		    display:grid;
+		    grid-template-columns:90px minmax(0,1fr);
+		    gap:12px;
+		    align-items:center;
+		    padding:13px 0;
+		    font-size:14px;
+		}
+		
+		.community-design .recipe-neighbor-row + .recipe-neighbor-row {
+		    border-top:1px solid #f1e9e1;
+		}
+		
+		.community-design .recipe-neighbor-label {
+		    color:#79513b;
+		    font-weight:600;
+		}
+		
+		.community-design .recipe-neighbor-row a {
+		    color:#292522;
+		    overflow-wrap:anywhere;
+		}
+		
+		.community-design .recipe-neighbor-row a:hover {
+		    color:#a54d28;
+		    text-decoration:underline;
+		}
+		
+		.community-design .recipe-neighbor-empty {
+		    color:#6f655d;
+		}
+    </style>
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="recipe-detail" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading compact"><div><p class="ds-eyebrow">모두의 레시피 / 전체보기</p><h2>오늘의 한 접시</h2></div><a class="ds-button light" data-link="recipes">← 목록으로</a></div>
-<article class="ds-paper"><div id="recipeDetail"></div><div class="ds-section-title"><h3>재료</h3><span>계량 단위와 분량을 확인해 주세요.</span></div><div id="recipeIngredients" class="ds-ingredient-list"></div><div class="ds-section-title"><h3>조리 방법</h3><a class="ds-button primary" data-link="recipe-mode">🍳 요리모드 시작</a></div><div id="recipeSteps" class="ds-step-list"></div><div class="ds-bottom-actions"><a class="ds-button light" data-link="recipe-update">수정 화면 보기</a><a class="ds-button primary" data-link="review-write">📸 따라 만들었어요</a></div></article></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
-</div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+                <h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1>
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋 요리 질문</a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading compact">
+                <div>
+                    <p class="ds-eyebrow">모두의 레시피 / 전체보기</p>
+                    <h2>오늘의 한 접시</h2>
+                </div>
+
+                <a class="ds-button light"
+                   th:href="@{/community/recipes(
+	                     page=${page},
+				         schType=${schType},
+				         kwd=${kwd},
+				         categoryId=${categoryId})}">
+                   ← 목록으로
+                </a>
+            </div>
+
+            <article class="ds-paper">
+
+                <!-- 컨트롤러에서 조회한 레시피 기본 정보 -->
+                <div class="ds-detail-top">
+                    <img th:if="${!#strings.isEmpty(recipe.thumbnailUrl)}"
+                         th:src="@{${recipe.thumbnailUrl}}"
+                         th:alt="${recipe.title}">
+
+                    <div class="recipe-photo-empty"
+                         th:if="${#strings.isEmpty(recipe.thumbnailUrl)}">
+                        🍳 사진이 없는 레시피
+                    </div>
+
+                    <div>
+                        <div class="ds-info-badges">
+                            <!-- 이 레시피에 선택한 카테고리만 표시 -->
+                            <th:block th:each="category : ${categories}">
+                                <span class="ds-pill"
+                                      th:if="${recipe.categoryIds != null
+                                          and recipe.categoryIds.contains(category.categoryId)}"
+                                      th:text="${category.categoryName}">
+                                </span>
+                            </th:block>
+                        </div>
+
+                        <h2 th:text="${recipe.title}"></h2>
+
+                        <p class="ds-description"
+                           th:if="${!#strings.isEmpty(recipe.summary)}"
+                           th:text="${recipe.summary}"></p>
+
+                        <p class="ds-author-line">
+                            <span th:text="${recipe.authorName}"></span>
+                            <span> · </span>
+                            <span th:text="${recipe.createdAt}"></span>
+                        </p>
+
+                        <div class="ds-info-badges">
+                            <span class="ds-pill"
+                                  th:if="${recipe.cookMinutes != null}">
+                                ⏱ <span th:text="${recipe.cookMinutes}"></span>분
+                            </span>
+
+                            <span class="ds-pill"
+                                  th:if="${recipe.servings != null}">
+                                🍽 <span th:text="${recipe.servings}"></span>인분
+                            </span>
+
+                            <span class="ds-pill"
+                                  th:if="${!#strings.isEmpty(recipe.difficulty)}"
+                                  th:text="${recipe.difficulty}">
+                            </span>
+                        </div>
+
+                        <div class="ds-tags">
+                            <th:block th:each="tag : ${tags}">
+                                <span th:if="${recipe.tagIds != null
+                                          and recipe.tagIds.contains(tag.tagId)}"
+                                      th:text="${'#' + tag.tagName}">
+                                </span>
+                            </th:block>
+                        </div>
+
+                        <!-- 목록과 같은 JS로 좋아요·찜 처리 -->
+                        <div class="recipe-actions">
+                            <button type="button" class="ds-toggle"
+                                    data-recipe-action="like"
+                                    th:classappend="${liked} ? 'active' : ''"
+                                    th:attr="data-url=@{/community/recipes/like/{id}(id=${recipe.recipeId})},
+                                             data-selected=${liked},
+                                             aria-pressed=${liked}">
+                                <span class="action-label"
+                                      th:text="${liked ? '♥ 좋아요' : '♡ 좋아요'}"></span>
+                                <span class="action-count"
+                                      th:text="${recipe.likeCount}"></span>
+                            </button>
+
+                            <button type="button" class="ds-toggle bookmark"
+                                    data-recipe-action="bookmark"
+                                    th:classappend="${bookmarked} ? 'active' : ''"
+                                    th:attr="data-url=@{/community/recipes/bookmark/{id}(id=${recipe.recipeId})},
+                                             data-selected=${bookmarked},
+                                             aria-pressed=${bookmarked}">
+                                <span class="action-label"
+                                      th:text="${bookmarked ? '✓ 찜했어요' : '＋ 찜하기'}"></span>
+                                <span class="action-count"
+                                      th:text="${recipe.bookmarkCount}"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ds-section-title">
+                    <h3>재료</h3>
+                    <span>계량 단위와 분량을 확인해 주세요.</span>
+                </div>
+
+                <!-- 재료 이름은 재료 사전과 연결해 조회한 값 -->
+                <div class="ds-ingredient-list">
+                    <div class="ds-ingredient-line"
+                         th:each="ingredient : ${recipeIngredients}">
+                        <span th:text="${ingredient.ingredientName}"></span>
+
+                        <strong>
+                            <span th:if="${ingredient.amount != null}"
+                                  th:text="${ingredient.amount.stripTrailingZeros().toPlainString()}">
+                            </span>
+                            <span th:text="${ingredient.unit}"></span>
+                        </strong>
+                    </div>
+                </div>
+
+                <p class="recipe-extra"
+                   th:if="${!#strings.isEmpty(recipe.otherIngredient)}"
+                   th:text="${recipe.otherIngredient}"></p>
+
+                <div class="ds-section-title">
+                    <h3>조리 방법</h3>
+                    <a class="ds-button primary"
+                       th:href="@{/community/recipes/{id}/mode(id=${recipe.recipeId})}">
+                        🍳 요리모드 시작
+                    </a>
+                </div>
+
+                <!-- 조리 단계 번호 순서로 표시 -->
+                <div class="ds-step-list">
+                    <div class="ds-step" th:each="step : ${recipeSteps}">
+                        <span class="ds-step-number"
+                              th:text="${step.stepNo}"></span>
+
+                        <div>
+                            <p th:text="${step.description}"></p>
+
+                            <div class="recipe-step-time"
+                                 th:if="${step.timerSeconds != null
+                                         and step.timerSeconds > 0}">
+                                ⏱ 타이머
+                                <span th:text="${step.timerSeconds}"></span>초
+                            </div>
+                        </div>
+
+                        <img th:if="${!#strings.isEmpty(step.imageUrl)}"
+                             th:src="@{${step.imageUrl}}"
+                             th:alt="${'조리 단계 ' + step.stepNo}"
+                             loading="lazy">
+                    </div>
+                </div>
+                
+                <!-- 이전글·다음글은 게시글 안에 표시 -->
+				<nav class="recipe-neighbors" aria-label="이전글과 다음글">
+				    <div class="recipe-neighbor-row">
+				        <span class="recipe-neighbor-label">↑ 이전글</span>
+				
+				        <a th:if="${prevRecipe != null}"
+				           th:href="@{/community/recipes/{id}(
+				                id=${prevRecipe.recipeId},
+				                page=${page},
+				                schType=${schType},
+				                kwd=${kwd},
+				                categoryId=${categoryId})}"
+				           th:text="${prevRecipe.title}">
+				        </a>
+				
+				        <span class="recipe-neighbor-empty"
+				              th:if="${prevRecipe == null}">
+				            이전글이 없습니다.
+				        </span>
+				    </div>
+				
+				    <div class="recipe-neighbor-row">
+				        <span class="recipe-neighbor-label">↓ 다음글</span>
+				
+				        <a th:if="${nextRecipe != null}"
+				           th:href="@{/community/recipes/{id}(
+				                id=${nextRecipe.recipeId},
+				                page=${page},
+				                schType=${schType},
+				                kwd=${kwd},
+				                categoryId=${categoryId})}"
+				           th:text="${nextRecipe.title}">
+				        </a>
+				
+				        <span class="recipe-neighbor-empty"
+				              th:if="${nextRecipe == null}">
+				            다음글이 없습니다.
+				        </span>
+				    </div>
+				</nav>
+
+                <div class="ds-bottom-actions">
+				    <a class="ds-button light"
+				        th:href="@{/community/recipes(
+					        page=${page},
+					        schType=${schType},
+					        kwd=${kwd},
+					        categoryId=${categoryId})}">
+				        목록
+				    </a>
+				
+				    <!-- 본인 레시피만 수정·삭제 -->
+				    <a class="ds-button light"
+				       th:if="${owner}"
+				       th:href="@{/community/recipes/{id}/update(id=${recipe.recipeId})}">
+				        수정
+				    </a>
+				
+				    <form class="recipe-delete-form"
+				          th:if="${owner}"
+				          th:action="@{/community/recipes/{id}/delete(id=${recipe.recipeId})}"
+				          method="post"
+				          onsubmit="return confirm('이 레시피를 삭제할까요?');">
+				        <button class="ds-button light" type="submit">
+				            삭제
+				        </button>
+				    </form>
+				
+				    <!-- 관리자에게만 숨김 버튼 표시 -->
+				    <form class="recipe-delete-form"
+				          th:if="${admin}"
+				          th:action="@{/community/recipes/{id}/hide(id=${recipe.recipeId})}"
+				          method="post"
+				          onsubmit="return confirm('이 레시피를 숨길까요? 숨기면 일반 목록에서 제외됩니다.');">
+				        <button class="ds-button light" type="submit">
+				            관리자 숨김
+				        </button>
+				    </form>
+				
+				    <a class="ds-button primary"
+				       th:href="@{/community/cooking/write(recipeId=${recipe.recipeId})}">
+				        📸 따라 만들었어요
+				    </a>
+				    </div><!-- ds-bottom-actions 끝 -->
+
+            </article><!-- 게시글 끝 -->
+        </section><!-- content-area 끝 -->
+    </div><!-- main-wrapper 끝 -->
+
+  <div id="recipeToast" class="ds-toast"
+     role="status" hidden="hidden"></div>
+</div><!-- content 프래그먼트 끝 -->
+
 <th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
+    <script th:src="@{/dist/js/util-async.js}"></script>
+    <script th:src="@{/dist/js/community-recipe.js}"></script>
 </th:block>
-</body></html>
+
+</body>
+</html>

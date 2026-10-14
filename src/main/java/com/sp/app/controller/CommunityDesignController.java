@@ -11,45 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/community")
 public class CommunityDesignController {
-    @GetMapping("/recipes")
-    public String recipes(Model model) {
-        model.addAttribute("pageTitle", "모두의 레시피");
-        model.addAttribute("activeMenu", "recipes");
-        model.addAttribute("previewId", 1L);
-        return "community/communityRecipe-list";
-    }
-
-    @GetMapping("/recipes/write")
-    public String recipeWrite(Model model) {
-        model.addAttribute("pageTitle", "레시피 작성");
-        model.addAttribute("activeMenu", "recipes");
-        model.addAttribute("previewId", 1L);
-        return "community/communityRecipe-write";
-    }
-
-    @GetMapping("/recipes/{recipeId}")
-    public String recipeDetail(@PathVariable("recipeId") long id, Model model) {
-        model.addAttribute("pageTitle", "레시피 전체보기");
-        model.addAttribute("activeMenu", "recipes");
-        model.addAttribute("previewId", id);
-        return "community/communityRecipe-detail";
-    }
-
-    @GetMapping("/recipes/{recipeId}/update")
-    public String recipeUpdate(@PathVariable("recipeId") long id, Model model) {
-        model.addAttribute("pageTitle", "레시피 수정");
-        model.addAttribute("activeMenu", "recipes");
-        model.addAttribute("previewId", id);
-        return "community/communityRecipe-update";
-    }
-
-    @GetMapping("/recipes/{recipeId}/mode")
-    public String recipeMode(@PathVariable("recipeId") long id, Model model) {
-        model.addAttribute("pageTitle", "요리모드");
-        model.addAttribute("activeMenu", "recipes");
-        model.addAttribute("previewId", id);
-        return "community/communityRecipe-mode";
-    }
 
     @GetMapping("/cooking")
     public String reviews(Model model) {

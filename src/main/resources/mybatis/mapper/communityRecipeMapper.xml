@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityRecipeMapper">
+
+    <!-- 회원 레시피도 중복되지 않는 키를 함께 저장 -->
+	<insert id="insertRecipe" parameterType="com.sp.app.domain.dto.CommunityRecipeDto">
+	    <selectKey keyProperty="recipeId" resultType="Long" order="BEFORE">
+	        SELECT SEQ_RECIPE.NEXTVAL FROM DUAL
+	    </selectKey>
+	
+	    INSERT INTO RECIPE(RECIPE_ID, AUTHOR_ID, SOURCE_TYPE, EXTERNAL_KEY,
+	        TITLE, SUMMARY, THUMBNAIL_URL, COOK_MINUTES, DIFFICULTY, SERVINGS,
+	        STATUS, OTHER_INGREDIENT, PUBLISHED_AT, CREATED_AT, UPDATED_AT)
+	    VALUES (#{recipeId}, #{authorId}, 'MEMBER', 'MEMBER_' || #{recipeId},
+	        #{title}, #{summary, jdbcType=VARCHAR}, #{thumbnailUrl, jdbcType=VARCHAR},
+	        #{cookMinutes, jdbcType=INTEGER}, #{difficulty, jdbcType=VARCHAR},
+	        #{servings, jdbcType=INTEGER}, 0, #{otherIngredient, jdbcType=VARCHAR},
+	        SYSTIMESTAMP, SYSTIMESTAMP, SYSTIMESTAMP)
+	</insert>
+
+    <!-- 검색 조건 -->
+    <sql id="where-list">
+        <choose>
+            <when test="schType == 'all'">
+                (INSTR(R.TITLE, #{kwd}) &gt; 0
+                    OR INSTR(R.SUMMARY, #{kwd}) &gt; 0
+                    OR INSTR(M.NAME, #{kwd}) &gt; 0)
+            </when>
+            <when test="schType == 'summary'">
+                INSTR(R.SUMMARY, #{kwd}) &gt; 0
+            </when>
+            <when test="schType == 'author'">
+                INSTR(M.NAME, #{kwd}) &gt; 0
+            </when>
+            <otherwise>
+                INSTR(R.TITLE, #{kwd}) &gt; 0
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 공개된 회원 레시피 개수 -->
+    <select id="dataCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM RECIPE R
+        LEFT OUTER JOIN MEMBER M ON R.AUTHOR_ID = M.MEMBER_ID
+        <where>
+            R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0 AND R.DELETED_AT IS NULL
+            <if test="kwd != null and kwd != ''">
+                AND <include refid="where-list"/>
+            </if>
+            <if test="categoryId != null and categoryId > 0">
+                AND R.RECIPE_ID IN (
+                    SELECT RECIPE_ID FROM RECIPE_CATEGORY
+                    WHERE CATEGORY_ID = #{categoryId}
+                )
+            </if>
+            <if test="authorId != null">
+                AND R.AUTHOR_ID = #{authorId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 레시피 목록과 좋아요·찜·후기 개수 -->
+    <select id="listRecipe" parameterType="map" resultType="com.sp.app.domain.dto.CommunityRecipeDto">
+        SELECT R.RECIPE_ID AS recipeId, R.AUTHOR_ID AS authorId,
+            NVL(M.NAME, '회원') AS authorName, R.SOURCE_TYPE AS sourceType,
+            R.TITLE AS title, R.SUMMARY AS summary, R.THUMBNAIL_URL AS thumbnailUrl,
+            R.COOK_MINUTES AS cookMinutes, R.DIFFICULTY AS difficulty,
+            R.SERVINGS AS servings, R.STATUS AS status,
+            TO_CHAR(R.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            NVL(L.likeCount, 0) AS likeCount,
+            NVL(B.bookmarkCount, 0) AS bookmarkCount,
+            NVL(V.reviewCount, 0) AS reviewCount
+        FROM RECIPE R
+        LEFT OUTER JOIN MEMBER M ON R.AUTHOR_ID = M.MEMBER_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS likeCount
+            FROM RECIPE_LIKE GROUP BY RECIPE_ID
+        ) L ON R.RECIPE_ID = L.RECIPE_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS bookmarkCount
+            FROM RECIPE_BOOKMARK GROUP BY RECIPE_ID
+        ) B ON R.RECIPE_ID = B.RECIPE_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS reviewCount
+            FROM RECIPE_REVIEW WHERE STATUS = 0 GROUP BY RECIPE_ID
+        ) V ON R.RECIPE_ID = V.RECIPE_ID
+        <where>
+            R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0 AND R.DELETED_AT IS NULL
+            <if test="kwd != null and kwd != ''">
+                AND <include refid="where-list"/>
+            </if>
+            <if test="categoryId != null and categoryId > 0">
+                AND R.RECIPE_ID IN (
+                    SELECT RECIPE_ID FROM RECIPE_CATEGORY
+                    WHERE CATEGORY_ID = #{categoryId}
+                )
+            </if>
+            <if test="authorId != null">
+                AND R.AUTHOR_ID = #{authorId}
+            </if>
+        </where>
+        ORDER BY R.RECIPE_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <!-- 상세 정보. 재료와 조리 단계는 별도로 조회 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityRecipeDto">
+        SELECT R.RECIPE_ID AS recipeId, R.AUTHOR_ID AS authorId,
+            NVL(M.NAME, '회원') AS authorName, R.SOURCE_TYPE AS sourceType,
+            R.EXTERNAL_KEY AS externalKey, R.TITLE AS title, R.SUMMARY AS summary,
+            R.THUMBNAIL_URL AS thumbnailUrl, R.COOK_MINUTES AS cookMinutes,
+            R.DIFFICULTY AS difficulty, R.SERVINGS AS servings, R.STATUS AS status,
+            R.BLIND_REASON AS blindReason, R.OTHER_INGREDIENT AS otherIngredient,
+            TO_CHAR(R.PUBLISHED_AT, 'YYYY.MM.DD HH24:MI') AS publishedAt,
+            TO_CHAR(R.DELETED_AT, 'YYYY.MM.DD HH24:MI') AS deletedAt,
+            TO_CHAR(R.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(R.UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt,
+            NVL(L.likeCount, 0) AS likeCount,
+            NVL(B.bookmarkCount, 0) AS bookmarkCount,
+            NVL(V.reviewCount, 0) AS reviewCount
+        FROM RECIPE R
+        LEFT OUTER JOIN MEMBER M ON R.AUTHOR_ID = M.MEMBER_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS likeCount
+            FROM RECIPE_LIKE GROUP BY RECIPE_ID
+        ) L ON R.RECIPE_ID = L.RECIPE_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS bookmarkCount
+            FROM RECIPE_BOOKMARK GROUP BY RECIPE_ID
+        ) B ON R.RECIPE_ID = B.RECIPE_ID
+        LEFT OUTER JOIN (
+            SELECT RECIPE_ID, COUNT(*) AS reviewCount
+            FROM RECIPE_REVIEW WHERE STATUS = 0 GROUP BY RECIPE_ID
+        ) V ON R.RECIPE_ID = V.RECIPE_ID
+        WHERE R.RECIPE_ID = #{recipeId}
+            AND R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0 AND R.DELETED_AT IS NULL
+    </select>
+
+    <!-- 본인이 작성한 공개 레시피만 수정 -->
+    <update id="updateRecipe" parameterType="com.sp.app.domain.dto.CommunityRecipeDto">
+        UPDATE RECIPE
+        SET TITLE = #{title}, SUMMARY = #{summary, jdbcType=VARCHAR},
+            THUMBNAIL_URL = #{thumbnailUrl, jdbcType=VARCHAR},
+            COOK_MINUTES = #{cookMinutes, jdbcType=INTEGER},
+            DIFFICULTY = #{difficulty, jdbcType=VARCHAR},
+            SERVINGS = #{servings, jdbcType=INTEGER},
+            OTHER_INGREDIENT = #{otherIngredient, jdbcType=VARCHAR},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE RECIPE_ID = #{recipeId} AND AUTHOR_ID = #{authorId}
+            AND SOURCE_TYPE = 'MEMBER' AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 행을 지우지 않고 삭제 상태로 변경 -->
+    <update id="deleteRecipe" parameterType="map">
+        UPDATE RECIPE
+        SET STATUS = 2, DELETED_AT = SYSTIMESTAMP, UPDATED_AT = SYSTIMESTAMP
+        WHERE RECIPE_ID = #{recipeId} AND AUTHOR_ID = #{authorId}
+            AND SOURCE_TYPE = 'MEMBER' AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 관리자 권한은 컨트롤러에서 확인 -->
+    <update id="hideRecipe" parameterType="map">
+        UPDATE RECIPE
+        SET STATUS = 1, BLIND_REASON = #{blindReason, jdbcType=VARCHAR},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE RECIPE_ID = #{recipeId}
+            AND SOURCE_TYPE = 'MEMBER' AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 사용 중인 카테고리 목록 -->
+    <select id="listCategory" resultType="com.sp.app.domain.dto.CommunityCategoryDto">
+        SELECT CATEGORY_ID AS categoryId, CATEGORY_CODE AS categoryCode,
+            CATEGORY_NAME AS categoryName, DESCRIPTION AS description,
+            ACTIVE_YN AS activeYn, SORT_ORDER AS sortOrder,
+            TO_CHAR(CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt
+        FROM CATEGORY
+        WHERE ACTIVE_YN = 'Y'
+        ORDER BY SORT_ORDER, CATEGORY_ID
+    </select>
+
+    <!-- 사용 중인 태그 목록 -->
+    <select id="listTag" resultType="com.sp.app.domain.dto.CommunityTagDto">
+        SELECT TAG_ID AS tagId, TAG_NAME AS tagName, TAG_GROUP AS tagGroup,
+            ACTIVE_YN AS activeYn,
+            TO_CHAR(CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt
+        FROM TAG
+        WHERE ACTIVE_YN = 'Y'
+        ORDER BY TAG_GROUP, TAG_ID
+    </select>
+
+    <!-- 재료 사전 검색 -->
+    <select id="listIngredient" parameterType="map" resultType="com.sp.app.domain.dto.CommunityIngredientDto">
+        SELECT INGREDIENT_ID AS ingredientId, INGREDIENT_NAME AS ingredientName,
+            INGREDIENT_TYPE AS ingredientType, DEFAULT_UNIT AS defaultUnit,
+            ACTIVE_YN AS activeYn,
+            TO_CHAR(CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt
+        FROM INGREDIENT
+        <where>
+            ACTIVE_YN = 'Y'
+            <if test="kwd != null and kwd != ''">
+                AND INSTR(INGREDIENT_NAME, #{kwd}) &gt; 0
+            </if>
+            <if test="ingredientType != null and ingredientType != ''">
+                AND INGREDIENT_TYPE = #{ingredientType}
+            </if>
+        </where>
+        ORDER BY INGREDIENT_NAME, INGREDIENT_ID
+    </select>
+
+    <!-- 해당 레시피에 선택된 카테고리 번호 -->
+    <select id="listCategoryIds" parameterType="Long" resultType="Long">
+        SELECT CATEGORY_ID FROM RECIPE_CATEGORY
+        WHERE RECIPE_ID = #{recipeId}
+        ORDER BY CATEGORY_ID
+    </select>
+
+    <!-- 해당 레시피에 선택된 태그 번호 -->
+    <select id="listTagIds" parameterType="Long" resultType="Long">
+        SELECT TAG_ID FROM RECIPE_TAG
+        WHERE RECIPE_ID = #{recipeId}
+        ORDER BY TAG_ID
+    </select>
+
+    <!-- 레시피와 카테고리 연결 -->
+    <insert id="insertRecipeCategory" parameterType="map">
+        INSERT INTO RECIPE_CATEGORY(RECIPE_ID, CATEGORY_ID)
+        VALUES (#{recipeId}, #{categoryId})
+    </insert>
+
+    <!-- 레시피와 태그 연결 -->
+    <insert id="insertRecipeTag" parameterType="map">
+        INSERT INTO RECIPE_TAG(RECIPE_ID, TAG_ID)
+        VALUES (#{recipeId}, #{tagId})
+    </insert>
+
+    <!-- 수정할 때 기존 카테고리 연결만 삭제 -->
+    <delete id="deleteRecipeCategory" parameterType="Long">
+        DELETE FROM RECIPE_CATEGORY WHERE RECIPE_ID = #{recipeId}
+    </delete>
+
+    <!-- 수정할 때 기존 태그 연결만 삭제 -->
+    <delete id="deleteRecipeTag" parameterType="Long">
+        DELETE FROM RECIPE_TAG WHERE RECIPE_ID = #{recipeId}
+    </delete>
+
+    <!-- 재료 사전과 연결해서 재료명도 조회 -->
+    <select id="listRecipeIngredient" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityRecipeIngredientDto">
+        SELECT R.RECIPE_ID AS recipeId, R.INGREDIENT_ID AS ingredientId,
+            I.INGREDIENT_NAME AS ingredientName, R.AMOUNT AS amount,
+            R.UNIT AS unit, R.REQUIRED_YN AS requiredYn,
+            R.SORT_ORDER AS sortOrder, R.NOTE AS note
+        FROM RECIPE_INGREDIENT R
+        JOIN INGREDIENT I ON R.INGREDIENT_ID = I.INGREDIENT_ID
+        WHERE R.RECIPE_ID = #{recipeId}
+        ORDER BY R.SORT_ORDER, R.INGREDIENT_ID
+    </select>
+
+    <!-- 레시피에 들어가는 재료와 분량 저장 -->
+    <insert id="insertRecipeIngredient" parameterType="com.sp.app.domain.dto.CommunityRecipeIngredientDto">
+        INSERT INTO RECIPE_INGREDIENT(RECIPE_ID, INGREDIENT_ID, AMOUNT,
+            UNIT, REQUIRED_YN, SORT_ORDER, NOTE)
+        VALUES (#{recipeId}, #{ingredientId}, #{amount, jdbcType=NUMERIC},
+            #{unit, jdbcType=VARCHAR}, #{requiredYn}, #{sortOrder},
+            #{note, jdbcType=VARCHAR})
+    </insert>
+
+    <!-- 재료 사전이 아닌 해당 레시피의 재료 연결만 삭제 -->
+    <delete id="deleteRecipeIngredient" parameterType="Long">
+        DELETE FROM RECIPE_INGREDIENT WHERE RECIPE_ID = #{recipeId}
+    </delete>
+
+    <!-- 조리 단계를 순서대로 조회 -->
+    <select id="listRecipeStep" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityRecipeStepDto">
+        SELECT STEP_ID AS stepId, RECIPE_ID AS recipeId, STEP_NO AS stepNo,
+            DESCRIPTION AS description, IMAGE_URL AS imageUrl,
+            TIMER_SECONDS AS timerSeconds
+        FROM RECIPE_STEP
+        WHERE RECIPE_ID = #{recipeId}
+        ORDER BY STEP_NO
+    </select>
+
+    <!-- 조리 단계 저장 -->
+    <insert id="insertRecipeStep" parameterType="com.sp.app.domain.dto.CommunityRecipeStepDto">
+        INSERT INTO RECIPE_STEP(STEP_ID, RECIPE_ID, STEP_NO, DESCRIPTION,
+            IMAGE_URL, TIMER_SECONDS)
+        VALUES (SEQ_RECIPE_STEP.NEXTVAL, #{recipeId}, #{stepNo}, #{description},
+            #{imageUrl, jdbcType=VARCHAR}, #{timerSeconds, jdbcType=INTEGER})
+    </insert>
+
+    <!-- 수정할 때 기존 조리 단계 삭제 -->
+    <delete id="deleteRecipeStep" parameterType="Long">
+        DELETE FROM RECIPE_STEP WHERE RECIPE_ID = #{recipeId}
+    </delete>
+
+    <!-- 좋아요 등록. 중복은 기본키와 컨트롤러에서 처리 -->
+    <insert id="insertRecipeLike" parameterType="map">
+        INSERT INTO RECIPE_LIKE(RECIPE_ID, MEMBER_ID, CREATED_AT)
+        VALUES (#{recipeId}, #{memberId}, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 로그인 회원의 좋아요만 취소 -->
+    <delete id="deleteRecipeLike" parameterType="map">
+        DELETE FROM RECIPE_LIKE
+        WHERE RECIPE_ID = #{recipeId} AND MEMBER_ID = #{memberId}
+    </delete>
+
+    <select id="recipeLikeCount" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) FROM RECIPE_LIKE WHERE RECIPE_ID = #{recipeId}
+    </select>
+
+    <!-- 본인이 좋아요를 눌렀으면 1, 아니면 0 -->
+    <select id="hasRecipeLike" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) FROM RECIPE_LIKE
+        WHERE RECIPE_ID = #{recipeId} AND MEMBER_ID = #{memberId}
+    </select>
+
+    <!-- 찜은 좋아요와 별도로 저장 -->
+    <insert id="insertRecipeBookmark" parameterType="map">
+        INSERT INTO RECIPE_BOOKMARK(RECIPE_ID, MEMBER_ID, CREATED_AT)
+        VALUES (#{recipeId}, #{memberId}, SYSTIMESTAMP)
+    </insert>
+
+    <delete id="deleteRecipeBookmark" parameterType="map">
+        DELETE FROM RECIPE_BOOKMARK
+        WHERE RECIPE_ID = #{recipeId} AND MEMBER_ID = #{memberId}
+    </delete>
+
+    <select id="recipeBookmarkCount" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) FROM RECIPE_BOOKMARK WHERE RECIPE_ID = #{recipeId}
+    </select>
+
+    <select id="hasRecipeBookmark" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) FROM RECIPE_BOOKMARK
+        WHERE RECIPE_ID = #{recipeId} AND MEMBER_ID = #{memberId}
+    </select>
+    
+    <!-- 이전글 -->
+	<select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityRecipeDto">
+	    SELECT R.RECIPE_ID AS recipeId, R.TITLE AS title
+	    FROM RECIPE R
+	    LEFT OUTER JOIN MEMBER M ON R.AUTHOR_ID = M.MEMBER_ID
+	    <where>
+	        R.RECIPE_ID &gt; #{recipeId}
+	        AND R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0 AND R.DELETED_AT IS NULL
+	        <if test="kwd != null and kwd != ''">
+	            AND <include refid="where-list"/>
+	        </if>
+	        <if test="categoryId != null and categoryId > 0">
+	            AND R.RECIPE_ID IN (
+	                SELECT RECIPE_ID FROM RECIPE_CATEGORY
+	                WHERE CATEGORY_ID = #{categoryId}
+	            )
+	        </if>
+	    </where>
+	    ORDER BY R.RECIPE_ID ASC
+	    FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<!-- 다음글 -->
+	<select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityRecipeDto">
+	    SELECT R.RECIPE_ID AS recipeId, R.TITLE AS title
+	    FROM RECIPE R
+	    LEFT OUTER JOIN MEMBER M ON R.AUTHOR_ID = M.MEMBER_ID
+	    <where>
+	        R.RECIPE_ID &lt; #{recipeId}
+	        AND R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0 AND R.DELETED_AT IS NULL
+	        <if test="kwd != null and kwd != ''">
+	            AND <include refid="where-list"/>
+	        </if>
+	        <if test="categoryId != null and categoryId > 0">
+	            AND R.RECIPE_ID IN (
+	                SELECT RECIPE_ID FROM RECIPE_CATEGORY
+	                WHERE CATEGORY_ID = #{categoryId}
+	            )
+	        </if>
+	    </where>
+	    ORDER BY R.RECIPE_ID DESC
+	    FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+</mapper>

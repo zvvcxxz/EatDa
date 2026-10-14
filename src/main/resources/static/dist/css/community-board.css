@@ -192,3 +192,42 @@
 .community-design .ds-picker-recipe-text small {font-size:12px;color:#7b695a}
 .community-design .ds-picker-select {padding:6px 10px;border-radius:16px;background:#fff0e5;color:#a24f2a;font-size:12px;font-weight:700;flex-shrink:0}
 @media(max-width:550px){.community-design .ds-picker-heading,.community-design .ds-picker-body {padding:16px}.community-design .ds-picker-heading h3 {font-size:18px}.community-design .ds-picker-row {gap:10px}.community-design .ds-picker-row img {width:50px;height:50px}}
+
+/* 레시피 재료: 분류 / 재료 / 분량 / 단위 / 삭제 */
+.community-design .ingredient-table-label,
+.community-design #ingredientRows .ds-ingredient-row {
+    grid-template-columns:
+        minmax(100px, 1fr)
+        minmax(130px, 1.5fr)
+        minmax(70px, .7fr)
+        minmax(60px, .7fr)
+        34px;
+}
+
+@media(max-width:600px) {
+    .community-design .ingredient-table-label {
+        display:none;
+    }
+
+    .community-design #ingredientRows .ds-ingredient-row {
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;
+        padding-bottom:12px;
+        margin-bottom:12px;
+        border-bottom:1px solid #eadfd5;
+    }
+
+    .community-design #ingredientRows [data-field="amount"] {
+        grid-column:1;
+        grid-row:2;
+    }
+
+    .community-design #ingredientRows [data-field="unit"] {
+        grid-column:2;
+        grid-row:2;
+    }
+
+    .community-design #ingredientRows [data-remove-ingredient] {
+        grid-column:3;
+        grid-row:1 / span 2;
+    }
+}

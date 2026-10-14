@@ -16,6 +16,10 @@ public interface CommunityRecipeService {
     public int dataCount(Map<String, Object> map);
     public List<CommunityRecipeDto> listRecipe(Map<String, Object> map);
     public CommunityRecipeDto findById(long recipeId);
+    
+    // 검색 조건에 맞는 이전글·다음글
+    public CommunityRecipeDto findByPrev(Map<String, Object> map);
+    public CommunityRecipeDto findByNext(Map<String, Object> map);
 
     // 기본 정보와 재료·조리 단계를 함께 저장
     public void insertRecipe(CommunityRecipeDto dto,

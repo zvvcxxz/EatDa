@@ -1,26 +1,576 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>레시피 작성 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>레시피 작성 · 잇다</title>
+</head>
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        .community-design .recipe-error {
+            padding:12px 16px;
+            margin-bottom:20px;
+            border:1px solid #efb5ad;
+            border-radius:10px;
+            background:#fff3f0;
+            color:#a52b23;
+        }
+        .community-design .recipe-choice {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:8px 12px;
+            border:1px solid #e4ddd5;
+            border-radius:20px;
+            background:#fff;
+            color:#333;
+            cursor:pointer;
+        }
+        .community-design .recipe-choice:has(input:checked) {
+            border-color:#ed8754;
+            background:#fff0e6;
+        }
+        .community-design .recipe-remove {
+            border:0;
+            background:transparent;
+            color:#75584b;
+            cursor:pointer;
+            font-size:18px;
+        }
+        .community-design .recipe-step-image {
+            width:100%;
+            max-height:180px;
+            object-fit:cover;
+            border-radius:8px;
+            margin-top:10px;
+        }
+        .community-design .recipe-step-image[hidden] {
+            display:none;
+        }
+    </style>
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="recipe-write" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading"><div><p class="ds-eyebrow">MY RECIPE</p><h2>나의 레시피를 나눠요.</h2><p>재료와 조리 순서를 차근차근 기록해 주세요.</p></div><a class="ds-button light" data-link="recipes">← 목록으로</a></div><form id="recipeForm" class="ds-paper ds-form"><div class="ds-form-section"><p class="ds-eyebrow">01 · 기본 정보</p><h3>어떤 요리를 만들었나요?</h3><div class="ds-field"><label for="recipeTitle">요리명 <b>*</b></label><input id="recipeTitle" name="title" maxlength="200" placeholder="예: 토마토 바질 파스타" required></div><div class="ds-field"><label for="recipeSummary">레시피 소개</label><textarea id="recipeSummary" name="summary" rows="2" placeholder="맛있게 만드는 나만의 포인트를 알려주세요."></textarea></div><div class="ds-two-col"><div class="ds-field"><label for="recipePhoto">대표 사진</label><label class="ds-photo-upload"><img id="recipePhotoPreview" hidden alt="대표 사진 미리보기"><span>📷<br>완성된 요리 사진 선택</span><input id="recipePhoto" type="file" name="selectFile" accept="image/*" data-preview="recipePhotoPreview"></label></div><div><div class="ds-field"><label for="cookMinutes">조리 시간 · 분</label><input id="cookMinutes" type="number" name="cookMinutes" min="0" placeholder="20"></div><div class="ds-field"><label for="servings">인분</label><input id="servings" type="number" name="servings" min="1" placeholder="2"></div><div class="ds-field"><label for="difficulty">난이도</label><select id="difficulty" name="difficulty"><option value="">선택</option><option>쉬움</option><option>보통</option><option>어려움</option></select></div></div></div></div>
-<div class="ds-form-section"><p class="ds-eyebrow">02 · 재료</p><h3>재료와 분량을 알려주세요.</h3><p class="ds-help">목록에서 재료를 선택하고 필요한 분량을 입력해 주세요.</p><div class="ds-table-label"><span>재료</span><span>분량</span><span>단위</span><span></span></div><div id="ingredientRows"></div><button type="button" id="addIngredient" class="ds-button dashed">＋ 재료 추가</button><div class="ds-field"><label for="otherIngredient">기타 재료 설명</label><input id="otherIngredient" name="otherIngredient" maxlength="100" placeholder="선택 목록에 없는 재료는 설명으로 적어주세요."></div></div>
-<div class="ds-form-section"><p class="ds-eyebrow">03 · 조리 순서</p><h3>한 단계씩 쉽게 알려주세요.</h3><div id="stepRows"></div><button type="button" id="addStep" class="ds-button dashed">＋ 조리 단계 추가</button></div>
-<div class="ds-form-section"><p class="ds-eyebrow">04 · 카테고리와 태그</p><h3>내 레시피를 소개하는 키워드</h3><div class="ds-field"><label>카테고리</label><div id="categoryChoices" class="ds-chips"></div></div><div class="ds-field"><label>태그</label><div id="tagChoices" class="ds-chips"></div></div></div><div class="ds-bottom-actions"><a class="ds-button light" data-link="recipes">취소</a><button class="ds-button primary" type="submit" id="recipeSubmit">레시피 등록</button></div></form></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content" class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+                <h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1>
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">🙋 요리 질문</a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow">MY RECIPE</p>
+                    <h2>나의 레시피를 나눠요.</h2>
+                    <p>재료와 조리 순서를 차근차근 기록해 주세요.</p>
+                </div>
+                <a class="ds-button light"
+                   th:href="@{/community/recipes}">← 목록으로</a>
+            </div>
+
+            <p class="recipe-error" role="alert"
+               th:if="${error != null}" th:text="${error}"></p>
+
+            <!-- 사진이 있으므로 multipart 방식으로 전송 -->
+            <form id="recipeForm" class="ds-paper ds-form"
+                  th:action="@{/community/recipes/write}"
+                  th:object="${recipe}"
+                  method="post" enctype="multipart/form-data">
+
+                <div class="ds-form-section">
+                    <p class="ds-eyebrow">01 · 기본 정보</p>
+                    <h3>어떤 요리를 만들었나요?</h3>
+
+                    <div class="ds-field">
+                        <label for="title">요리명 <b>*</b></label>
+                        <input id="title" th:field="*{title}"
+                               maxlength="200" required
+                               placeholder="예: 토마토 바질 파스타">
+                    </div>
+
+                    <div class="ds-field">
+                        <label for="summary">레시피 소개</label>
+                        <textarea id="summary" th:field="*{summary}"
+                                  rows="2" maxlength="1000"
+                                  placeholder="나만의 요리 포인트를 알려주세요."></textarea>
+                    </div>
+
+                    <div class="ds-two-col">
+                        <div class="ds-field">
+                            <label for="recipePhoto">대표 사진</label>
+                            <label class="ds-photo-upload">
+                                <img id="recipePhotoPreview" hidden
+                                     alt="대표 사진 미리보기">
+                                <span>📷<br>완성된 요리 사진 선택</span>
+                                <input id="recipePhoto" type="file"
+                                       name="selectFile" accept="image/*">
+                            </label>
+                            
+                            <!-- 삭제 버튼을 누르면 true로 변경 -->
+							<input type="hidden" name="deleteThumbnail"
+							       id="deleteThumbnail" value="false">
+							
+							<button type="button" class="ds-button light"
+							        data-delete-thumbnail>
+							    사진 삭제
+							</button>
+							
+							<p class="ds-help" id="thumbnailDeleteMessage" hidden>
+							    사진을 제거했습니다. 저장 버튼을 눌러 반영해 주세요.
+							</p>
+                        </div>
+
+                        <div>
+                            <div class="ds-field">
+                                <label for="cookMinutes">조리 시간 · 분</label>
+                                <input id="cookMinutes" type="number"
+                                       th:field="*{cookMinutes}"
+                                       min="0" max="99999"
+                                       placeholder="20">
+                            </div>
+
+                            <div class="ds-field">
+                                <label for="servings">인분</label>
+                                <input id="servings" type="number"
+                                       th:field="*{servings}"
+                                       min="1" max="99999"
+                                       placeholder="2">
+                            </div>
+
+                            <div class="ds-field">
+                                <label for="difficulty">난이도</label>
+                                <select id="difficulty" th:field="*{difficulty}">
+                                    <option value="">선택</option>
+                                    <option value="쉬움">쉬움</option>
+                                    <option value="보통">보통</option>
+                                    <option value="어려움">어려움</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ds-form-section">
+                    <p class="ds-eyebrow">02 · 재료</p>
+                    <h3>재료와 분량을 알려주세요.</h3>
+                    <p class="ds-help">재료를 선택하면 기본 단위가 입력됩니다.</p>
+
+                    <div class="ds-table-label ingredient-table-label">
+					    <span>분류</span>
+					    <span>재료</span>
+					    <span>분량</span>
+					    <span>단위</span>
+					    <span></span>
+					</div>
+
+                    <div id="ingredientRows">
+                        <!-- 등록 실패 시 입력한 재료를 다시 표시 -->
+                        <div class="ds-ingredient-row"
+                             th:each="item : ${recipe.ingredients}">
+                            <select data-field="ingredientId" required>
+                                <option value="">재료 선택</option>
+                                <option th:each="ingredient : ${ingredientCatalog}"
+                                        th:value="${ingredient.ingredientId}"
+                                        th:text="${ingredient.ingredientName}"
+                                        th:attr="data-unit=${ingredient.defaultUnit},
+         										 data-type=${ingredient.ingredientType}"
+                                        th:selected="${ingredient.ingredientId == item.ingredientId}">
+                                </option>
+                            </select>
+
+                            <input type="number" data-field="amount"
+                                   min="0" max="999999999.999" step="0.001"
+                                   th:value="${item.amount}" placeholder="분량">
+
+                            <input data-field="unit" maxlength="20"
+                                   th:value="${item.unit}" placeholder="단위">
+
+                            <button type="button" class="recipe-remove"
+                                    data-remove-ingredient
+                                    aria-label="재료 삭제">×</button>
+
+                            <input type="hidden" data-field="requiredYn" value="Y">
+                        </div>
+                    </div>
+
+                    <button type="button" id="addIngredient"
+                            class="ds-button dashed">＋ 재료 추가</button>
+
+                    <div class="ds-field">
+                        <label for="otherIngredient">기타 재료 설명</label>
+                        <input id="otherIngredient" th:field="*{otherIngredient}"
+                               maxlength="100"
+                               placeholder="목록에 없는 재료는 여기에 적어주세요.">
+                    </div>
+                </div>
+
+                <div class="ds-form-section">
+                    <p class="ds-eyebrow">03 · 조리 순서</p>
+                    <h3>한 단계씩 쉽게 알려주세요.</h3>
+
+                    <div id="stepRows">
+                        <div class="ds-step-editor"
+                             th:each="step : ${recipe.steps}">
+                            <div class="ds-step-editor-head">
+                                <span class="step-number"></span>
+                                <button type="button" class="recipe-remove"
+                                        data-remove-step
+                                        aria-label="조리 단계 삭제">×</button>
+                            </div>
+
+                            <input type="hidden" data-field="stepId" value="0">
+
+                            <div class="ds-field">
+                                <textarea data-field="description" rows="4"
+                                          maxlength="2000" required
+                                          th:text="${step.description}"
+                                          placeholder="이 단계의 조리 방법을 적어주세요."></textarea>
+                            </div>
+
+                            <div class="ds-field">
+							    <label>
+							        단계 사진
+							        <input type="file" data-field="selectFile"
+							               accept="image/*">
+							    </label>
+							
+							    <img class="recipe-step-image" hidden
+							         alt="조리 단계 사진 미리보기">
+							
+							    <!-- 삭제 여부를 서버로 전달 -->
+							    <input type="hidden" data-field="deleteImage" value="false">
+							
+							    <button type="button" class="ds-button light"
+							            data-delete-step-image>
+							        단계 사진 삭제
+							    </button>
+							
+							    <p class="ds-help" data-image-delete-message hidden>
+							        사진을 제거했습니다. 저장 버튼을 눌러 반영해 주세요.
+							    </p>
+							</div>
+
+                            <div class="ds-step-timer">
+                                <label>
+                                    타이머
+                                    <input type="number" data-field="timerSeconds"
+                                           min="0" max="99999999"
+                                           th:value="${step.timerSeconds}"
+                                           placeholder="선택">
+                                    초
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="addStep"
+                            class="ds-button dashed">＋ 조리 단계 추가</button>
+                </div>
+
+                <div class="ds-form-section">
+                    <p class="ds-eyebrow">04 · 카테고리와 태그</p>
+                    <h3>내 레시피를 소개하는 키워드</h3>
+
+                    <div class="ds-field">
+                        <label>카테고리</label>
+                        <div class="ds-chips">
+                            <label class="recipe-choice"
+                                   th:each="category : ${categories}">
+                                <input type="checkbox" name="categoryIds"
+                                       th:value="${category.categoryId}"
+                                       th:checked="${recipe.categoryIds != null
+                                           and recipe.categoryIds.contains(category.categoryId)}">
+                                <span th:text="${category.categoryName}"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="ds-field">
+                        <label>태그</label>
+                        <div class="ds-chips">
+                            <label class="recipe-choice" th:each="tag : ${tags}">
+                                <input type="checkbox" name="tagIds"
+                                       th:value="${tag.tagId}"
+                                       th:checked="${recipe.tagIds != null
+                                           and recipe.tagIds.contains(tag.tagId)}">
+                                <span th:text="${tag.tagName}"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ds-bottom-actions">
+                    <a class="ds-button light"
+                       th:href="@{/community/recipes}">취소</a>
+                    <button class="ds-button primary" type="submit">
+                        레시피 등록
+                    </button>
+                </div>
+            </form>
+
+            <!-- 추가 버튼을 누르면 아래 입력칸을 복사 -->
+            <template id="ingredientTemplate">
+                <div class="ds-ingredient-row">
+                    <select data-field="ingredientId" required>
+                        <option value="">재료 선택</option>
+                        <option th:each="ingredient : ${ingredientCatalog}"
+                                th:value="${ingredient.ingredientId}"
+                                th:text="${ingredient.ingredientName}"
+                                th:attr="data-unit=${ingredient.defaultUnit},
+         								 data-type=${ingredient.ingredientType}">
+                        </option>
+                    </select>
+
+                    <input type="number" data-field="amount"
+                           min="0" max="999999999.999" step="0.001"
+                           placeholder="분량">
+
+                    <input data-field="unit" maxlength="20" placeholder="단위">
+
+                    <button type="button" class="recipe-remove"
+                            data-remove-ingredient
+                            aria-label="재료 삭제">×</button>
+
+                    <input type="hidden" data-field="requiredYn" value="Y">
+                </div>
+            </template>
+
+            <template id="stepTemplate">
+                <div class="ds-step-editor">
+                    <div class="ds-step-editor-head">
+                        <span class="step-number"></span>
+                        <button type="button" class="recipe-remove"
+                                data-remove-step
+                                aria-label="조리 단계 삭제">×</button>
+                    </div>
+
+                    <input type="hidden" data-field="stepId" value="0">
+
+                    <div class="ds-field">
+                        <textarea data-field="description" rows="4"
+                                  maxlength="2000" required
+                                  placeholder="이 단계의 조리 방법을 적어주세요."></textarea>
+                    </div>
+
+                    <div class="ds-field">
+					    <label>
+					        단계 사진
+					        <input type="file" data-field="selectFile"
+					               accept="image/*">
+					    </label>
+					
+					    <img class="recipe-step-image" hidden
+					         alt="조리 단계 사진 미리보기">
+					
+					    <!-- 삭제 여부를 서버로 전달 -->
+					    <input type="hidden" data-field="deleteImage" value="false">
+					
+					    <button type="button" class="ds-button light"
+					            data-delete-step-image>
+					        단계 사진 삭제
+					    </button>
+					
+					    <p class="ds-help" data-image-delete-message hidden>
+					        사진을 제거했습니다. 저장 버튼을 눌러 반영해 주세요.
+					    </p>
+					</div>
+
+                    <div class="ds-step-timer">
+                        <label>
+                            타이머
+                            <input type="number" data-field="timerSeconds"
+                                   min="0" max="99999999" placeholder="선택">
+                            초
+                        </label>
+                    </div>
+                </div>
+            </template>
+        </section>
+    </div>
 </div>
+
 <th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('recipeForm');
+            const ingredientRows = document.getElementById('ingredientRows');
+            const stepRows = document.getElementById('stepRows');
+
+            // 입력칸 이름을 DTO의 List 순서에 맞춤
+            function setInputNames() {
+                ingredientRows.querySelectorAll('.ds-ingredient-row')
+                    .forEach(function(row, index) {
+                        row.querySelectorAll('[data-field]').forEach(function(input) {
+                            input.name = 'ingredients[' + index + '].' + input.dataset.field;
+                        });
+                    });
+
+                stepRows.querySelectorAll('.ds-step-editor')
+                    .forEach(function(row, index) {
+                        row.querySelector('.step-number').textContent = 'STEP ' + (index + 1);
+
+                        row.querySelectorAll('[data-field]').forEach(function(input) {
+                            input.name = 'steps[' + index + '].' + input.dataset.field;
+                        });
+                    });
+            }
+
+            function addIngredient() {
+                const template = document.getElementById('ingredientTemplate');
+                ingredientRows.appendChild(template.content.cloneNode(true));
+                setInputNames();
+            }
+
+            function addStep() {
+                const template = document.getElementById('stepTemplate');
+                stepRows.appendChild(template.content.cloneNode(true));
+                setInputNames();
+            }
+
+            document.getElementById('addIngredient')
+                .addEventListener('click', addIngredient);
+
+            document.getElementById('addStep')
+                .addEventListener('click', addStep);
+
+            ingredientRows.addEventListener('click', function(event) {
+                const button = event.target.closest('[data-remove-ingredient]');
+                if (!button) return;
+
+                if (ingredientRows.children.length <= 1) {
+                    alert('재료는 한 개 이상 입력해 주세요.');
+                    return;
+                }
+
+                button.closest('.ds-ingredient-row').remove();
+                setInputNames();
+            });
+
+            stepRows.addEventListener('click', function(event) {
+                const button = event.target.closest('[data-remove-step]');
+                if (!button) return;
+
+                if (stepRows.children.length <= 1) {
+                    alert('조리 단계는 한 개 이상 입력해 주세요.');
+                    return;
+                }
+
+                button.closest('.ds-step-editor').remove();
+                setInputNames();
+            });
+
+            // DB에 저장된 재료의 기본 단위 사용
+            ingredientRows.addEventListener('change', function(event) {
+                const select = event.target.closest('select[data-field="ingredientId"]');
+                if (!select) return;
+
+                const row = select.closest('.ds-ingredient-row');
+                const option = select.selectedOptions[0];
+                row.querySelector('[data-field="unit"]').value =
+                    option.dataset.unit || '';
+            });
+
+            // 선택한 사진은 화면에서 먼저 확인
+            function previewPhoto(file, image) {
+                if (!file) {
+                    image.hidden = true;
+                    image.removeAttribute('src');
+                    return;
+                }
+
+                const url = URL.createObjectURL(file);
+                image.onload = function() {
+                    URL.revokeObjectURL(url);
+                };
+                image.src = url;
+                image.hidden = false;
+            }
+
+            document.getElementById('recipePhoto')
+                .addEventListener('change', function() {
+                    previewPhoto(
+                        this.files[0],
+                        document.getElementById('recipePhotoPreview')
+                    );
+                });
+
+            stepRows.addEventListener('change', function(event) {
+                const input = event.target.closest('input[data-field="selectFile"]');
+                if (!input) return;
+
+                const image = input.closest('.ds-step-editor')
+                    .querySelector('.recipe-step-image');
+
+                previewPhoto(input.files[0], image);
+            });
+
+            form.addEventListener('submit', function(event) {
+                setInputNames();
+
+                const selectedIds = new Set();
+                const selects = ingredientRows.querySelectorAll(
+                    'select[data-field="ingredientId"]'
+                );
+
+                for (const select of selects) {
+                    if (selectedIds.has(select.value)) {
+                        event.preventDefault();
+                        alert('같은 재료는 한 번만 선택해 주세요.');
+                        select.focus();
+                        return;
+                    }
+                    selectedIds.add(select.value);
+                }
+            });
+
+            if (ingredientRows.children.length === 0) addIngredient();
+            if (stepRows.children.length === 0) addStep();
+
+            setInputNames();
+        });
+    </script>
+    
+<script th:src="@{/dist/js/community-ingredient.js}"></script>
+<script th:src="@{/dist/js/community-recipe-photo.js}"></script> 
 </th:block>
-</body></html>
+
+</body>
+</html>
