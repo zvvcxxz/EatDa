@@ -3,10 +3,12 @@ package com.sp.app.domain.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import com.sp.app.domain.entity.MemberFridge;
 import com.sp.app.domain.entity.MyIngredient;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -100,6 +102,15 @@ public class MyFridgeDto {
                 this.expiring = false;
             }
         }
+    }
+    
+    //목록, 전체갯수 응답용
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PagedResponse {
+        private List<ItemResponse> items;
+        private long totalCount;
     }
 
     // 카테고리 이모지 매핑 

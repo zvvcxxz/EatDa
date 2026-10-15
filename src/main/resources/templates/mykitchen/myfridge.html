@@ -19,7 +19,7 @@
             <div class="section-heading">
                 <div>
                     <h2>우리 집 냉장고</h2>
-                    <p class="muted">최근 등록된 순으로 최대 30개의 재료를 보여줍니다.</p>
+                    <p class="muted">같은 재료라도 유통기한이 다르면 별도로 등록돼요.</p>
                 </div>
                 <button type="button" class="btn btn-primary" id="addIngredientButton" @click="openAddModal">
                     + 재료 추가
@@ -63,8 +63,8 @@
 
             <!-- Vue v-for 동적 카드 목록 (3줄 제한 + 페이징) -->
             <div class="ingredient-grid" v-if="fridgeItems.length > 0">
-                <article class="ingredient-card" v-for="item in visibleFridgeItems" :key="item.fridgeItemId">
-                    <div class="card-top">
+    			<article class="ingredient-card" v-for="item in fridgeItems" :key="item.fridgeItemId">
+           			<div class="card-top">
                         <span class="category-label">
                             <span class="category-emoji">{{ getCategoryEmoji(item.categoryName) }}</span>
                             <span>{{ item.categoryName }}</span>
@@ -102,12 +102,12 @@
                 </article>
             </div>
 
-            <!-- 3줄 초과 시 더보기 버튼 -->
-            <div class="load-more-container" v-if="fridgeItems.length > visibleLimit">
-                <button type="button" class="btn-load-more" @click="loadMore">
-                    ➕ 더보기 ({{ visibleFridgeItems.length }} / {{ fridgeItems.length }})
-                </button>
-            </div>
+			<!-- 더보기 버튼 (hasMore 조건) -->
+			<div class="load-more-container" v-if="hasMore">
+			    <button type="button" class="btn-load-more" @click="loadMore">
+			        ➕ 더보기 (현재 {{ fridgeItems.length }} / {{ totalCount }}개 표시 중)
+			    </button>
+			</div>
 
             <!-- 레시피 추천 배너 -->
             <div class="recommend-banner">

@@ -140,63 +140,72 @@
         </div>
     </div>
 
-    <!-- Vue 3. 보유 재료 기반 맞춤 레시피 추천 모달 -->
-    <div v-if="isRecommendModalOpen" class="modal-overlay">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h3>🍳 내 냉장고 맞춤 레시피 추천</h3>
-                <button type="button" class="btn-close" @click="closeRecommendModal">✕</button>
-            </div>
-
-            <div v-if="isLoadingRecommendations" class="loading-box">
-                <div class="spinner"></div>
-                <p>보유 재료와 유통기한 가중치를 계산하여 레시피를 찾고 있습니다...</p>
-            </div>
-
-            <div v-else-if="recommendedRecipes.length === 0" class="empty-hint">
-                냉장고 속 재료로 추천할 수 있는 레시피가 없어요. 재료를 더 추가해 보세요!
-            </div>
-
-            <div v-else class="recommend-recipe-grid">
-                <article v-for="recipe in recommendedRecipes" :key="recipe.recipeId || recipe.id" class="recommend-recipe-card">
-                    <div class="recipe-thumb-box">
-                        <img :src="recipe.thumbnailUrl || recipe.mainPhoto || '/dist/images/itda-logo.png'" 
-                             :alt="recipe.recipeTitle || recipe.title"
-                             onerror="this.src='https://via.placeholder.com/300x200?text=EatDa+Recipe'">
-                        <span class="match-score-badge" v-if="recipe.matchRate || recipe.score || recipe.matchCount">
-                            🎯 {{ Math.round(recipe.matchRate || recipe.score || 80) }}% 일치
-                        </span>
-                    </div>
-                    <div class="recipe-info-box">
-                        <h4 class="recipe-title">
-                            <a :href="'/recipe/detail/' + (recipe.recipeId || recipe.id)">
-                                {{ recipe.recipeTitle || recipe.title || recipe.name }}
-                            </a>
-                        </h4>
-                        
-                        <div class="ingredient-match-details">
-                            <div v-if="recipe.matchingIngredients && recipe.matchingIngredients.length > 0">
-                                <span class="tag-title match">보유 재료</span>
-                                <div class="chip-group">
-                                    <span class="recipe-ing-chip match" v-for="ing in recipe.matchingIngredients" :key="ing">{{ ing }}</span>
-                                </div>
-                            </div>
-                            <div v-if="recipe.missingIngredients && recipe.missingIngredients.length > 0" class="mt-2">
-                                <span class="tag-title missing">부족한 재료</span>
-                                <div class="chip-group">
-                                    <span class="recipe-ing-chip missing" v-for="ing in recipe.missingIngredients" :key="ing">{{ ing }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" @click="closeRecommendModal">닫기</button>
-            </div>
-        </div>
-    </div>
+	<!-- Vue 3. 보유 재료 기반 맞춤 레시피 추천 모달 -->
+	<div v-if="isRecommendModalOpen" class="modal-overlay">
+	    <div class="modal-content modal-lg">
+	        <div class="modal-header">
+	            <h3>🍳 내 냉장고 맞춤 레시피 추천</h3>
+	            <button type="button" class="btn-close" @click="closeRecommendModal">✕</button>
+	        </div>
+	
+	        <div v-if="isLoadingRecommendations" class="loading-box">
+	            <div class="spinner"></div>
+	            <p>보유 재료와 유통기한 가중치를 계산하여 레시피를 찾고 있습니다...</p>
+	        </div>
+	
+	        <div v-else-if="recommendedRecipes.length === 0" class="empty-hint">
+	            냉장고 속 재료로 추천할 수 있는 레시피가 없어요. 재료를 더 추가해 보세요!
+	        </div>
+	
+	        <div v-else class="recommend-recipe-grid">
+	            <article v-for="recipe in recommendedRecipes" :key="recipe.recipeId || recipe.id" class="recommend-recipe-card">
+	                <div class="recipe-thumb-box">
+	                    <img :src="recipe.thumbnailUrl || recipe.mainPhoto || '/dist/images/default-recipe.png'" 
+	                         :alt="recipe.recipeTitle || recipe.title"
+	                         onerror="this.src='https://via.placeholder.com/300x200?text=EatDa+Recipe'">
+	                    <span class="match-score-badge" v-if="recipe.matchRate || recipe.score || recipe.matchCount">
+	                        🎯 {{ Math.round(recipe.matchRate || recipe.score || 80) }}% 일치
+	                    </span>
+	                </div>
+	                
+	                <div class="recipe-info-box">
+	                    <h4 class="recipe-title">
+	                        <a :href="'/community/recipes/' + (recipe.recipeId || recipe.id)" target="_blank">
+	                            {{ recipe.recipeTitle || recipe.title || recipe.name }}
+	                        </a>
+	                    </h4>
+	                    
+	                    <!-- 💡 보유 재료 및 부족한 재료 나열 부분 -->
+	                    <div class="ingredient-match-details">
+	                        <!-- 보유 일치 재료 -->
+	                        <div v-if="recipe.matchingIngredients && recipe.matchingIngredients.length > 0">
+	                            <span class="tag-title match">✅ 보유 일치 재료 ({{ recipe.matchingIngredients.length }}개)</span>
+	                            <div class="chip-group">
+	                                <span class="recipe-ing-chip match" v-for="ing in recipe.matchingIngredients" :key="ing">
+	                                    {{ ing }}
+	                                </span>
+	                            </div>
+	                        </div>
+	
+	                        <!-- 부족한 재료 -->
+	                        <div v-if="recipe.missingIngredients && recipe.missingIngredients.length > 0" class="mt-2">
+	                            <span class="tag-title missing">🛒 부족한 재료 ({{ recipe.missingIngredients.length }}개)</span>
+	                            <div class="chip-group">
+	                                <span class="recipe-ing-chip missing" v-for="ing in recipe.missingIngredients" :key="ing">
+	                                    {{ ing }}
+	                                </span>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </article>
+	        </div>
+	
+	        <div class="modal-footer">
+	            <button type="button" class="btn btn-light" @click="closeRecommendModal">닫기</button>
+	        </div>
+	    </div>
+	</div>
 
 </th:block>
 

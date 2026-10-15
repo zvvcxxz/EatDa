@@ -11,7 +11,7 @@ public interface MyFridgeService {
     List<MyFridgeDto.IngredientResponse> getIngredientsByCategory(String categoryCode);
 
     // 2. 내 냉장고 재료 관리 (CRUD)
-    List<MyFridgeDto.ItemResponse> getMemberFridgeItemsFiltered(Long memberId, String keyword, String categoryId, int limit);
+    MyFridgeDto.PagedResponse getMemberFridgeItemsFiltered(Long memberId, String keyword, String categoryId, int page, int size);
     List<MyFridgeDto.ItemResponse> getMemberFridgeItems(Long memberId);
     void registerFridgeItems(Long memberId, List<MyFridgeDto.RegisterRequest> requests);
     void updateFridgeItem(Long memberId, Long fridgeItemId, MyFridgeDto.UpdateRequest request);

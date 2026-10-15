@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MyFridgeApiController {
 
-    // MyRecipeRecommendationService 제거 후 MyFridgeService 하나로 통합
     private final MyFridgeService fridgeService;
 
     // 로그인 회원 ID 추출 헬퍼 메서드
@@ -55,24 +54,29 @@ public class MyFridgeApiController {
         return ResponseEntity.ok(result);
     }
 
-    // 3. 내 냉장고 보유 재료 목록 조회 (전체 조회 + 필터/검색 겸용)
-    @GetMapping("/items")
-    public ResponseEntity<List<MyFridgeDto.ItemResponse>> getFridgeItems(
+    // 3. 내 냉장고 보유 재료 목록 조회 (페이징 처리)
+    /*@GetMapping("/items")
+    public ResponseEntity<MyFridgeDto.PagedResponse> getFridgeItems(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "categoryId", required = false) String categoryId,
-            @RequestParam(value = "limit", defaultValue = "30") int limit) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         
         Long memberId = getLoginMemberId();
-
-        // 검색어나 카테고리 조건이 하나라도 전달된 경우 필터링 메서드 호출
-        if ((keyword != null && !keyword.trim().isEmpty()) || (categoryId != null && !categoryId.trim().isEmpty())) {
-            return ResponseEntity.ok(fridgeService.getMemberFridgeItemsFiltered(memberId, keyword, categoryId, limit));
-        }
-
-        // 조건이 없으면 전체 보유 재료 조회
+        MyFridgeDto.PagedResponse response = fridgeService.getMemberFridgeItemsFiltered(
+                memberId, keyword, categoryId, page, size);
+                
+        return ResponseEntity.ok(response);
+    }*/
+    // 내 냉장고 보유 재료 전체 조회: 페이징 처리 하니까 오래된/유통기한 임박/경과한 재료 필터링이 제대로 안 되는 문제가 있음
+    	//해결하려면 너무 쿼리가 복잡해지고 유저의 냉장고 재료 조회가 크게 db를 무겁게 만들지 않으므로 그냥 js로 페이징처리
+    @GetMapping("/items")
+    public ResponseEntity<List<MyFridgeDto.ItemResponse>> getFridgeItems() {
+        Long memberId = getLoginMemberId();
         List<MyFridgeDto.ItemResponse> items = fridgeService.getMemberFridgeItems(memberId);
         return ResponseEntity.ok(items);
     }
+    
 
     // 4. 내 냉장고에 재료 등록 (일괄 등록 및 중복 수량 합산)
     @PostMapping("/items")

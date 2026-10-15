@@ -145,5 +145,79 @@
         )
         WHERE ROWNUM &lt;= #{limit}
     </select>
+    
+    <!-- 8. 내가 작성한 레시피 목록 조회 (페이징) -->
+    <select id="selectMyRecipes" resultType="com.sp.app.domain.dto.MyRecipeDto">
+        SELECT * FROM (
+            SELECT ROWNUM AS rnum, A.* FROM (
+                SELECT 
+                    r.RECIPE_ID AS recipeId,
+                    r.AUTHOR_ID AS authorId,
+                    m.NAME AS authorName,
+                    m.PROFILE_URL AS authorProfileUrl,
+                    r.TITLE AS title,
+                    r.SUMMARY AS summary,
+                    r.THUMBNAIL_URL AS thumbnailUrl,
+                    r.COOK_MINUTES AS cookMinutes,
+                    r.DIFFICULTY AS difficulty,
+                    r.SERVINGS AS servings,
+                    r.CREATED_AT AS createdAt,
+                    (SELECT COUNT(*) FROM RECIPE_LIKE rl WHERE rl.RECIPE_ID = r.RECIPE_ID) AS likeCount,
+                    (SELECT COUNT(*) FROM RECIPE_BOOKMARK rb WHERE rb.RECIPE_ID = r.RECIPE_ID) AS bookmarkCount,
+                    (SELECT COUNT(*) FROM RECIPE_REVIEW rr WHERE rr.RECIPE_ID = r.RECIPE_ID) AS reviewCount
+                FROM RECIPE r
+                JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+                WHERE r.AUTHOR_ID = #{memberId}
+                  AND r.DELETED_AT IS NULL
+                ORDER BY r.CREATED_AT DESC
+            ) A WHERE ROWNUM &lt;= #{offset} + #{size}
+        ) WHERE rnum &gt; #{offset}
+    </select>
+
+    <!-- 9. 내가 작성한 레시피 총 개수 -->
+    <select id="countMyRecipes" resultType="long">
+        SELECT COUNT(*)
+        FROM RECIPE
+        WHERE AUTHOR_ID = #{memberId}
+          AND DELETED_AT IS NULL
+    </select>
+
+    <!-- 10. 내가 찜한(북마크) 레시피 목록 조회 (페이징) -->
+    <select id="selectBookmarkedRecipes" resultType="com.sp.app.domain.dto.MyRecipeDto">
+        SELECT * FROM (
+            SELECT ROWNUM AS rnum, A.* FROM (
+                SELECT 
+                    r.RECIPE_ID AS recipeId,
+                    r.AUTHOR_ID AS authorId,
+                    m.NAME AS authorName,
+                    m.PROFILE_URL AS authorProfileUrl,
+                    r.TITLE AS title,
+                    r.SUMMARY AS summary,
+                    r.THUMBNAIL_URL AS thumbnailUrl,
+                    r.COOK_MINUTES AS cookMinutes,
+                    r.DIFFICULTY AS difficulty,
+                    r.SERVINGS AS servings,
+                    rb.CREATED_AT AS bookmarkedAt,
+                    (SELECT COUNT(*) FROM RECIPE_LIKE rl WHERE rl.RECIPE_ID = r.RECIPE_ID) AS likeCount,
+                    (SELECT COUNT(*) FROM RECIPE_BOOKMARK rb_sub WHERE rb_sub.RECIPE_ID = r.RECIPE_ID) AS bookmarkCount,
+                    (SELECT COUNT(*) FROM RECIPE_REVIEW rr WHERE rr.RECIPE_ID = r.RECIPE_ID) AS reviewCount
+                FROM RECIPE_BOOKMARK rb
+                JOIN RECIPE r ON rb.RECIPE_ID = r.RECIPE_ID
+                JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+                WHERE rb.MEMBER_ID = #{memberId}
+                  AND r.DELETED_AT IS NULL
+                ORDER BY rb.CREATED_AT DESC
+            ) A WHERE ROWNUM &lt;= #{offset} + #{size}
+        ) WHERE rnum &gt; #{offset}
+    </select>
+
+    <!-- 11. 내가 찜한 레시피 총 개수 -->
+    <select id="countBookmarkedRecipes" resultType="long">
+        SELECT COUNT(*)
+        FROM RECIPE_BOOKMARK rb
+        JOIN RECIPE r ON rb.RECIPE_ID = r.RECIPE_ID
+        WHERE rb.MEMBER_ID = #{memberId}
+          AND r.DELETED_AT IS NULL
+    </select>
 
 </mapper>

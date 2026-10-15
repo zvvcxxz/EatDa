@@ -1,6 +1,5 @@
 const { createApp, ref, computed, onMounted } = Vue;
 
-// 영문 코드 및 한글명 호환 이모지 사전
 const CATEGORY_EMOJI = {
     '육류': '🥩', 'MEAT': '🥩',
     '해산물': '🐟', 'SEAFOOD': '🐟',
@@ -28,7 +27,7 @@ const INGREDIENT_EMOJI = {
     '돼지고기': '🥩', '삼겹살': '🥓', '돼지고기 목살': '🥩', '돼지고기 앞다리살': '🥩', '돼지고기 다짐육': '🥩',
     '소고기': '🥩', '소고기 다짐육': '🥩', '소고기 국거리': '🥩', '닭고기': '🍗', '닭가슴살': '🍗', '닭다리': '🍗', '오리고기': '🍗',
     '고등어': '🐟', '갈치': '🐟', '연어': '🐟', '대구': '🐟', '참치살': '🐟', '새우': '🦐', '오징어': '🦑', '낙지': '🐙',
-    '문어': '🐙', '바지락': '🐚', '홍합': '🐚', '굴': '🦪', '전복': '🐚', '꽃게': '🦀', '멸치': '🐟', '다시마': '🌿', '미역': '🌿',
+    '문어': '🐙', '바지락': '🐚', '홍합': '🐚', '굴': '𦝁', '전복': '🐚', '꽃게': '🦀', '멸치': '🐟', '다시마': '🌿', '미역': '🌿',
     '계란': '🥚', '달걀': '🥚', '메추리알': '🥚', '우유': '🥛', '생크림': '🥛', '플레인 요거트': '🥛', '슬라이스 치즈': '🧀',
     '모차렐라 치즈': '🧀', '파르메산 치즈': '🧀', '크림치즈': '🧀', '쌀': '🍚', '현미': '🌾', '밀가루': '🌾', '파스타 면': '🍝',
     '소면': '🍜', '우동 면': '🍜', '라면': '🍜', '당면': '🍜', '떡국 떡': '🍚', '떡볶이 떡': '🍚', '식빵': '🍞',
@@ -61,8 +60,6 @@ createApp({
     setup() {
         const isModalOpen = ref(false);
         const isEditModalOpen = ref(false);
-        
-        // 레시피 추천 모달 전용 상태
         const isRecommendModalOpen = ref(false);
         const isLoadingRecommendations = ref(false);
         const recommendedRecipes = ref([]);
@@ -73,21 +70,17 @@ createApp({
         const selectedCategory = ref(null);
         const categoryIngredients = ref([]);
 
-        const fridgeItems = ref([]);
+        // 전체 원본 데이터
+        const rawFridgeItems = ref([]);
+
+        // 필터 조건 변수
         const filterKeyword = ref('');
+        const activeFilterKeyword = ref(''); // 검색 버튼/엔터 클릭 시 적용할 키워드
         const filterStatus = ref('');
         const selectedFilterCategory = ref(null);
 
-        // 화면 노출 개수 제한
+        // 표시 개수 제어 (기본 10개씩 더보기)
         const visibleLimit = ref(10);
-
-        const visibleFridgeItems = computed(() => {
-            return fridgeItems.value.slice(0, visibleLimit.value);
-        });
-
-        const loadMore = () => {
-            visibleLimit.value += 10;
-        };
 
         const editForm = ref({
             fridgeItemId: null,
@@ -114,25 +107,12 @@ createApp({
             { code: 'WATER', label: '물·육수 💧' }
         ]);
 
+        // 1. 서버에서 회원의 냉장고 재료 전체 로드 (딱 1번만 가져옴)
         const loadFridgeItems = () => {
-            const params = {};
-            if (filterKeyword.value.trim()) params.keyword = filterKeyword.value.trim();
-            if (selectedFilterCategory.value) {
-                params.categoryId = CATEGORY_NAME_MAP[selectedFilterCategory.value] || selectedFilterCategory.value;
-            }
-
-            axios.get('/api/fridge/items', { params })
+            axios.get('/api/fridge/items')
                 .then(res => {
-                    let items = res.data;
-                    if (filterStatus.value === 'OLD') {
-                        items = items.filter(item => item.isOld || item.old);
-                    } else if (filterStatus.value === 'EXPIRING') {
-                        items = items.filter(item => item.isExpiring || item.expiring);
-                    } else if (filterStatus.value === 'EXPIRED') {
-                        items = items.filter(item => item.isExpired || item.expired);
-                    }
-
-                    fridgeItems.value = items.map(item => {
+                    const fetchedItems = res.data || [];
+                    rawFridgeItems.value = fetchedItems.map(item => {
                         const rawCat = item.categoryName || item.ingredientType || item.category || item.type || item.category_name;
                         const finalCatName = CATEGORY_NAME_MAP[rawCat] || rawCat || '기타';
                         return {
@@ -142,19 +122,76 @@ createApp({
                             categoryName: finalCatName
                         };
                     });
-
-                    visibleLimit.value = 10;
                 })
                 .catch(err => console.error('내 냉장고 재료 조회 실패:', err));
         };
 
-        const applyFilter = () => loadFridgeItems();
-        const filterByCategory = (categoryCode) => {
-            selectedFilterCategory.value = categoryCode;
-            loadFridgeItems();
+        // 2. [핵심] 검색/카테고리/상태 필터가 적용된 전체 재료 리스트 (Computed)
+        const filteredFridgeItems = computed(() => {
+            return rawFridgeItems.value.filter(item => {
+                // 키워드 검색
+                if (activeFilterKeyword.value.trim()) {
+                    const kw = activeFilterKeyword.value.trim().toLowerCase();
+                    if (!item.ingredientName.toLowerCase().includes(kw)) {
+                        return false;
+                    }
+                }
+
+                // 카테고리 필터
+                if (selectedFilterCategory.value) {
+                    const targetCat = CATEGORY_NAME_MAP[selectedFilterCategory.value] || selectedFilterCategory.value;
+                    if (item.categoryName !== targetCat && item.categoryCode !== selectedFilterCategory.value) {
+                        return false;
+                    }
+                }
+
+                // 재료 상태 필터 (DTO에서 pre-compute해 준 속성 활용)
+                if (filterStatus.value) {
+                    if (filterStatus.value === 'EXPIRED' && !item.expired) return false;
+                    if (filterStatus.value === 'EXPIRING' && !item.expiring) return false;
+                    if (filterStatus.value === 'OLD') {
+                        // 등록일 기준 30일 이상 경과 여부
+                        if (!item.registeredDate) return false;
+                        const regDate = new Date(item.registeredDate);
+                        const thirtyDaysAgo = new Date();
+                        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                        if (regDate > thirtyDaysAgo) return false;
+                    }
+                }
+
+                return true;
+            });
+        });
+
+        // 3. 필터링된 전체 개수
+        const totalCount = computed(() => filteredFridgeItems.value.length);
+
+        // 4. 화면에 실제로 잘라서 노출할 데이터 (10개, 20개, 30개 ...)
+        const fridgeItems = computed(() => {
+            return filteredFridgeItems.value.slice(0, visibleLimit.value);
+        });
+
+        // 5. 더보기 버튼 노출 여부
+        const hasMore = computed(() => {
+            return fridgeItems.value.length < totalCount.value;
+        });
+
+        // 더보기 버튼 클릭
+        const loadMore = () => {
+            visibleLimit.value += 10;
         };
 
-        // 레시피 가중치 추천 API 호출 함수
+        // 필터 적용 버튼 클릭
+        const applyFilter = () => {
+            activeFilterKeyword.value = filterKeyword.value;
+            visibleLimit.value = 10; // 필터 변경 시 첫 10개로 리셋
+        };
+
+        const filterByCategory = (categoryCode) => {
+            selectedFilterCategory.value = categoryCode;
+            visibleLimit.value = 10;
+        };
+
         const openRecommendModal = () => {
             isRecommendModalOpen.value = true;
             isLoadingRecommendations.value = true;
@@ -179,7 +216,6 @@ createApp({
         onMounted(() => {
             loadFridgeItems();
 
-            // 주소창에 tab=recommendations 쿼리가 넘어온 경우 자동 추천 모달 팝업
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tab') === 'recommendations') {
                 openRecommendModal();
@@ -293,7 +329,7 @@ createApp({
                 .then(() => {
                     alert('냉장고에 성공적으로 등록되었습니다.');
                     closeModal();
-                    loadFridgeItems();
+                    loadFridgeItems(); // 갱신만 해주면 Vue 반응형에 의해 더보기 위치 자동 유지
                 })
                 .catch(err => {
                     alert(err.response?.data?.message || '등록 중 오류가 발생했습니다.');
@@ -361,10 +397,10 @@ createApp({
             categoryList,
             selectedCategory,
             categoryIngredients,
-            fridgeItems,
-            visibleFridgeItems,
-            visibleLimit,
+            fridgeItems,       // 화면 노출용 잘린 배열 (10, 20, 30개...)
             loadMore,
+            hasMore,
+            totalCount,        // 현재 필터링 기준 전체 개수
             filterKeyword,
             filterStatus,
             selectedFilterCategory,
