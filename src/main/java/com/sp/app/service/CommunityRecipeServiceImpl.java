@@ -77,7 +77,7 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
         return dto;
     }
 
-    // 기본 정보와 연결 데이터를 하나의 작업으로 저장
+    // 기본 정보와 재료·단계를 함께 저장
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertRecipe(
@@ -110,7 +110,6 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 dto.setThumbnailUrl("/uploads/community/recipes/" + filename);
             }
 
-            // XML에서 생성한 레시피 번호가 dto에 들어옴
             mapper.insertRecipe(dto);
 
             for (CommunityRecipeStepDto step : steps) {
@@ -119,9 +118,9 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
 
             saveRecipeDetails(dto, ingredients, steps, uploadedFiles);
         } catch (Exception e) {
-            // 파일은 DB 롤백으로 지워지지 않으므로 따로 정리
+            // 등록 실패 시 이번에 올린 사진 정리
             for (String filename : uploadedFiles) {
-                storageService.deleteFile(uploadPath, filename);
+                deletePhoto("/uploads/community/recipes/" + filename);
             }
 
             log.info("insertRecipe : ", e);
@@ -159,11 +158,9 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
             dto.setSourceType(original.getSourceType());
             dto.setExternalKey(original.getExternalKey());
 
-            // 삭제를 선택했으면 사진 주소를 비움
             dto.setThumbnailUrl(dto.isDeleteThumbnail()
                     ? null : original.getThumbnailUrl());
 
-            // 새 사진을 선택했으면 새 사진으로 변경
             if (dto.getSelectFile() != null
                     && !dto.getSelectFile().isEmpty()) {
 
@@ -183,7 +180,7 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
                 imageMap.put(step.getStepId(), step.getImageUrl());
             }
 
-            // 단계 사진도 삭제 여부에 따라 유지하거나 비움
+            // 새 사진이 없으면 기존 단계 사진 유지
             for (CommunityRecipeStepDto step : steps) {
                 step.setImageUrl(step.isDeleteImage()
                         ? null : imageMap.get(step.getStepId()));
@@ -202,10 +199,29 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
 
             saveRecipeDetails(dto, ingredients, steps, uploadedFiles);
 
+            // 수정 후에도 사용하는 사진 주소
+            List<String> keepImages = new ArrayList<>();
+            keepImages.add(dto.getThumbnailUrl());
+
+            for (CommunityRecipeStepDto step : steps) {
+                keepImages.add(step.getImageUrl());
+            }
+
+            // 더 이상 사용하지 않는 대표·단계 사진 삭제
+            if (!keepImages.contains(original.getThumbnailUrl())) {
+                deletePhoto(original.getThumbnailUrl());
+            }
+
+            for (CommunityRecipeStepDto step : originalSteps) {
+                if (!keepImages.contains(step.getImageUrl())) {
+                    deletePhoto(step.getImageUrl());
+                }
+            }
+
             return result;
         } catch (Exception e) {
             for (String filename : uploadedFiles) {
-                storageService.deleteFile(uploadPath, filename);
+                deletePhoto("/uploads/community/recipes/" + filename);
             }
 
             log.info("updateRecipe : ", e);
@@ -221,6 +237,7 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
             List<String> uploadedFiles) throws Exception {
 
         long recipeId = dto.getRecipeId();
+
         Map<String, Object> map = new HashMap<>();
         map.put("recipeId", recipeId);
 
@@ -274,11 +291,40 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
         }
     }
 
-    // 삭제·숨김은 XML에서 상태값 변경
     @Override
     public int deleteRecipe(Map<String, Object> map) throws Exception {
         try {
-            return mapper.deleteRecipe(map);
+            long recipeId = Long.parseLong(
+                    String.valueOf(map.get("recipeId")));
+
+            long authorId = Long.parseLong(
+                    String.valueOf(map.get("authorId")));
+
+            CommunityRecipeDto original = mapper.findById(recipeId);
+
+            if (original == null) {
+                return 0;
+            }
+
+            if (!Objects.equals(original.getAuthorId(), authorId)) {
+                throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            }
+
+            // DB에서 삭제 처리하기 전에 사진 주소 조회
+            List<CommunityRecipeStepDto> steps =
+                    mapper.listRecipeStep(recipeId);
+
+            int result = mapper.deleteRecipe(map);
+
+            if (result > 0) {
+                deletePhoto(original.getThumbnailUrl());
+
+                for (CommunityRecipeStepDto step : steps) {
+                    deletePhoto(step.getImageUrl());
+                }
+            }
+
+            return result;
         } catch (Exception e) {
             log.info("deleteRecipe : ", e);
             throw e;
@@ -288,10 +334,37 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
     @Override
     public int hideRecipe(Map<String, Object> map) throws Exception {
         try {
+            // 숨김은 사진을 삭제하지 않음
             return mapper.hideRecipe(map);
         } catch (Exception e) {
             log.info("hideRecipe : ", e);
             throw e;
+        }
+    }
+
+    // 사진 주소에서 파일명을 꺼내 실제 파일 삭제
+    private void deletePhoto(String imageUrl) {
+        String prefix = "/uploads/community/recipes/";
+
+        if (imageUrl == null || !imageUrl.startsWith(prefix)) {
+            return;
+        }
+
+        String filename = imageUrl.substring(prefix.length());
+
+        if (filename.isBlank() || filename.contains("/")
+                || filename.contains("\\") || filename.contains("..")) {
+            return;
+        }
+
+        try {
+            boolean deleted = storageService.deleteFile(uploadPath, filename);
+
+            if (!deleted) {
+                log.info("사진 삭제 확인 필요 : {}", filename);
+            }
+        } catch (Exception e) {
+            log.info("deletePhoto : ", e);
         }
     }
 
