@@ -36,16 +36,11 @@
 	</select>
 	
 	<select id="listMember" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
-			SELECT m.MEMBER_ID AS memberId, 
-			       m.LOGIN_ID AS loginId, 
-			       m.NAME AS name, 
-			       m.EMAIL AS email, 
-			       m.PHONE AS phone, 
+			SELECT m.MEMBER_ID AS memberId,  m.LOGIN_ID AS loginId, m.NAME AS name, m.EMAIL AS email, m.PHONE AS phone, 
 			       TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
 			       m.STATUS AS status, 
 			       TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
-			       r.ROLE_NAME AS roleName,
-			       m.SNS_PROVIDER AS snsProvider
+			       r.ROLE_NAME AS roleName, m.SNS_PROVIDER AS snsProvider
 			FROM MEMBER m
 			JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
 			<where>
@@ -62,24 +57,13 @@
 		</select>
 	
 	<select id="findById" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
-			SELECT m.MEMBER_ID AS memberId,
-				   m.LOGIN_ID AS loginId,
-				   m.NAME AS name,
+			SELECT m.MEMBER_ID AS memberId, m.LOGIN_ID AS loginId, m.NAME AS name,
 				   TO_CHAR(m.BIRTH, 'YYYY-MM-DD') AS birth,
-				   m.EMAIL AS email,
-				   m.PHONE AS phone,
-				   m.ZIP AS zip,
-				   m.ADDR1 AS addr1,
-				   m.ADDR2 AS addr2,
-				   m.STATUS AS status,
+				   m.EMAIL AS email, m.PHONE AS phone, m.ZIP AS zip, m.ADDR1 AS addr1, m.ADDR2 AS addr2, m.STATUS AS status,
 				   TO_CHAR(m.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
 				   TO_CHAR(m.UPDATED_AT, 'YYYY-MM-DD') AS updateAt,
 				   TO_CHAR(m.LAST_LOGIN_AT, 'YYYY-MM-DD HH24:MI') AS lastLoginAt,
-				   m.FAILURE_CNT AS failureCnt,
-				   m.SNS_PROVIDER AS snsProvider,
-				   m.SNS_ID AS snsId,
-				   r.ROLE_NAME AS roleName,
-				   m.ROLE_ID AS roleId
+				   m.FAILURE_CNT AS failureCnt, m.SNS_PROVIDER AS snsProvider, m.SNS_ID AS snsId,r.ROLE_NAME AS roleName, m.ROLE_ID AS roleId
 			 FROM MEMBER m
 			 JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
 			 WHERE m.MEMBER_ID = #{memberId}	   
@@ -94,10 +78,7 @@
 	</insert>
 	
 	<select id="listMemberStatusHist" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminMemberDto">
-			SELECT h.STATUS_HIST_ID AS statusHistId,
-				   h.BEFORE_STATUS AS beforeStatus,
-				   h.AFTER_STATUS AS afterStatus,
-				   h.REASON AS reason,
+			SELECT h.STATUS_HIST_ID AS statusHistId, h.BEFORE_STATUS AS beforeStatus, h.AFTER_STATUS AS afterStatus, h.REASON AS reason,
 				   TO_CHAR(h.START_AT, 'YYYY-MM-DD HH24:MI') AS startAt,
 				   a.Name AS adminName
 			FROM MEMBER_STATUS_HIST h
@@ -120,7 +101,7 @@
 	</update>
 	
 	<update id="updateMemberStatus" parameterType="map">
-				UPDATE MEMBER SET STAUTS = #{status}, UPDATED_AT = SYSTIMESTAMP
+				UPDATE MEMBER SET STATUS = #{status}, UPDATED_AT = SYSTIMESTAMP
 				WHERE MEMBER_ID = #{memberId}
 	</update>
 	

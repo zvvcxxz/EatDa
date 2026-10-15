@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.admin.mapper.AdminRecipeMapper">
+	<sql id="where-list">
+		<if test="sourceType != null and sourceType != ''">
+			AND r.SOURCE_TYPE = #{sourceType}
+		</if>
+		<if test="kwd != null and kwd != ''">
+			<choose>
+				<when test="schType == 'userName'">
+					AND INSTR(m.NAME, #{kwd}) &gt; 0
+				</when>
+				<when test="schType == 'title'">
+					AND INSTR(r.TITLE, #{kwd}) &gt; 0
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<select id="dataCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(*)
+		FROM RECIPE r
+		JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+		<where>
+			<include refid="where-list"/>
+		</where>
+	</select>
+	
+	<select id="listRecipe" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminRecipeDto">
+		SELECT
+			r.RECIPE_ID AS recipeId, r.AUTHOR_ID AS memberId, r.TITLE AS title, 0 AS viewCount, r.SOURCE_TYPE AS sourceType, r.STATUS AS status,
+			TO_CHAR(r.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
+			m.NAME AS userName,
+			m.LOGIN_ID AS loginId
+		FROM RECIPE r
+		JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+		<where>
+			<include refid="where-list"/>
+		</where>	
+		ORDER BY r.RECIPE_ID DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<select id="findById" parameterType="Long" resultType="com.sp.app.admin.domain.dto.AdminRecipeDto">
+		SELECT
+			r.RECIPE_ID AS recipeId, r.AUTHOR_ID AS memberId, r.SOURCE_TYPE AS sourceType, r.TITLE AS title, r.SUMMARY AS summary, r.THUMBNAIL_URL AS thumbnailUrl, r.COOK_MINUTES AS cookMinutes, r.DIFFICULTY AS difficulty, r.SERVINGS AS servings, r.STATUS AS status,
+			TO_CHAR(r.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
+			m.NAME AS userName, m.LOGIN_ID AS loginId
+		FROM RECIPE r
+		JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
+		WHERE r.RECIPE_ID = #{recipeId}
+	</select>
+</mapper>
