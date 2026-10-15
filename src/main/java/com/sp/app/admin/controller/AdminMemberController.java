@@ -109,10 +109,35 @@ public class AdminMemberController {
         Map<String, Object> model = new HashMap<>();
         
         try {
-            // service.updateMember(dto); 
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("memberId", dto.getMemberId());
+            paramMap.put("name", dto.getName());
+            paramMap.put("birth", dto.getBirth());
+            paramMap.put("roleId", dto.getRoleId());
+            
+            service.updateMember(paramMap); 
             
             model.put("state", "true");
         } catch (Exception e) {
+            log.error("update error", e);
+            model.put("state", "false");
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("status")
+    public Map<String, Object> updateMemberStatus(AdminMemberDto dto) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            dto.setAdminId(1L);
+
+            service.updateMemberStatus(dto); 
+            model.put("state", "true");
+        } catch (Exception e) {
+            log.error("status update error", e);
             model.put("state", "false");
         }
         

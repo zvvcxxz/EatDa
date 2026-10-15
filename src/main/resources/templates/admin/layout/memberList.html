@@ -1,4 +1,3 @@
-<!-- 상단 검색 및 통계 영역 (여기서부터 파일 시작!) -->
 <div class="list-header-tools">
     <span class="total-count">
         총 <strong>[[${dataCount}]]</strong>명 (<strong>[[${page}]]</strong> / [[${total_page}]] 페이지)
@@ -20,14 +19,12 @@
     </div>
 </div>
 
-<!-- 테이블 영역 -->
 <div class="table-wrap">
     <table>
         <thead>
             <tr><th>번호</th><th>아이디</th><th>이름</th><th>권한</th><th>가입일</th><th>상태</th></tr>
         </thead>
         <tbody>
-            <!-- 💡 여기서 반복문(th:each)이 돌면서 dto가 생깁니다 -->
             <tr th:each="dto, stat : ${list}" th:onclick="|profile(${dto.memberId}, ${page})|" style="cursor: pointer;">
                 <td th:text="${dataCount - (page-1) * size - stat.index}">1</td>
                 <td class="cell-title" th:text="${dto.loginId != null ? dto.loginId : dto.snsId}">admin123</td>
@@ -48,7 +45,6 @@
 
 <p class="empty" th:if="${#lists.isEmpty(list)}" style="display: block;">검색 결과가 없습니다.</p>
 
-<!-- 페이징 영역 -->
 <div class="page-navigation page-navigation-wrap" th:if="${dataCount > 0}">
     <a th:if="${page > 1}" th:onclick="|listMember(${page - 1})|">이전</a>
     <span th:each="p : ${#numbers.sequence(1, total_page)}" 

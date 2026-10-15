@@ -56,50 +56,34 @@ window.profile = function(memberId, page) {
         .catch(err => console.error(err));
 };
 
-function getCsrfToken() {
-    const tokenMeta = document.querySelector("meta[name='_csrf']");
-    const headerMeta = document.querySelector("meta[name='_csrf_header']");
-    return {
-        token: tokenMeta ? tokenMeta.getAttribute("content") : '',
-        header: headerMeta ? headerMeta.getAttribute("content") : ''
-    };
-}
-
 window.updateMemberOk = function(page) {
     const f = document.getElementById('memberUpdateForm');
     if(!f.name.value.trim()) { alert('이름을 입력하세요.'); return; }
     if(!confirm('회원 정보를 수정하시겠습니까?')) return;
     
     const params = new URLSearchParams(new FormData(f));
-    const csrf = getCsrfToken(); // 토큰 가져오기
     
     fetch('/admin/member/update', {
         method: 'PUT',
         body: params,
-        headers: { 
-            'Content-Type': 'application/x-www-form-urlencoded',
-            [csrf.header]: csrf.token // 💡 헤더에 CSRF 토큰 추가!
-        }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
-    .then(res => {
-        if (!res.ok) {
-            if (res.status === 403) throw new Error('보안 정책(CSRF 토큰 누락 등)에 의해 차단되었습니다.');
-            throw new Error('서버와 통신 중 오류가 발생했습니다.');
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-        if(data.state === "true" || data.success) {
-            closeDialog(document.getElementById('memberUpdateDialog'));
+        if(data.state === "true") {
+            const dialog = document.getElementById('memberUpdateDialog');
+            if(typeof closeDialog === 'function') closeDialog(dialog);
+            else if(dialog) dialog.close();
+            
             if(typeof window.notify === 'function') window.notify('회원 정보가 수정되었습니다.');
             else alert('회원 정보가 수정되었습니다.');
             
             profile(f.memberId.value, page);
         } else {
-            alert('수정 실패: ' + (data.message || data.error || '알 수 없는 오류'));
+            alert('회원 정보 수정에 실패했습니다.');
         }
     })
-    .catch(err => alert(err.message));
+    .catch(err => console.error(err));
 };
 
 window.updateStatusOk = function(page) {
@@ -109,33 +93,26 @@ window.updateStatusOk = function(page) {
     if(!confirm('회원 상태를 변경하시겠습니까?')) return;
     
     const params = new URLSearchParams(new FormData(f));
-    const csrf = getCsrfToken();
     
     fetch('/admin/member/status', {
         method: 'POST',
         body: params,
-        headers: { 
-            'Content-Type': 'application/x-www-form-urlencoded',
-            [csrf.header]: csrf.token // 💡 헤더에 CSRF 토큰 추가!
-        }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
-    .then(res => {
-        if (!res.ok) {
-            if (res.status === 403) throw new Error('보안 정책(CSRF 토큰 누락 등)에 의해 차단되었습니다.');
-            throw new Error('서버와 통신 중 오류가 발생했습니다.');
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-        if(data.state === "true" || data.success) {
-            closeDialog(document.getElementById('memberStatusDialog'));
+        if(data.state === "true") {
+            const dialog = document.getElementById('memberStatusDialog');
+            if(typeof closeDialog === 'function') closeDialog(dialog);
+            else if(dialog) dialog.close();
+            
             if(typeof window.notify === 'function') window.notify('회원 상태가 변경되었습니다.');
             else alert('회원 상태가 변경되었습니다.');
             
             profile(f.memberId.value, page);
         } else {
-            alert('변경 실패: ' + (data.message || data.error || '알 수 없는 오류'));
+            alert('회원 상태 변경에 실패했습니다.');
         }
     })
-    .catch(err => alert(err.message));
+    .catch(err => console.error(err));
 };

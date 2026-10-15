@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/Layout3}">
+
+<div layout:fragment="content">
+    <div class="container-fluid px-4">
+        <h2 class="mt-4">레시피 상세 보기</h2>
+        
+        <div class="card mb-4 mt-3">
+            <div class="card-header">
+                <i class="fas fa-file-alt me-1"></i>
+                <span th:text="${dto.title}">레시피 제목</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered align-middle">
+                    <tbody>
+                        <tr>
+                            <th class="table-light text-center" style="width: 15%;">레시피 번호</th>
+                            <td style="width: 35%;" th:text="${dto.recipeId}"></td>
+                            <th class="table-light text-center" style="width: 15%;">출처</th>
+                            <td style="width: 35%;" th:text="${dto.sourceType == 'API' ? '공식' : '유저'}"></td>
+                        </tr>
+                        <tr>
+                            <th class="table-light text-center">작성자</th>
+                            <td th:text="${dto.userName != null ? dto.userName : dto.loginId}"></td>
+                            <th class="table-light text-center">등록일</th>
+                            <td th:text="${dto.createdAt}"></td>
+                        </tr>
+                        <tr>
+                            <th class="table-light text-center">조리 시간</th>
+                            <td th:text="${dto.cookMinutes != null ? dto.cookMinutes + '분' : '-'}"></td>
+                            <th class="table-light text-center">난이도 / 인원</th>
+                            <td th:text="${(dto.difficulty != null ? dto.difficulty : '-') + ' / ' + (dto.servings != null ? dto.servings + '인분' : '-')}"></td>
+                        </tr>
+                        <tr>
+                            <th class="table-light text-center">요약 정보</th>
+                            <td colspan="3" th:text="${dto.summary != null ? dto.summary : '-'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-outline-secondary" 
+                            th:onclick="|location.href='@{/admin/recipe/list(page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}'|">목록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

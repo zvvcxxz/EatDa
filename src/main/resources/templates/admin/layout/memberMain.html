@@ -10,11 +10,11 @@
 <th:block layout:fragment="content">
 	<div class="admin-wrap">
 		<section class="page-heading">
-			<div>
-				<p class="eyebrow">MEMBER MANAGEMENT</p>
-				<h2>회원 관리</h2>
-				<p class="subtitle">서비스에 가입한 회원들의 정보와 상태를 관리해요.</p>
-			</div>
+		    <div onclick="location.href='/'" style="cursor: pointer;">
+		        <p class="eyebrow">MEMBER MANAGEMENT</p>
+		        <h2>회원 관리</h2>
+		        <p class="subtitle">서비스에 가입한 회원들의 정보와 상태를 관리해요.</p>
+		    </div>
 		</section>
 
 		<section class="panel">
@@ -24,8 +24,8 @@
                 </div>
                 <div class="custom-tabs" id="myTab">
                     <button class="active" data-role="">전체 회원</button>
-                    <button data-role="1">일반 회원</button>
-                    <button data-role="2">관리자</button>
+						<button data-role="2">일반 회원</button>
+						<button data-role="1">관리자</button>
                 </div>
 			</div>
             
