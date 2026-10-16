@@ -358,7 +358,7 @@ public class CommunityRecipeServiceImpl implements CommunityRecipeService {
         }
 
         try {
-            boolean deleted = storageService.deleteFile(uploadPath, filename);
+        	boolean deleted = storageService.deleteFile(uploadPath, filename);
 
             if (!deleted) {
                 log.info("사진 삭제 확인 필요 : {}", filename);

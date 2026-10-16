@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityReviewMapper">
+
+    <!-- 후기 번호를 먼저 받아 등록 후 상세보기에서 사용 -->
+    <insert id="insertReview" parameterType="com.sp.app.domain.dto.CommunityReviewDto">
+        <selectKey keyProperty="reviewId" resultType="Long" order="BEFORE">
+            SELECT SEQ_RECIPE_REVIEW.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO RECIPE_REVIEW(REVIEW_ID, RECIPE_ID, MEMBER_ID, TITLE,
+            CONTENT, IMAGE_URL, STATUS, CREATED_AT, UPDATED_AT)
+        VALUES (#{reviewId}, #{recipeId}, #{memberId}, #{title}, #{content},
+            #{imageUrl, jdbcType=VARCHAR}, 0, SYSTIMESTAMP, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 후기 내용은 VARCHAR2이므로 INSTR로 검색 -->
+    <sql id="where-list">
+        <choose>
+            <when test="schType == 'all'">
+                (INSTR(V.TITLE, #{kwd}) &gt; 0 OR INSTR(V.CONTENT, #{kwd}) &gt; 0
+                    OR INSTR(R.TITLE, #{kwd}) &gt; 0 OR INSTR(M.NAME, #{kwd}) &gt; 0)
+            </when>
+            <when test="schType == 'content'">
+                INSTR(V.CONTENT, #{kwd}) &gt; 0
+            </when>
+            <when test="schType == 'recipe'">
+                INSTR(R.TITLE, #{kwd}) &gt; 0
+            </when>
+            <when test="schType == 'author'">
+                INSTR(M.NAME, #{kwd}) &gt; 0
+            </when>
+            <otherwise>
+                INSTR(V.TITLE, #{kwd}) &gt; 0
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 공개 후기 개수. recipeId가 있으면 해당 레시피 후기만 조회 -->
+    <select id="dataCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM RECIPE_REVIEW V
+        LEFT OUTER JOIN RECIPE R ON V.RECIPE_ID = R.RECIPE_ID
+        LEFT OUTER JOIN MEMBER M ON V.MEMBER_ID = M.MEMBER_ID
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND V.STATUS = 0
+            <if test="recipeId != null and recipeId > 0">
+                AND V.RECIPE_ID = #{recipeId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 원본 레시피가 숨김·삭제되어도 공개 후기는 유지 -->
+    <select id="listReview" parameterType="map" resultType="com.sp.app.domain.dto.CommunityReviewDto">
+        SELECT V.REVIEW_ID AS reviewId, V.RECIPE_ID AS recipeId,
+            V.MEMBER_ID AS memberId, NVL(M.NAME, '회원') AS memberName,
+            V.TITLE AS title, V.CONTENT AS content, V.IMAGE_URL AS imageUrl,
+            V.STATUS AS status, R.TITLE AS recipeTitle,
+            R.THUMBNAIL_URL AS recipeThumbnailUrl,
+            CASE WHEN R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0
+                AND R.DELETED_AT IS NULL THEN 1 ELSE 0 END AS originalActive,
+            TO_CHAR(V.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(V.UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt
+        FROM RECIPE_REVIEW V
+        LEFT OUTER JOIN RECIPE R ON V.RECIPE_ID = R.RECIPE_ID
+        LEFT OUTER JOIN MEMBER M ON V.MEMBER_ID = M.MEMBER_ID
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND V.STATUS = 0
+            <if test="recipeId != null and recipeId > 0">
+                AND V.RECIPE_ID = #{recipeId}
+            </if>
+        </where>
+        ORDER BY V.REVIEW_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <!-- 후기 상세와 원본 레시피의 공개 여부 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityReviewDto">
+        SELECT V.REVIEW_ID AS reviewId, V.RECIPE_ID AS recipeId,
+            V.MEMBER_ID AS memberId, NVL(M.NAME, '회원') AS memberName,
+            V.TITLE AS title, V.CONTENT AS content, V.IMAGE_URL AS imageUrl,
+            V.STATUS AS status, R.TITLE AS recipeTitle,
+            R.THUMBNAIL_URL AS recipeThumbnailUrl,
+            CASE WHEN R.SOURCE_TYPE = 'MEMBER' AND R.STATUS = 0
+                AND R.DELETED_AT IS NULL THEN 1 ELSE 0 END AS originalActive,
+            TO_CHAR(V.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+            TO_CHAR(V.UPDATED_AT, 'YYYY.MM.DD HH24:MI') AS updatedAt
+        FROM RECIPE_REVIEW V
+        LEFT OUTER JOIN RECIPE R ON V.RECIPE_ID = R.RECIPE_ID
+        LEFT OUTER JOIN MEMBER M ON V.MEMBER_ID = M.MEMBER_ID
+        WHERE V.REVIEW_ID = #{reviewId} AND V.STATUS = 0
+    </select>
+
+    <!-- 검색한 목록 안에서 번호가 큰 가장 가까운 후기 -->
+    <select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityReviewDto">
+        SELECT V.REVIEW_ID AS reviewId, V.TITLE AS title
+        FROM RECIPE_REVIEW V
+        LEFT OUTER JOIN RECIPE R ON V.RECIPE_ID = R.RECIPE_ID
+        LEFT OUTER JOIN MEMBER M ON V.MEMBER_ID = M.MEMBER_ID
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND V.REVIEW_ID &gt; #{reviewId} AND V.STATUS = 0
+            <if test="recipeId != null and recipeId > 0">
+                AND V.RECIPE_ID = #{recipeId}
+            </if>
+        </where>
+        ORDER BY V.REVIEW_ID ASC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <!-- 검색한 목록 안에서 번호가 작은 가장 가까운 후기 -->
+    <select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityReviewDto">
+        SELECT V.REVIEW_ID AS reviewId, V.TITLE AS title
+        FROM RECIPE_REVIEW V
+        LEFT OUTER JOIN RECIPE R ON V.RECIPE_ID = R.RECIPE_ID
+        LEFT OUTER JOIN MEMBER M ON V.MEMBER_ID = M.MEMBER_ID
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND V.REVIEW_ID &lt; #{reviewId} AND V.STATUS = 0
+            <if test="recipeId != null and recipeId > 0">
+                AND V.RECIPE_ID = #{recipeId}
+            </if>
+        </where>
+        ORDER BY V.REVIEW_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <!-- 본인의 공개 후기만 수정. 원본 레시피 번호는 유지 -->
+    <update id="updateReview" parameterType="com.sp.app.domain.dto.CommunityReviewDto">
+        UPDATE RECIPE_REVIEW
+        SET TITLE = #{title}, CONTENT = #{content},
+            IMAGE_URL = #{imageUrl, jdbcType=VARCHAR}, UPDATED_AT = SYSTIMESTAMP
+        WHERE REVIEW_ID = #{reviewId} AND MEMBER_ID = #{memberId} AND STATUS = 0
+    </update>
+
+    <!-- DB는 삭제 상태로 변경하고 실제 사진은 Impl에서 삭제 -->
+    <update id="deleteReview" parameterType="map">
+        UPDATE RECIPE_REVIEW SET STATUS = 2, UPDATED_AT = SYSTIMESTAMP
+        WHERE REVIEW_ID = #{reviewId} AND MEMBER_ID = #{memberId} AND STATUS = 0
+    </update>
+
+    <!-- 관리자 권한은 컨트롤러에서 확인. 숨김은 사진 유지 -->
+    <update id="hideReview" parameterType="Long">
+        UPDATE RECIPE_REVIEW SET STATUS = 1, UPDATED_AT = SYSTIMESTAMP
+        WHERE REVIEW_ID = #{reviewId} AND STATUS = 0
+    </update>
+
+</mapper>
