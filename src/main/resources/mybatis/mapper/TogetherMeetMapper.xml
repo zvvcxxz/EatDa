@@ -45,6 +45,7 @@
 		WHERE t.status = 0
 			AND t.deleted_at IS NULL
 		ORDER BY t.created_at DESC, t.meet_id DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
 	
 	<select id="findMeetById" resultType="TogetherMeetDto">
@@ -208,6 +209,14 @@
 		WHERE c.meet_id = #{meet_id}
 			AND c.deleted_at IS NULL
 		ORDER BY c.created_at ASC, c.comment_id ASC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<select id="countMeetComments" resultType="int">
+		SELECT COUNT(*)
+		FROM meet_comment
+		WHERE meet_id = #{meet_id}
+			AND deleted_at IS NULL
 	</select>
 	
 	<update id="updateMeet" parameterType="TogetherMeetDto">
@@ -226,4 +235,14 @@
 			AND status = 0
 			AND deleted_at IS NULL
 	</update>
+	
+	<delete id="deleteMeet">
+		UPDATE meal_meeting
+		SET status = 2,
+			deleted_at = SYSTIMESTAMP,
+			updated_at = SYSTIMESTAMP
+		WHERE meet_id = #{meet_id}
+			AND author_id = #{author_id}
+			AND deleted_at IS NULL
+	</delete>
 </mapper>

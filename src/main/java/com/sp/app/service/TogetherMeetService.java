@@ -10,9 +10,11 @@ import com.sp.app.domain.dto.TogetherMeetParticipantDto;
 public interface TogetherMeetService {
 	public void insertMeet(TogetherMeetDto dto) throws Exception; // 글 등록
 	
-	public List<TogetherMeetDto> listMeet() throws Exception; // 글 목록
+	public List<TogetherMeetDto> listMeet(int offset, int size) throws Exception; // 글 목록 (더보기)
 	
 	public int updateMeet(TogetherMeetDto dto) throws Exception; // 글 수정
+	
+	public int deleteMeet(Long meet_id, Long author_id) throws Exception; // 글 삭제
 	
 	public TogetherMeetDto findMeetById(Long meet_id) throws Exception; // 글 상세보기 
 	
@@ -30,5 +32,7 @@ public interface TogetherMeetService {
 	
 	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이먹어요 댓글 등록
 	
-	public List<TogetherMeetCommentDto> listMeetComment(Long meet_id) throws Exception; // 같이먹어요 댓글 목록
+	public List<TogetherMeetCommentDto> listMeetComment(Long meet_id, int offset, int size) throws Exception; // 같이먹어요 댓글 목록
+	
+	public int countMeetComments(Long meet_id) throws Exception; // 같이 먹어요 전체 댓글 수
 }

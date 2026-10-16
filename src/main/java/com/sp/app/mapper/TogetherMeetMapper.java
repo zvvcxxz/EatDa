@@ -15,11 +15,13 @@ import com.sp.app.domain.dto.TogetherMeetParticipantDto;
 public interface TogetherMeetMapper {
 	public void insertMeet(TogetherMeetDto dto) throws SQLException; // 같이먹어요 글 작성
 
-	public List<TogetherMeetDto> listMeet(); // 같이먹어요 글 목록(리스트)
+	public List<TogetherMeetDto> listMeet(@Param("offset") int offset, @Param("size") int size); // 같이먹어요 글 목록(더보기)
 	
 	public int updateMeet(TogetherMeetDto dto) throws SQLException; // 같임먹어요 글 수정
 
 	public TogetherMeetDto findMeetById(Long meet_id); // 같이 먹어요 글 상세보기
+	
+	public int deleteMeet(@Param("meet_id")Long meet_id, @Param("author_id") Long author_id) throws Exception; // 같이 먹어요 글 삭제
 
 	public void updateViewCount(@Param("meet_id") Long meet_id); // 글 상세보기 - 조회수 증가
 
@@ -41,7 +43,10 @@ public interface TogetherMeetMapper {
 	// 같이먹어요 댓글
 	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception; // 같이 먹어요 댓글 등록
 	
-	public List<TogetherMeetCommentDto> listMeetComment(@Param("meet_id") Long meet_id); // 같이 먹어요 댓글 목록
+	public List<TogetherMeetCommentDto> listMeetComment(
+			@Param("meet_id") Long meet_id,
+			@Param("offset") int offset,
+			@Param("size") int size); // 같이 먹어요 댓글 목록
 	
-	
+	public int countMeetComments(@Param("meet_id") Long meet_id); // 삭제 되지 않은 전체 댓글 수
 }

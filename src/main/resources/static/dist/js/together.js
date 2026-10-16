@@ -77,3 +77,141 @@
         }
     });
 })();
+
+(() => {
+	const button = document.querySelector('#btnLoadMorePosts');
+	const list = document.querySelector('.together-page .tg-list');
+	
+	if(!button || !list) return;
+	
+	// 기존 카드 모양 복사
+	const template = list.querySelector('.tg-card')?.cloneNode(true);
+	if(!template) return;
+	
+	const label = button.querySelector('span');
+	const statusLabels = {
+		0 : '모집 중',
+		1 : '모집 마감',
+		2 : '모임 완료',
+		3 : '모임 취소'
+	};
+	
+	// 요청 주소에서 상세보기 기본 경로 만들기
+	const moreUrl = new URL(button.dataset.url, location.origin);
+	const detailPath = moreUrl.pathname.replace(/\/more$/,'/detail/');
+	
+	// 새 게시글 카드 만들기
+	function createCard(post) {
+		const card = template.cloneNode(true);
+		
+		const setText = (selector, value) => {
+			const element = card.querySelector(selector);
+			if(element) element.textContent = value ?? '';
+		};
+		
+		const title = card.querySelector('.tg-title');
+		title.textContent = post.title ?? '';
+		title.href = detailPath + encodeURIComponent(post.meet_id);
+		
+		const status = card.querySelector('.tg-status');
+		
+		if(status) {
+			status.hidden = post.meet_status == null;
+			status.textContent = 
+				statusLabels[post.meet_status] ?? '상태 미확인';
+		}
+		
+		setText('.tg-excerpt', post.content);
+		
+		const values = card.querySelectorAll('.tg-meta dd');
+		values[0].textContent = post.location_text ?? '';
+		values[1].textContent = post.meet_at ?? '';
+		values[2].textContent = post.application_deadline || '별도 마감 없음';
+		
+		setText('.tg-card-side strong', post.max_participants);
+		setText('.tg-author span', post.name);
+		
+		const dates = card.querySelectorAll('.tg-date span');
+		dates[0].textContent = post.created_at ?? '';
+		dates[1].textContent = post.view_count ?? 0;
+		
+		return card;
+	} 
+	
+	// 더보기 실패 안내
+	const feedback = document.createElement('p');
+	feedback.className = 'tg-empty';
+	feedback.setAttribute('role', 'status');
+	feedback.hidden = true;
+	button.parentElement.after(feedback);
+	
+	let loading = false;
+	
+	button.addEventListener('click', async () => {
+		// 중복 클릭 막기
+		if(loading) return;
+		
+		loading = true;
+		button.disabled = true;
+		button.setAttribute('aria-busy' , 'true');
+		label.textContent = '불러오는 중...';
+		feedback.hidden = true;
+		
+		try {
+			const url = new URL(moreUrl);
+			url.searchParams.set('offset', button.dataset.offset);
+			
+			const response = await fetch(url, {
+				headers : {Accept : 'application/json'}
+			});
+			
+			if(!response.ok) {
+				throw new Error(`목록 조회 실패 : ${response.status}`);
+			}
+			
+			const data = await response.json();
+			
+			if (!Array.isArray(data.posts)
+			        || typeof data.hasMore !== 'boolean'
+			        || !Number.isInteger(data.nextOffset)) {
+			    throw new Error('목록 응답 형식이 올바르지 않습니다.');
+			}
+			
+			// 기존 목록 아래에 추가
+			const cards = data.posts.map(createCard);
+			list.append(...cards);
+			
+			// 새 카드 부드럽게 표시
+			if (!window.matchMedia('(prefers-reduced-motion : reduce)').matches) {
+				cards.forEach((card, index) => {
+					card.animate([
+						{ opacity : 0, transform : 'translateY(20px)' },
+						{ opacity : 1, transform : 'translateY(0px)' }
+					], {
+						duration : 350,
+						delay : index * 40,
+						easing : 'ease-out',
+						fill : 'backwards'
+					});
+				});
+			}
+			
+			// 다음 조회 위치저장
+			button.dataset.offset = data.nextOffset;
+			
+			// 남은 글이 없으면 버튼 숨김
+			button.parentElement.hidden = !data.hasMore;
+			
+		} catch (error) {
+			console.error('게시글 더보기 실패' , error);
+			feedback.textContent = 
+				'목록을 불러오지 못했습니다. 다시 눌러주세요.';
+				feedback.hidden = false;
+		} finally {
+			loading = false;
+			button.disabled = false;
+			button.removeAttribute('aria-busy');
+			label.textContent = '게시글 더보기';
+		}
+	});
+})();

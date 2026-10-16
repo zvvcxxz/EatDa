@@ -139,10 +139,14 @@
 							th:href="@{/together/meet/{id}/edit(id=${meet.meet_id})}"> <i
 							class="fa-solid fa-pen" aria-hidden="true"></i> 수정
 						</a>
-
-						<button type="button" class="btn btn-danger" data-pending="글 삭제">
-							<i class="fa-solid fa-trash-can" aria-hidden="true"></i> 삭제
-						</button>
+						<!-- 글 삭제 -->
+						<form method="post" th:if="${isAuthor == true}"
+							th:action="@{/together/meet/{id}/delete(id = ${meet.meet_id})}"
+							onsubmit="return confirm('게시글을 삭제하시겠습니까?');">
+							<button type="submit" class="btn btn-danger">
+								<i class="fa-solid fa-trash-can" aria-hidden="true"></i> 삭제
+							</button>
+						</form>
 					</div>
 				</div>
 			</article>
@@ -273,6 +277,18 @@
 
 						<p class="reply-content" th:text="${comment.content}"></p>
 					</article>
+				</div>
+
+				<!-- 댓글 더보기 버튼 -->
+				<div class="reply-more-wrap" th:if="${commentHasMore == true}">
+					<button type="button" class="btn-more-comments"
+						id="btnLoadMoreComments"
+						th:attr="data-offset=${commentNextOffset},
+                     data-author-id=${meet.author_id},
+                     data-url=@{/together/meet/{id}/comments/more(id=${meet.meet_id})}">
+						<span>댓글 더보기</span> <i class="fa-solid fa-chevron-down"
+							aria-hidden="true"></i>
+					</button>
 				</div>
 			</section>
 		</th:block>

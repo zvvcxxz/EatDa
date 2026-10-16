@@ -15,8 +15,8 @@
 		<!-- 등록 / 수정 결과 알림 -->
 		<div class="tg-result-toast" data-list-result-toast role="status"
 			aria-live="polite" aria-atomic="true" th:if="${message != null}">
-			<i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-			<span th:text="${message}"></span>
+			<i class="fa-solid fa-circle-info" aria-hidden="true"></i> <span
+				th:text="${message}"></span>
 		</div>
 		<section class="tg-hero">
 			<div class="tg-eyebrow">
@@ -28,7 +28,7 @@
 			<p>부담 없이 함께 식사할 이웃을 만나보세요.</p>
 		</section>
 
-		
+
 		<div class="tg-toolbar">
 			<nav class="tg-tabs" aria-label="Together 게시판">
 				<a class="tg-tab is-active" aria-current="page"
@@ -52,7 +52,7 @@
 							class="tg-badge tg-status" th:if="${post.meet_status != null}"
 							th:text="${statusLabels != null and statusLabels.containsKey(post.meet_status) ? statusLabels.get(post.meet_status) : '상태 ' + post.meet_status}"></span>
 					</div>
-					
+
 					<a class="tg-title"
 						th:href="@{/together/meet/detail/{id}(id=${post.meet_id})}"
 						th:text="${post.title}"></a>
@@ -76,7 +76,7 @@
 					<p>
 						최대 참여 인원 <strong th:text="${post.max_participants}"></strong>명
 					</p>
-					
+
 					<div class="tg-author">
 						<i class="fa-solid fa-user" aria-hidden="true"></i><span
 							th:text="${post.name}"></span>
@@ -91,7 +91,16 @@
 			</article>
 		</section>
 
-		
+		<!-- 게시글 더보기 버튼 -->
+		<div class="tg-more-wrap" th:if="${hasMore == true}">
+			<button type="button" class="tg-btn-more" id="btnLoadMorePosts"
+				th:attr="data-offset=${nextOffset},
+                     data-url=@{/together/meet/more}">
+				<span>게시글 더보기</span> <i class="fa-solid fa-chevron-down"
+					aria-hidden="true"></i>
+			</button>
+		</div>
+
 		<!-- 글쓰기 모달 -->
 		<dialog class="tg-dialog" data-write-dialog
 			aria-labelledby="meet-write-title">
@@ -100,7 +109,7 @@
 			<button type="button" class="tg-close" data-close-write
 				aria-label="글쓰기 닫기">×</button>
 		</div>
-		
+
 		<!-- 글 등록 -->
 		<form th:action="@{/together/meet/write}" method="post"
 			data-write-form>
