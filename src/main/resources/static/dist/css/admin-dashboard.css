@@ -210,3 +210,13 @@ dialog::backdrop { background: rgba(37, 29, 21, .42); }
 .profile-footer { display: flex; justify-content: space-between; margin-top: 25px; }
 .profile-footer .btn-group { display: flex; gap: 8px; }
 .history-title { font-size: 16px; font-weight: 700; margin: 40px 0 15px 0; }
+
+/* 태그 관리 화면 전용 스타일 */
+.cursor-pointer { cursor: pointer; }
+.tag-col-num { width: 80px; }
+.tag-col-group { width: 140px; }
+.tag-col-status { width: 100px; }
+.tag-col-date { width: 150px; }
+.tag-col-manage { width: 100px; }
+.tag-name-text { font-weight: 700; }
+.wrap-active-yn { display: none; }

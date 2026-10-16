@@ -1,105 +1,125 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{admin/layout/layout3}">
-
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
 <th:block layout:fragment="content">
-    
-    <div class="body-container">
-        <div class="body-title">
-            <h3><i class="bi bi-book"></i> 레시피 관리</h3>
-        </div>
-        
-        <div class="body-main">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="tab-all" data-source="" type="button" role="tab">전체 레시피</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-api" data-source="API" type="button" role="tab">공식 레시피</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-member" data-source="MEMBER" type="button" role="tab">모두의 레시피</button>
-                </li>
-            </ul>
+	<div class="admin-wrap">
+		<section class="page-heading">
+		    <div onclick="location.href='/'" style="cursor: pointer;">
+		        <p class="eyebrow">RECIPE MANAGEMENT</p>
+		        <h2>레시피 관리</h2>
+		        <p class="subtitle">등록된 레시피 데이터와 회원 작성 레시피를 관리해요.</p>
+		    </div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head" style="flex-direction: column; align-items: flex-start; padding-bottom: 0; border-bottom: none;">
+				<div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                    <div><h2>레시피 목록</h2></div>
+                </div>
+                <div class="custom-tabs" id="myTab">
+                    <button type="button" th:classappend="${sourceType == '' ? 'active' : ''}" 
+                            data-source="" onclick="searchTab(this)">전체 레시피</button>
+                    <button type="button" th:classappend="${sourceType == 'API' ? 'active' : ''}" 
+                            data-source="API" onclick="searchTab(this)">공식 레시피</button>
+                    <button type="button" th:classappend="${sourceType == 'MEMBER' ? 'active' : ''}" 
+                            data-source="MEMBER" onclick="searchTab(this)">모두의 레시피</button>
+                </div>
+			</div>
             
-            <div class="tab-content pt-3">
-                
-                <div class="row board-list-header">
-				    <div class="col-auto me-auto">
-				        <p class="form-control-plaintext">데이터 <span style="font-weight: 600; color: #0d6efd;" th:text="${dataCount}">0</span>개 
-				        (<span th:text="${page}">1</span>/<span th:text="${total_page}">1</span> 페이지)</p>
-				    </div>
-                    <div class="col-auto text-end">
-                        <form name="searchForm" class="d-flex justify-content-end">
-                            <select name="schType" class="form-select form-select-sm" style="width: 130px; margin-right: 5px;">
-                                <option value="title">레시피 제목</option>
-                                <option value="userName">작성자</option>
+            <div class="panel-body">
+                <div class="list-header-tools">
+                    <span class="total-count">
+                        총 <strong>[[${dataCount}]]</strong>개 (<strong>[[${page}]]</strong> / [[${total_page}]] 페이지)
+                    </span>
+                    
+                    <div class="search-tools">
+                        <form name="searchForm" th:action="@{/admin/recipe/list}" method="get" class="d-flex gap-2">
+                            <input type="hidden" name="page" th:value="${page}">
+                            <input type="hidden" name="sourceType" th:value="${sourceType}">
+                            
+                            <select name="schType" id="searchType" class="select-ui" style="width: 120px;">
+                                <option value="title" th:selected="${schType == 'title'}">레시피 제목</option>
+                                <option value="userName" th:selected="${schType == 'userName'}">작성자</option>
                             </select>
-                            <input type="text" name="kwd" class="form-control form-control-sm" style="width: 200px; margin-right: 5px;">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">검색</button>
+                            
+                            <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어 입력" onkeypress="if(event.keyCode==13) searchList();">
+                            
+                            <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
+                            <button type="button" class="custom-btn secondary" onclick="resetList()"><i class="bi bi-arrow-clockwise"></i></button>
                         </form>
                     </div>
                 </div>
-                
-                <table class="table table-hover board-list text-center" style="margin-top: 15px;">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="80">번호</th>
-                            <th width="100">출처</th>
-                            <th>제목</th>
-                            <th width="120">작성자</th>
-                            <th width="100">조회수</th>
-                            <th width="150">등록일</th>
-                            <th width="100">상태</th>
-                            <th width="100">관리</th>
-                        </tr>
-                    </thead>
-					<tbody id="listData">
-					    <tr th:if="${#lists.isEmpty(list)}">
-					        <td colspan="8" class="text-center" style="padding: 50px 0;">
-					            등록된 레시피가 존재하지 않습니다.
-					        </td>
-					    </tr>
-					    
-					    <tr th:each="dto : ${list}">
-					        <td th:text="${dto.recipeId}">1</td>
-					        <td>
-					            <span class="badge" 
-					                  th:classappend="${dto.sourceType == 'API' ? 'bg-primary' : 'bg-secondary'}"
-					                  th:text="${dto.sourceType == 'API' ? '공식' : '유저'}">출처</span>
-					        </td>
-					        
-					        <td class="text-start">
-					            <a th:href="@{/admin/recipe/article(recipeId=${dto.recipeId}, page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}" 
-					               th:text="${dto.title}" 
-					               class="text-decoration-none text-reset" style="font-weight: 500;">레시피 제목</a>
-					        </td>
-					        
-					        <td th:text="${dto.userName != null ? dto.userName : dto.loginId}">홍길동</td>
-					        
-					        <td th:text="${dto.viewCount}">0</td>
-					        <td th:text="${dto.createdAt}">2026-10-15</td>
-					        <td>
-					            <span th:if="${dto.status == 1}" class="text-success">정상</span>
-					            <span th:if="${dto.status == 0}" class="text-danger">숨김</span>
-					        </td>
-					        
-					        <td>
-					            <a th:href="@{/admin/recipe/article(recipeId=${dto.recipeId}, page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}" 
-					               class="btn btn-sm btn-outline-secondary">상세</a>
-					        </td>
-					    </tr>
-					</tbody>
-                </table>
-                
-                <div class="page-navigation text-center">
-                    페이징
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">번호</th>
+                                <th style="width: 100px;">출처</th>
+                                <th>제목</th>
+                                <th style="width: 120px;">작성자</th>
+                                <th style="width: 90px;">조회수</th>
+                                <th style="width: 140px;">등록일</th>
+                                <th style="width: 90px;">상태</th>
+                                <th style="width: 90px;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(list)}">
+                                <td colspan="8" class="empty">등록된 레시피가 존재하지 않습니다.</td>
+                            </tr>
+                            
+                            <tr th:each="dto, stat : ${list}">
+                                <td th:text="${dataCount - (page - 1) * size - stat.index}">1</td>
+                                <td>
+                                    <span class="custom-badge blue" th:if="${dto.sourceType == 'API'}">공식</span>
+                                    <span class="custom-badge gray" th:if="${dto.sourceType != 'API'}">유저</span>
+                                </td>
+                                <td class="cell-title">
+                                    <a th:href="@{/admin/recipe/article(recipeId=${dto.recipeId}, page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}" 
+                                       th:text="${dto.title}" style="color: inherit; text-decoration: none;">레시피 제목</a>
+                                </td>
+                                <td th:text="${dto.userName != null ? dto.userName : dto.loginId}">작성자</td>
+                                <td th:text="${dto.viewCount}">0</td>
+                                <td class="muted" th:text="${dto.createdAt}">2026-10-16</td>
+                                <td>
+                                    <span class="custom-badge green" th:if="${dto.status == 0}">정상</span>
+                                    <span class="custom-badge red" th:if="${dto.status == 1}">숨김</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/recipe/article(recipeId=${dto.recipeId}, page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}" 
+                                       class="custom-btn secondary small">상세</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
+                <div class="page-navigation page-navigation-wrap" th:if="${dataCount > 0}">
+                    <a th:if="${page > 1}" th:onclick="|goPage(${page - 1})|">이전</a>
+                    <span th:each="p : ${#numbers.sequence(1, total_page)}" 
+                          th:text="${p}" 
+                          th:classappend="${p == page} ? 'active' : ''" 
+                          th:onclick="|goPage(${p})|">1</span>
+                    <a th:if="${page < total_page}" th:onclick="|goPage(${page + 1})|">다음</a>
+                </div>
             </div>
-        </div>
-    </div>
+		</section>
+	</div>
+</th:block>
 
+<th:block layout:fragment="aside-container">
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>	
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+    <script th:src="@{/dist/js/admin-recipe.js}"></script>
 </th:block>
 </html>

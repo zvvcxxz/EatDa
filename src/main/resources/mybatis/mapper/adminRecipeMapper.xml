@@ -51,4 +51,11 @@
 		JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
 		WHERE r.RECIPE_ID = #{recipeId}
 	</select>
+	
+	<update id="updateRecipeStatus" parameterType="map">
+		UPDATE RECIPE
+		SET STATUS = #{status}
+		WHERE RECIPE_ID = #{recipeId}
+	</update>
+	
 </mapper>

@@ -19,7 +19,6 @@ public class AdminRecipeDto {
 	private int status;
 	private String blindReason;
 	
-	
 	private String createdAt;
 	private String updateAt;
 	

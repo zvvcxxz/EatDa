@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div onclick="location.href='/admin/tag/list'" class="cursor-pointer">
+				<p class="eyebrow">TAG MANAGEMENT</p>
+				<h2>태그 관리</h2>
+				<p class="subtitle">레시피 분류와 검색에 사용되는 해시태그를 관리해요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>태그 목록</h2></div>
+				<button type="button" class="custom-btn primary" onclick="openTagDialog('write')">+ 태그 등록</button>
+			</div>
+            
+            <div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th class="tag-col-num">번호</th>
+                            <th class="tag-col-group">태그 그룹</th>
+                            <th>태그명</th>
+                            <th class="tag-col-status">상태</th>
+                            <th class="tag-col-date">등록일</th>
+                            <th class="tag-col-manage">관리</th>
+						</tr>
+					</thead>
+					<tbody id="tag-rows">
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="6" class="empty">등록된 태그가 없습니다.</td>
+                        </tr>
+						<tr th:each="dto, stat : ${list}">
+						    <td th:text="${dataCount - (page-1) * size - stat.index}">1</td>
+						    <td>
+						        <span class="custom-badge blue" th:text="${dto.tagGroup}">TIME</span>
+						    </td>
+						    <td class="cell-title tag-name-text">
+                                #<span th:text="${dto.tagName}">10분요리</span>
+                            </td>
+						    <td>
+						        <span class="custom-badge green" th:if="${dto.activeYn == 'Y'}">사용중</span>
+						        <span class="custom-badge red" th:if="${dto.activeYn == 'N'}">미사용</span>
+						    </td>
+						    <td class="muted" th:text="${dto.createdAt}">2026-10-16</td>
+						    <td>
+                                <button type="button" class="custom-btn secondary small" 
+                                        th:onclick="openTagDialog('update', [[${dto.tagId}]], [[${dto.tagName}]], [[${dto.tagGroup}]], [[${dto.activeYn}]])">
+                                    수정
+                                </button>
+                            </td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+            
+            <div class="page-navigation page-navigation-wrap"></div>
+
+            <div class="search-section">
+                <form name="searchForm" class="form-search">
+                    <select name="schType" class="select-ui">
+                        <option value="tagName" th:selected="${schType=='tagName'}">태그명</option>
+                        <option value="tagGroup" th:selected="${schType=='tagGroup'}">태그 그룹명</option>
+                    </select>
+                    <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
+                    <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/tag/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                </form>
+            </div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<dialog id="tag-dialog">
+		<div class="dialog-head">
+			<h2 id="dialog-title">태그 등록</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<form id="tag-form" class="form-grid" method="post" th:action="@{/admin/tag/write}">
+                <input type="hidden" name="tagId" id="form-tagId" value="0">
+                <input type="hidden" name="page" th:value="${page}">
+                
+				<label class="field">
+                    <span>태그 그룹 분류</span>
+                    <select name="tagGroup" id="form-tagGroup" class="select-ui" required>
+                        <option value="TIME">조리시간 (TIME)</option>
+                        <option value="TASTE">맛 (TASTE)</option>
+                        <option value="LIFE">라이프 (LIFE)</option>
+                        <option value="SITUATION">상황 (SITUATION)</option>
+                        <option value="FOOD_TYPE">종류 (FOOD_TYPE)</option>
+                        <option value="HEALTH">건강 (HEALTH)</option>
+                        <option value="METHOD">조리법 (METHOD)</option>
+                    </select>
+                </label>
+                
+				<label class="field">
+                    <span>태그 이름 (# 없이 입력)</span>
+                    <input type="text" name="tagName" id="form-tagName" required placeholder="예: 에어프라이어">
+                </label>
+                
+                <label class="field wrap-active-yn" id="wrap-activeYn">
+                    <span>사용 여부 (상태)</span>
+                    <select name="activeYn" id="form-activeYn" class="select-ui">
+                        <option value="Y">사용중 (Y)</option>
+                        <option value="N">미사용 (N - 숨김처리)</option>
+                    </select>
+                </label>
+                
+				<button type="submit" class="custom-btn primary full mt-2" id="dialog-submit-btn">태그 등록</button>
+			</form>
+		</div>
+	</dialog>
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript" th:src="@{/dist/posts/renderPaging.js}"></script>
+    
+    <script type="text/javascript">
+        window.tagData = {
+            page: '[[${page}]]',
+            size: '[[${size}]]',
+            dataCount: '[[${dataCount}]]',
+            schType: '[[${schType}]]',
+            kwd: '[[${kwd}]]'
+        };
+    </script>
+    
+    <script type="text/javascript" th:src="@{/dist/js/admin-tag.js}"></script>
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>

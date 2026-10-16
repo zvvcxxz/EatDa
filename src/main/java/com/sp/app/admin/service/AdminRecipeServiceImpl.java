@@ -52,4 +52,14 @@ public class AdminRecipeServiceImpl implements AdminRecipeService{
 		
 		return dto;
 	}
+
+	@Override
+	public void updateRecipeStatus(Map<String, Object> map) throws Exception {
+		try {
+			mapper.updateRecipeStatus(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
 }
