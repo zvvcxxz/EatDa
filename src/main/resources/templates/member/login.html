@@ -83,7 +83,6 @@
 
 <th:block layout:fragment="script">
     <script type="text/javascript">
-        // 페이지 로드 시 localStorage에서 저장된 아이디 복원
         document.addEventListener("DOMContentLoaded", function() {
             const savedId = localStorage.getItem("savedLoginId");
             if (savedId) {
@@ -92,7 +91,6 @@
             }
         });
 
-        // 로그인 전송 처리
         function sendLogin() {
             const f = document.loginForm;
 
@@ -107,8 +105,6 @@
                 f.password.focus();
                 return;
             }
-
-            // 아이디 저장 처리
             const rememberMeChk = document.getElementById("rememberMe").checked;
             if (rememberMeChk) {
                 localStorage.setItem("savedLoginId", f.login_id.value.trim());

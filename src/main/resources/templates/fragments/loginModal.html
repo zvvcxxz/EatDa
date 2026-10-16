@@ -15,7 +15,6 @@
     </div>
 
     <form action="/member/login" th:action="@{/member/login}" method="post" class="login-form">
-      <!-- th:action 폼은 Spring에서 CSRF가 활성화되면 토큰을 자동 삽입합니다. -->
       <div class="login-field">
         <label for="modal-login-id">아이디 / 이메일</label>
         <input type="text" id="modal-login-id" name="login_id" autocomplete="username"
@@ -27,16 +26,16 @@
                autocomplete="current-password" placeholder="••••••••" required>
       </div>
       <div class="login-options">
-        <label class="login-remember">
-          <input type="checkbox" name="remember-me">
-          <span>로그인 상태 유지</span>
-        </label>
-        <nav class="login-links" aria-label="회원 계정 메뉴">
-          <a class="login-signup" href="/member/account" th:href="@{/member/account}">회원가입</a>
-          <span class="login-divider" aria-hidden="true">|</span>
-          <a href="/member/pwdFind" th:href="@{/member/pwdFind}">비밀번호 찾기</a>
-        </nav>
-      </div>
+		  <label class="login-remember">
+		    <input type="checkbox" id="modal-remember-id" name="remember-id">
+		    <span>아이디 저장</span>
+		  </label>
+		  <nav class="login-links" aria-label="회원 계정 메뉴">
+		    <a class="login-signup" href="/member/account" th:href="@{/member/account}">회원가입</a>
+		    <span class="login-divider" aria-hidden="true">|</span>
+		    <a href="/member/pwdFind" th:href="@{/member/pwdFind}">비밀번호 찾기</a>
+		  </nav>
+		</div>
       <button type="submit" class="login-submit">로그인하고 조리 시작하기 🍳</button>
     </form>
 
@@ -48,6 +47,34 @@
         <a href="/oauth/google" th:href="@{/oauth/google}" class="login-social-button google">구글</a>
       </div>
     </div>
+
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', () => {
+			  const loginForm = document.querySelector('.login-form');
+			  const loginIdInput = document.getElementById('modal-login-id');
+			  const rememberIdCheckbox = document.getElementById('modal-remember-id');
+			
+			  // 1. 페이지 로드 시 저장된 아이디 불러오기
+			  const savedLoginId = localStorage.getItem('savedLoginId');
+			  if (savedLoginId) {
+			    loginIdInput.value = savedLoginId;
+			    rememberIdCheckbox.checked = true;
+			  }
+			
+			  // 2. 로그인 폼 제출(submit) 시 아이디 저장 여부 처리
+			  if (loginForm) {
+			    loginForm.addEventListener('submit', () => {
+			      if (rememberIdCheckbox.checked) {
+			        // '아이디 저장' 체크 시 localStorage에 저장
+			        localStorage.setItem('savedLoginId', loginIdInput.value.trim());
+			      } else {
+			        // 체크 해제 시 저장된 아이디 삭제
+			        localStorage.removeItem('savedLoginId');
+			      }
+			    });
+			  }
+		});
+	</script>
   </dialog>
 </body>
 </html>

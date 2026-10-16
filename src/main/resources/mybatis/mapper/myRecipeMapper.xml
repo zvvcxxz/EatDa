@@ -162,6 +162,7 @@
                     r.DIFFICULTY AS difficulty,
                     r.SERVINGS AS servings,
                     r.CREATED_AT AS createdAt,
+                    r.STATUS AS status,
                     (SELECT COUNT(*) FROM RECIPE_LIKE rl WHERE rl.RECIPE_ID = r.RECIPE_ID) AS likeCount,
                     (SELECT COUNT(*) FROM RECIPE_BOOKMARK rb WHERE rb.RECIPE_ID = r.RECIPE_ID) AS bookmarkCount,
                     (SELECT COUNT(*) FROM RECIPE_REVIEW rr WHERE rr.RECIPE_ID = r.RECIPE_ID) AS reviewCount
@@ -197,6 +198,7 @@
                     r.COOK_MINUTES AS cookMinutes,
                     r.DIFFICULTY AS difficulty,
                     r.SERVINGS AS servings,
+                    r.STATUS AS status,
                     rb.CREATED_AT AS bookmarkedAt,
                     (SELECT COUNT(*) FROM RECIPE_LIKE rl WHERE rl.RECIPE_ID = r.RECIPE_ID) AS likeCount,
                     (SELECT COUNT(*) FROM RECIPE_BOOKMARK rb_sub WHERE rb_sub.RECIPE_ID = r.RECIPE_ID) AS bookmarkCount,

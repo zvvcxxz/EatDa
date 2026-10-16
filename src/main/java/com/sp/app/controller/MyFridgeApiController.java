@@ -29,8 +29,7 @@ public class MyFridgeApiController {
 
     private final MyFridgeService fridgeService;
 
-    // 로그인 회원 ID 추출 헬퍼 메서드
-    private Long getLoginMemberId() {
+    private Long getLoginMemberId() { //데이터 주인 확인용
         SessionInfo info = LoginMemberUtil.getSessionInfo();
         if (info == null || info.getMember_id() == null) {
             throw new IllegalStateException("로그인이 필요한 서비스입니다.");

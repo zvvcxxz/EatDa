@@ -36,6 +36,8 @@ public class MyRecipeDto {
     private int likeCount;              // 좋아요 수
     private int bookmarkCount;          // 찜 수
     private int reviewCount;            // 후기 수
+    private int myRecipeCount;          // 내가 작성한 레시피 수
+    private int favoritesCount;         // 내가 찜한 레시피 수
 
     // 3. 연관 세부 데이터 리스트
     private List<IngredientItem> ingredients; // 레시피 재료
