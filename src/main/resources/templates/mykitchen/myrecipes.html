@@ -14,15 +14,16 @@
             <a th:if="${tab == 'mine'}" class="btn btn-primary" th:href="@{/community/recipes/write}">+ 레시피 작성</a>
         </div>
 
-        <!-- 정렬 툴바 -->
-        <form method="get" th:action="${tab == 'mine' ? '/my/recipes' : '/my/bookmarks'}" class="toolbar">
-            <label class="sr-only" for="recipeSort">정렬</label>
-            <select name="sort" id="recipeSort" onchange="this.form.submit()">
-                <option value="latest" th:selected="${param.sort == null or param.sort[0] == 'latest'}" 
-                        th:text="${tab == 'favorites' ? '최신 찜 순' : '최신순'}">최신순</option>
-                <option value="likes" th:selected="${param.sort != null and param.sort[0] == 'likes'}">좋아요순</option>
-            </select>
-        </form>
+		<!-- 정렬 툴바 -->
+		<form method="get" th:action="${tab == 'mine' ? '/my/recipes' : '/my/bookmarks'}" class="toolbar">
+		    <input type="hidden" name="page" value="1">
+		    <label class="sr-only" for="recipeSort">정렬</label>
+		    <select name="sort" id="recipeSort" onchange="this.form.submit()">
+		        <option value="latest" th:selected="${sort == 'latest'}" 
+		                th:text="${tab == 'favorites' ? '최신 찜 순' : '최신순'}">최신순</option>
+		        <option value="likes" th:selected="${sort == 'likes'}">좋아요순</option>
+		    </select>
+		</form>
 
         <!-- 데이터 없음 상태 -->
         <div class="empty-state" th:if="${#lists.isEmpty(recipes)}">
@@ -83,6 +84,27 @@
                 </div>
             </article>
         </div>
+        
+        <!-- 페이징 UI (이전/다음 경로 동적 처리 및 active 클래스 적용) -->
+		<div class="pagination-container" th:if="${totalPages > 1}">
+		    <div class="pagination">
+		        <!-- 이전 페이지 버튼 -->
+		        <a th:if="${page > 1}" 
+		           th:href="@{${tab == 'mine' ? '/my/recipes' : '/my/bookmarks'}(page=${page - 1}, size=${size}, sort=${sort})}" 
+		           class="btn btn-light btn-small">이전</a>
+		
+		        <!-- 페이지 번호 반복 출력 -->
+		        <a th:each="i : ${#numbers.sequence(1, totalPages)}" 
+		           th:href="@{${tab == 'mine' ? '/my/recipes' : '/my/bookmarks'}(page=${i}, size=${size}, sort=${sort})}" 
+		           th:text="${i}" 
+		           th:class="${i == page} ? 'active' : ''">1</a>
+		
+		        <!-- 다음 페이지 버튼 -->
+		        <a th:if="${page < totalPages}" 
+		           th:href="@{${tab == 'mine' ? '/my/recipes' : '/my/bookmarks'}(page=${page + 1}, size=${size}, sort=${sort})}" 
+		           class="btn btn-light btn-small">다음</a>
+		    </div>
+		</div>
     </section>
 </th:block>
 

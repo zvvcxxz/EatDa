@@ -1,6 +1,10 @@
 package com.sp.app.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -112,4 +116,15 @@ public class GlobalExceptionHandler {
 		
 		return mav;
 	}
+	
+	// (myfridge/사용자 입력 json을 위한 추가) 단위 유효성 검증, 잘못된 데이터 전달 등
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+
+        log.info("BAD_REQUEST (IllegalArgument) - {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }

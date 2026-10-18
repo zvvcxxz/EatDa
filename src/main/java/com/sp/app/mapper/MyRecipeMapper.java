@@ -25,12 +25,12 @@ public interface MyRecipeMapper {
     
     //내가 작성한 레시피 목록 & 개수
     List<MyRecipeDto> selectMyRecipes(@Param("memberId") Long memberId, 
-            @Param("offset") int offset, @Param("size") int size);  
+            @Param("offset") int offset, @Param("size") int size, @Param("sort") String sort);  
     long countMyRecipes(@Param("memberId") Long memberId);
 
     //내가 찜한 레시피 목록 & 개수
     List<MyRecipeDto> selectBookmarkedRecipes(@Param("memberId") Long memberId, 
-            @Param("offset") int offset, @Param("size") int size);
+            @Param("offset") int offset, @Param("size") int size, @Param("sort") String sort);
     long countBookmarkedRecipes(@Param("memberId") Long memberId);
 
 }

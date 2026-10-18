@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!app) return;
 
     const apiBase = app.dataset.apiBase || "";
-    const kitchenUrl = app.dataset.kitchenUrl || "/kitchen";
+    const kitchenUrl = app.dataset.kitchenUrl || "/my";
 
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
@@ -28,10 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3500);
     }
 
-    // 공통 API 요청 헬퍼
+    // 공통 API 요청 헬퍼 (CSRF 자동 처리 및 루트 경로 구분)
     async function request(path, options = {}) {
         const headers = new Headers(options.headers);
-        headers.set("Accept", "application/json");
+        headers.set("Accept", "application/json, text/html, */*");
 
         if (options.body != null) {
             headers.set("Content-Type", "application/json");
@@ -43,34 +43,41 @@ document.addEventListener("DOMContentLoaded", () => {
             headers.set(csrfHeader, csrfToken);
         }
 
-        const response = await fetch(`${apiBase}${path}`, {
+        // /my 및 /community 로 시작하는 루트 API 경로는 apiBase 제외
+        const targetUrl = (options.isRoot || path.startsWith("/community") || path.startsWith("/my") || path.startsWith("http"))
+            ? path
+            : `${apiBase}${path}`;
+
+        const response = await fetch(targetUrl, {
             ...options,
             method,
             headers,
             credentials: "same-origin"
         });
 
+        // 1. 실제 로그인 페이지로 리다이렉트된 경우만 체크
         if (response.redirected) {
-            throw new Error("로그인 상태를 확인한 후 다시 시도해 주세요.");
+            if (response.url.includes("/login") || response.url.includes("/member/login")) {
+                throw new Error("로그인 상태를 확인한 후 다시 시도해 주세요.");
+            }
         }
 
         const contentType = response.headers.get("content-type") || "";
         let data = null;
 
-        if (response.status !== 204 && contentType.includes("json")) {
+        // 2. JSON 형식 응답인 경우 데이터 파싱
+        if (contentType.includes("json")) {
             data = await response.json();
         }
 
+        // 3. HTTP 에러 상태코드(4xx, 5xx) 처리
         if (!response.ok) {
             if (response.status === 401) throw new Error("로그인이 필요합니다.");
             if (response.status === 403) throw new Error("접근 권한이 없거나 인증 정보가 만료되었습니다.");
             throw new Error(data?.message || data?.detail || "요청 처리 중 오류가 발생했습니다.");
         }
 
-        if (response.status !== 204 && !contentType.includes("json")) {
-            throw new Error("서버 응답 형식을 확인해 주세요.");
-        }
-
+        // 4. response.ok (2xx 성공) 라면 정상 리턴
         return data;
     }
 
@@ -187,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return { clear, schedule };
     }
 
-    // ==================== [1. 쪽지 회원 검색 기능] ====================
+    // 1. 쪽지 회원 검색 기능
     const recipientAutocomplete = createAutocomplete({
         input: $("recipientSearch"),
         container: $("recipientSuggestions"),
@@ -255,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
-    // ==================== [2. 관심 태그 관리] ====================
+    // 2. 관심 태그 및 카테고리 관리
     $("tagForm")?.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -266,23 +273,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (button) button.disabled = true;
 
         try {
+            const categoryIds = [...form.querySelectorAll('input[name="categoryIds"]:checked')]
+                .map((input) => Number(input.value));
+
             const tagIds = [...form.querySelectorAll('input[name="tagIds"]:checked')]
                 .map((input) => Number(input.value));
 
-            await request("/tags", {
+            // [수정] 컨트롤러 매핑 주소 /my/preferences 로 변경
+            await request("/my/preferences", {
                 method: "PUT",
-                body: JSON.stringify({ tagIds })
+                body: JSON.stringify({ categoryIds, tagIds })
             });
 
-            toast("관심 태그를 저장했습니다.");
+            toast("관심 카테고리 및 태그가 저장되었습니다.");
         } catch (error) {
-            toast(error.message);
+            toast(error.message || "저장 중 오류가 발생했습니다.");
         } finally {
             if (button) button.disabled = false;
         }
     });
 
-    // ==================== [3. 기타 공통 액션 처리 (레시피, 알림 등)] ====================
+    // 3. 기타 공통 액션 처리 (레시피, 알림 등)
     function navigateToInternalUrl(path) {
         if (!path) {
             toast("관련 콘텐츠가 삭제되었거나 더 이상 열람할 수 없습니다.");
@@ -304,12 +315,13 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (action) {
             case "delete-recipe":
                 if (!confirm("레시피를 삭제할까요? 삭제 후에는 복구할 수 없습니다.")) return;
-                await request(`/recipes/${id}`, { method: "DELETE" });
+                await request(`/community/recipes/${id}/delete`, { method: "POST" });
                 location.reload();
                 break;
 
             case "remove-favorite":
-                await request(`/favorites/${id}`, { method: "DELETE" });
+                if (!confirm("찜 목록에서 삭제하시겠습니까?")) return;
+                await request(`/community/recipes/bookmark/${id}`, { method: "DELETE" });
                 location.reload();
                 break;
 

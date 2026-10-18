@@ -22,4 +22,5 @@ public class MyRecipeRecommendDto {
     private double matchRate;                   // 일치율 (%)
     private List<String> matchingIngredients;   // 보유 일치 재료명 리스트
     private List<String> missingIngredients;    // 부족한 재료명 리스트
+    private List<String> urgentIngredients; //임박재료
 }

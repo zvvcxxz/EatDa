@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="input-field">
                                     <label class="input-sublabel">단위</label>
-                                    <input type="text" v-model="item.unit" placeholder="예: 개, g">
+                                    <input type="text" v-model="item.unit" maxlength="6" placeholder="예: 개, g">
                                 </div>
                                 <div class="input-field">
                                     <label class="input-sublabel">유통기한(선택)</label>
@@ -125,7 +125,7 @@
                 </div>
                 <div class="input-field">
                     <label class="input-sublabel">단위</label>
-                    <input type="text" v-model="editForm.unit" class="form-control" placeholder="단위 (예: 개, g, ml)">
+                    <input type="text" v-model="editForm.unit" maxlength="6" class="form-control" placeholder="단위 (예: 개, g, ml)">
                 </div>
                 <div class="input-field">
                     <label class="input-sublabel">유통기한(선택)</label>
@@ -163,8 +163,13 @@
 	                    <img :src="recipe.thumbnailUrl || recipe.mainPhoto || '/dist/images/default-recipe.png'" 
 	                         :alt="recipe.recipeTitle || recipe.title"
 	                         onerror="this.src='https://via.placeholder.com/300x200?text=EatDa+Recipe'">
-	                    <span class="match-score-badge" v-if="recipe.matchRate || recipe.score || recipe.matchCount">
-	                        🎯 {{ Math.round(recipe.matchRate || recipe.score || 80) }}% 일치
+	                    
+	                    <!-- 💡 1) 임박 재료 포함 시 배지 강조 표시 -->
+	                    <span class="urgent-badge" v-if="recipe.urgentMatchCount > 0 || (recipe.urgentIngredients && recipe.urgentIngredients.length > 0)">
+	                        🔥 임박 재료 {{ recipe.urgentMatchCount || recipe.urgentIngredients.length }}개 활용!
+	                    </span>
+	                    <span class="match-score-badge">
+	                        🎯 {{ Math.round(recipe.matchRate || 0) }}% 일치
 	                    </span>
 	                </div>
 	                
@@ -175,13 +180,18 @@
 	                        </a>
 	                    </h4>
 	                    
-	                    <!-- 💡 보유 재료 및 부족한 재료 나열 부분 -->
 	                    <div class="ingredient-match-details">
 	                        <!-- 보유 일치 재료 -->
 	                        <div v-if="recipe.matchingIngredients && recipe.matchingIngredients.length > 0">
-	                            <span class="tag-title match">✅ 보유 일치 재료 ({{ recipe.matchingIngredients.length }}개)</span>
+	                            <span class="tag-title match">
+	                                ✅ 보유 일치 재료 ({{ recipe.matchingIngredients.length }}개)
+	                            </span>
 	                            <div class="chip-group">
-	                                <span class="recipe-ing-chip match" v-for="ing in recipe.matchingIngredients" :key="ing">
+	                                <!-- 💡 2) 임박 재료에 해당하는 칩은 'urgent-chip' 클래스 및 ⏰ 이모지 부여 -->
+	                                <span class="recipe-ing-chip match" 
+	                                      :class="{ 'urgent-chip': recipe.urgentIngredients && recipe.urgentIngredients.includes(ing) }"
+	                                      v-for="ing in recipe.matchingIngredients" :key="ing">
+	                                    <template v-if="recipe.urgentIngredients && recipe.urgentIngredients.includes(ing)">⏰ </template>
 	                                    {{ ing }}
 	                                </span>
 	                            </div>

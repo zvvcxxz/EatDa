@@ -18,9 +18,9 @@ public class MyRecipeServiceImpl implements MyRecipeService {
 	private final MyRecipeMapper myRecipeMapper;
 	
 	@Override
-	public List<MyRecipeDto> selectMyRecipes(Long memberId, int offset, int size) {
+	public List<MyRecipeDto> selectMyRecipes(Long memberId, int offset, int size, String sort) {
 		List<MyRecipeDto> list = null;
-		list = myRecipeMapper.selectMyRecipes(memberId, offset, size);
+		list = myRecipeMapper.selectMyRecipes(memberId, offset, size, sort);
 		
 		return list;
 	}
@@ -33,9 +33,9 @@ public class MyRecipeServiceImpl implements MyRecipeService {
 	}
 
 	@Override
-	public List<MyRecipeDto> selectBookmarkedRecipes(Long memberId, int offset, int size) {
+	public List<MyRecipeDto> selectBookmarkedRecipes(Long memberId, int offset, int size, String sort) {
 		List<MyRecipeDto> list = null;
-		list = myRecipeMapper.selectBookmarkedRecipes(memberId, offset, size);
+		list = myRecipeMapper.selectBookmarkedRecipes(memberId, offset, size, sort);
 
 		return list;
 	}

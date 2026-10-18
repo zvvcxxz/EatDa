@@ -364,7 +364,8 @@ createApp({
                     loadFridgeItems();
                 })
                 .catch(err => {
-                    alert('수정에 실패했습니다.');
+					const errorMessage = err.response?.data?.message || '수정에 실패했습니다.';
+                    alert(errorMessage);
                     console.error(err);
                 });
         };

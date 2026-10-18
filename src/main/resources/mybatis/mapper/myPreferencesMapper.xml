@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sp.app.mapper.MyPreferencesMapper">
+
+    <!-- 1-1. 전체 카테고리 및 회원 선택 여부 조회 -->
+    <select id="selectCategoriesWithMemberPref" resultType="com.sp.app.domain.dto.MyPreferencesDto$CategoryItem">
+        SELECT 
+            c.CATEGORY_ID AS categoryId,
+            c.CATEGORY_CODE AS categoryCode,
+            c.CATEGORY_NAME AS categoryName,
+            c.DESCRIPTION AS description,
+            CASE WHEN mpc.MEMBER_ID IS NOT NULL THEN 1 ELSE 0 END AS selected
+        FROM CATEGORY c
+        LEFT JOIN MEMBER_PREF_CATEGORY mpc 
+               ON c.CATEGORY_ID = mpc.CATEGORY_ID AND mpc.MEMBER_ID = #{memberId}
+        WHERE c.ACTIVE_YN = 'Y'
+        ORDER BY c.SORT_ORDER ASC, c.CATEGORY_ID ASC
+    </select>
+
+    <!-- 1-2. 전체 태그 및 회원 선택 여부 조회 -->
+    <select id="selectTagsWithMemberPref" resultType="com.sp.app.domain.dto.MyPreferencesDto$TagItem">
+        SELECT 
+            t.TAG_ID AS tagId,
+            t.TAG_NAME AS tagName,
+            t.TAG_GROUP AS tagGroup,
+            CASE WHEN mpt.MEMBER_ID IS NOT NULL THEN 1 ELSE 0 END AS selected
+        FROM TAG t
+        LEFT JOIN MEMBER_PREF_TAG mpt 
+               ON t.TAG_ID = mpt.TAG_ID AND mpt.MEMBER_ID = #{memberId}
+        WHERE t.ACTIVE_YN = 'Y'
+        ORDER BY t.TAG_ID ASC
+    </select>
+
+    <!-- 2-1. 기존 카테고리 선호 삭제 -->
+    <delete id="deleteMemberCategories">
+        DELETE FROM MEMBER_PREF_CATEGORY
+        WHERE MEMBER_ID = #{memberId}
+    </delete>
+
+    <!-- 2-2. 기존 태그 선호 삭제 -->
+    <delete id="deleteMemberTags">
+        DELETE FROM MEMBER_PREF_TAG
+        WHERE MEMBER_ID = #{memberId}
+    </delete>
+
+    <!-- 3-1. 카테고리 선호 일괄 등록-->
+    <insert id="insertMemberCategories">
+        INSERT ALL
+        <foreach collection="categoryIds" item="categoryId">
+            INTO MEMBER_PREF_CATEGORY (MEMBER_ID, CATEGORY_ID, CREATED_AT)
+            VALUES (#{memberId}, #{categoryId}, SYSTIMESTAMP)
+        </foreach>
+        SELECT * FROM DUAL
+    </insert>
+
+    <!-- 3-2. 태그 선호 일괄 등록-->
+    <insert id="insertMemberTags">
+        INSERT ALL
+        <foreach collection="tagIds" item="tagId">
+            INTO MEMBER_PREF_TAG (MEMBER_ID, TAG_ID, CREATED_AT)
+            VALUES (#{memberId}, #{tagId}, SYSTIMESTAMP)
+        </foreach>
+        SELECT * FROM DUAL
+    </insert>
+
+</mapper>
