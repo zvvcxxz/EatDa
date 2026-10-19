@@ -220,3 +220,6 @@ dialog::backdrop { background: rgba(37, 29, 21, .42); }
 .tag-col-manage { width: 100px; }
 .tag-name-text { font-weight: 700; }
 .wrap-active-yn { display: none; }
+
+/* 테이블 액션 버튼 그룹 */
+.table-action-btns {display: flex;gap: 4px;justify-content: center;}

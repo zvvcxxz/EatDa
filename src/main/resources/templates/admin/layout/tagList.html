@@ -53,10 +53,7 @@
 						    </td>
 						    <td class="muted" th:text="${dto.createdAt}">2026-10-16</td>
 						    <td>
-                                <button type="button" class="custom-btn secondary small" 
-                                        th:onclick="openTagDialog('update', [[${dto.tagId}]], [[${dto.tagName}]], [[${dto.tagGroup}]], [[${dto.activeYn}]])">
-                                    수정
-                                </button>
+								<button type="button" class="custom-btn secondary small" th:onclick="openTagDialog('update', [[${dto.tagId}]], '[[${dto.tagName}]]', '[[${dto.tagGroup}]]', '[[${dto.activeYn}]]')">수정</button>
                             </td>
 						</tr>
 					</tbody>

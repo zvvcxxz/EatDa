@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.admin.mapper.AdminTagMapper">
+	<sql id="where-list">
+		<if test="kwd != null and kwd != ''">
+			<choose>
+				<when test="schType == 'tagName'">
+					AND INSTR(TAG_NAME, #{kwd}) &gt; 0
+				</when>
+				<when test="schType == 'tagGroup'">
+					AND INSTR(TAG_GROUP, UPPER(#{kwd})) &gt; 0
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<insert id="insertTag" parameterType="com.sp.app.admin.domain.dto.AdminTagDto">
+		INSERT INTO TAG (
+			TAG_ID, TAG_NAME, TAG_GROUP, ACTIVE_YN, CREATED_AT, UPDATED_AT
+		) VALUES (
+			SEQ_TAG.NEXTVAL, #{tagName}, #{tagGroup}, NVL(#{activeYn, jdbcType=VARCHAR}, 'Y'), SYSTIMESTAMP, SYSTIMESTAMP
+		)
+	</insert>
+	
+	<update id="updateTag" parameterType="com.sp.app.admin.domain.dto.AdminTagDto">
+		UPDATE TAG SET
+			TAG_NAME = #{tagName},
+			TAG_GROUP = #{tagGroup},
+			ACTIVE_YN = NVL(#{activeYn, jdbcType=VARCHAR}, 'Y'),
+			UPDATED_AT = SYSTIMESTAMP
+		WHERE TAG_ID = #{tagId}
+	</update>
+	
+	<update id="deleteTag" parameterType="long">
+		UPDATE TAG SET ACTIVE_YN = 'N', UPDATED_AT = SYSTIMESTAMP WHERE TAG_ID = #{tagId}
+	</update>
+	
+	<select id="dataCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM TAG
+		<where>
+			<include refid="where-list"/>
+		</where>
+	</select>
+	
+	<select id="listTag" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminTagDto">
+		SELECT TAG_ID AS tagId,
+			   TAG_NAME AS tagName,
+			   TAG_GROUP AS tagGroup,
+			   ACTIVE_YN AS activeYn,
+			   TO_CHAR(CREATED_AT, 'YYYY-MM-DD') AS createdAt
+		FROM TAG
+		<where>
+			<include refid="where-list"/>
+		</where>
+		ORDER BY TAG_ID DESC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+	
+	<select id="findById" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminTagDto">
+		SELECT TAG_ID AS tagId, TAG_NAME AS tagName, TAG_GROUP AS tagGroup, ACTIVE_YN AS activeYn
+		FROM TAG WHERE TAG_ID = #{tagId}
+	</select>
+	
+	<select id="findByName" parameterType="String" resultType="com.sp.app.admin.domain.dto.AdminTagDto">
+		SELECT TAG_ID AS tagId, TAG_NAME AS tagName, TAG_GROUP AS tagGroup, ACTIVE_YN AS activeYn
+  	    FROM TAG WHERE TAG_NAME = #{tagName}
+	</select>
+</mapper>
