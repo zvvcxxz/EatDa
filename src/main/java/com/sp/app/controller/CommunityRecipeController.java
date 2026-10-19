@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.sp.app.common.PaginateUtil;
 import com.sp.app.domain.dto.CommunityRecipeDto;
@@ -42,7 +41,7 @@ public class CommunityRecipeController {
     private final CommunityRecipeService service;
     private final PaginateUtil paginateUtil;
 
- // 레시피 목록·검색·카테고리 선택
+    // 목록·검색·카테고리 선택
     @GetMapping({"", "/"})
     public String list(
             @RequestParam(name = "page", defaultValue = "1") int current_page,
@@ -116,7 +115,7 @@ public class CommunityRecipeController {
         return "community/communityRecipe-list";
     }
 
- // 상세보기와 검색 조건 유지
+    // 상세보기와 이전글·다음글
     @GetMapping("/{recipeId}")
     public String article(
             @PathVariable("recipeId") long recipeId,
@@ -148,7 +147,6 @@ public class CommunityRecipeController {
         categoryId = Math.max(0, categoryId);
 
         boolean owner = Objects.equals(dto.getAuthorId(), info.getMember_id());
-
         boolean admin = userDetails.getAuthorities().stream()
                 .anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()));
 
@@ -158,8 +156,6 @@ public class CommunityRecipeController {
         Map<String, Object> map = new HashMap<>();
         map.put("recipeId", recipeId);
         map.put("memberId", info.getMember_id());
-
-        // 이전글·다음글 조회에도 목록의 검색 조건 사용
         map.put("schType", schType);
         map.put("kwd", kwd);
         map.put("categoryId", categoryId);
@@ -179,7 +175,6 @@ public class CommunityRecipeController {
         model.addAttribute("previewId", recipeId);
         model.addAttribute("pageTitle", dto.getTitle());
         model.addAttribute("activeMenu", "recipes");
-
         model.addAttribute("page", page);
         model.addAttribute("schType", schType);
         model.addAttribute("kwd", kwd);
@@ -196,12 +191,19 @@ public class CommunityRecipeController {
         }
 
         model.addAttribute("recipe", new CommunityRecipeDto());
-        setWriteModel(model, "write");
+
+        // 변경: 화면에 필요한 데이터를 여기서 직접 전달
+        model.addAttribute("categories", service.listCategory());
+        model.addAttribute("tags", service.listTag());
+        model.addAttribute("ingredientCatalog", service.listIngredient(Map.of()));
+        model.addAttribute("mode", "write");
+        model.addAttribute("pageTitle", "레시피 작성");
+        model.addAttribute("activeMenu", "recipes");
 
         return "community/communityRecipe-write";
     }
 
-    // 등록 처리. 작성자 번호는 로그인 정보 사용
+    // 등록 처리
     @PostMapping("/write")
     public String writeSubmit(
             @ModelAttribute("recipe") CommunityRecipeDto dto,
@@ -214,13 +216,130 @@ public class CommunityRecipeController {
         }
 
         dto.setAuthorId(info.getMember_id());
-        setWriteModel(model, "write");
 
-        String error = validateRecipe(dto);
+        // 변경: 입력 오류로 돌아갈 때도 선택 목록이 필요함
+        model.addAttribute("categories", service.listCategory());
+        model.addAttribute("tags", service.listTag());
+        model.addAttribute("ingredientCatalog", service.listIngredient(Map.of()));
+        model.addAttribute("mode", "write");
+        model.addAttribute("pageTitle", "레시피 작성");
+        model.addAttribute("activeMenu", "recipes");
 
-        if (error != null) {
-            model.addAttribute("error", error);
+        // 변경: 입력값을 이 메서드 안에서 직접 확인
+        if (dto.getTitle() == null || dto.getTitle().isBlank()
+                || dto.getTitle().length() > 200) {
+            model.addAttribute("error", "제목은 1~200자로 입력하세요.");
             return "community/communityRecipe-write";
+        }
+
+        dto.setTitle(dto.getTitle().trim());
+
+        if (dto.getSummary() != null && dto.getSummary().length() > 1000) {
+            model.addAttribute("error", "레시피 소개는 1000자 이내로 입력하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        if (dto.getOtherIngredient() != null
+                && dto.getOtherIngredient().length() > 100) {
+            model.addAttribute("error", "기타 재료 설명은 100자 이내로 입력하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        if (dto.getCookMinutes() != null && dto.getCookMinutes() < 0) {
+            model.addAttribute("error", "조리 시간은 0 이상으로 입력하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        if (dto.getServings() != null && dto.getServings() < 1) {
+            model.addAttribute("error", "인분은 1 이상으로 입력하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        if (dto.getIngredients() == null || dto.getIngredients().isEmpty()) {
+            model.addAttribute("error", "재료를 하나 이상 선택하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        // 재료 사전에 있는 재료인지, 중복 선택했는지 확인
+        Set<Long> ingredientIds = new HashSet<>();
+        Set<Long> availableIngredientIds = new HashSet<>();
+
+        service.listIngredient(Map.of()).forEach(
+                ingredient -> availableIngredientIds.add(ingredient.getIngredientId()));
+
+        for (CommunityRecipeIngredientDto ingredient : dto.getIngredients()) {
+            if (ingredient == null
+                    || !availableIngredientIds.contains(ingredient.getIngredientId())) {
+                model.addAttribute("error", "재료는 사용 중인 재료 목록에서 선택하세요.");
+                return "community/communityRecipe-write";
+            }
+
+            if (!ingredientIds.add(ingredient.getIngredientId())) {
+                model.addAttribute("error", "같은 재료는 한 번만 선택하세요.");
+                return "community/communityRecipe-write";
+            }
+
+            if (ingredient.getAmount() != null
+                    && ingredient.getAmount().signum() < 0) {
+                model.addAttribute("error", "재료 분량은 0 이상으로 입력하세요.");
+                return "community/communityRecipe-write";
+            }
+
+            if (ingredient.getRequiredYn() != null
+                    && !ingredient.getRequiredYn().isBlank()
+                    && !List.of("Y", "N").contains(ingredient.getRequiredYn())) {
+                model.addAttribute("error", "필수 재료 선택값을 확인하세요.");
+                return "community/communityRecipe-write";
+            }
+        }
+
+        if (dto.getSteps() == null || dto.getSteps().isEmpty()) {
+            model.addAttribute("error", "조리 단계를 하나 이상 입력하세요.");
+            return "community/communityRecipe-write";
+        }
+
+        for (CommunityRecipeStepDto step : dto.getSteps()) {
+            if (step == null || step.getDescription() == null
+                    || step.getDescription().isBlank()
+                    || step.getDescription().length() > 2000) {
+                model.addAttribute("error", "각 단계의 조리 방법은 1~2000자로 입력하세요.");
+                return "community/communityRecipe-write";
+            }
+
+            if (step.getTimerSeconds() != null && step.getTimerSeconds() < 0) {
+                model.addAttribute("error", "타이머 시간은 0 이상으로 입력하세요.");
+                return "community/communityRecipe-write";
+            }
+        }
+
+        Set<Long> categoryIds = new HashSet<>();
+        service.listCategory().forEach(
+                category -> categoryIds.add(category.getCategoryId()));
+
+        if (dto.getCategoryIds() != null) {
+            Set<Long> selectedIds = new HashSet<>();
+
+            for (Long categoryId : dto.getCategoryIds()) {
+                if (!categoryIds.contains(categoryId)
+                        || !selectedIds.add(categoryId)) {
+                    model.addAttribute("error", "카테고리 선택을 확인하세요.");
+                    return "community/communityRecipe-write";
+                }
+            }
+        }
+
+        Set<Long> tagIds = new HashSet<>();
+        service.listTag().forEach(tag -> tagIds.add(tag.getTagId()));
+
+        if (dto.getTagIds() != null) {
+            Set<Long> selectedIds = new HashSet<>();
+
+            for (Long tagId : dto.getTagIds()) {
+                if (!tagIds.contains(tagId) || !selectedIds.add(tagId)) {
+                    model.addAttribute("error", "태그 선택을 확인하세요.");
+                    return "community/communityRecipe-write";
+                }
+            }
         }
 
         try {
@@ -234,7 +353,7 @@ public class CommunityRecipeController {
         return "redirect:/community/recipes/" + dto.getRecipeId();
     }
 
-    // 본인의 레시피 수정 화면
+    // 수정 화면
     @GetMapping("/{recipeId}/update")
     public String updateForm(
             @PathVariable("recipeId") long recipeId,
@@ -253,7 +372,7 @@ public class CommunityRecipeController {
         }
 
         if (!Objects.equals(dto.getAuthorId(), info.getMember_id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/recipes";
         }
 
         dto.setIngredients(service.listRecipeIngredient(recipeId));
@@ -261,12 +380,19 @@ public class CommunityRecipeController {
 
         model.addAttribute("recipe", dto);
         model.addAttribute("previewId", recipeId);
-        setWriteModel(model, "update");
+
+        // 변경: 수정 화면의 선택 목록을 직접 전달
+        model.addAttribute("categories", service.listCategory());
+        model.addAttribute("tags", service.listTag());
+        model.addAttribute("ingredientCatalog", service.listIngredient(Map.of()));
+        model.addAttribute("mode", "update");
+        model.addAttribute("pageTitle", "레시피 수정");
+        model.addAttribute("activeMenu", "recipes");
 
         return "community/communityRecipe-update";
     }
 
-    // 주소를 직접 입력해도 작성자 확인
+    // 수정 처리
     @PostMapping("/{recipeId}/update")
     public String updateSubmit(
             @PathVariable("recipeId") long recipeId,
@@ -286,7 +412,7 @@ public class CommunityRecipeController {
         }
 
         if (!Objects.equals(original.getAuthorId(), info.getMember_id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/recipes";
         }
 
         dto.setRecipeId(recipeId);
@@ -294,13 +420,129 @@ public class CommunityRecipeController {
         dto.setThumbnailUrl(original.getThumbnailUrl());
 
         model.addAttribute("previewId", recipeId);
-        setWriteModel(model, "update");
 
-        String error = validateRecipe(dto);
+        // 변경: 수정 실패 시 사용할 화면 데이터
+        model.addAttribute("categories", service.listCategory());
+        model.addAttribute("tags", service.listTag());
+        model.addAttribute("ingredientCatalog", service.listIngredient(Map.of()));
+        model.addAttribute("mode", "update");
+        model.addAttribute("pageTitle", "레시피 수정");
+        model.addAttribute("activeMenu", "recipes");
 
-        if (error != null) {
-            model.addAttribute("error", error);
+        // 변경: 수정 입력값도 이 메서드 안에서 직접 확인
+        if (dto.getTitle() == null || dto.getTitle().isBlank()
+                || dto.getTitle().length() > 200) {
+            model.addAttribute("error", "제목은 1~200자로 입력하세요.");
             return "community/communityRecipe-update";
+        }
+
+        dto.setTitle(dto.getTitle().trim());
+
+        if (dto.getSummary() != null && dto.getSummary().length() > 1000) {
+            model.addAttribute("error", "레시피 소개는 1000자 이내로 입력하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        if (dto.getOtherIngredient() != null
+                && dto.getOtherIngredient().length() > 100) {
+            model.addAttribute("error", "기타 재료 설명은 100자 이내로 입력하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        if (dto.getCookMinutes() != null && dto.getCookMinutes() < 0) {
+            model.addAttribute("error", "조리 시간은 0 이상으로 입력하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        if (dto.getServings() != null && dto.getServings() < 1) {
+            model.addAttribute("error", "인분은 1 이상으로 입력하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        if (dto.getIngredients() == null || dto.getIngredients().isEmpty()) {
+            model.addAttribute("error", "재료를 하나 이상 선택하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        Set<Long> ingredientIds = new HashSet<>();
+        Set<Long> availableIngredientIds = new HashSet<>();
+
+        service.listIngredient(Map.of()).forEach(
+                ingredient -> availableIngredientIds.add(ingredient.getIngredientId()));
+
+        for (CommunityRecipeIngredientDto ingredient : dto.getIngredients()) {
+            if (ingredient == null
+                    || !availableIngredientIds.contains(ingredient.getIngredientId())) {
+                model.addAttribute("error", "재료는 사용 중인 재료 목록에서 선택하세요.");
+                return "community/communityRecipe-update";
+            }
+
+            if (!ingredientIds.add(ingredient.getIngredientId())) {
+                model.addAttribute("error", "같은 재료는 한 번만 선택하세요.");
+                return "community/communityRecipe-update";
+            }
+
+            if (ingredient.getAmount() != null
+                    && ingredient.getAmount().signum() < 0) {
+                model.addAttribute("error", "재료 분량은 0 이상으로 입력하세요.");
+                return "community/communityRecipe-update";
+            }
+
+            if (ingredient.getRequiredYn() != null
+                    && !ingredient.getRequiredYn().isBlank()
+                    && !List.of("Y", "N").contains(ingredient.getRequiredYn())) {
+                model.addAttribute("error", "필수 재료 선택값을 확인하세요.");
+                return "community/communityRecipe-update";
+            }
+        }
+
+        if (dto.getSteps() == null || dto.getSteps().isEmpty()) {
+            model.addAttribute("error", "조리 단계를 하나 이상 입력하세요.");
+            return "community/communityRecipe-update";
+        }
+
+        for (CommunityRecipeStepDto step : dto.getSteps()) {
+            if (step == null || step.getDescription() == null
+                    || step.getDescription().isBlank()
+                    || step.getDescription().length() > 2000) {
+                model.addAttribute("error", "각 단계의 조리 방법은 1~2000자로 입력하세요.");
+                return "community/communityRecipe-update";
+            }
+
+            if (step.getTimerSeconds() != null && step.getTimerSeconds() < 0) {
+                model.addAttribute("error", "타이머 시간은 0 이상으로 입력하세요.");
+                return "community/communityRecipe-update";
+            }
+        }
+
+        Set<Long> categoryIds = new HashSet<>();
+        service.listCategory().forEach(
+                category -> categoryIds.add(category.getCategoryId()));
+
+        if (dto.getCategoryIds() != null) {
+            Set<Long> selectedIds = new HashSet<>();
+
+            for (Long categoryId : dto.getCategoryIds()) {
+                if (!categoryIds.contains(categoryId)
+                        || !selectedIds.add(categoryId)) {
+                    model.addAttribute("error", "카테고리 선택을 확인하세요.");
+                    return "community/communityRecipe-update";
+                }
+            }
+        }
+
+        Set<Long> tagIds = new HashSet<>();
+        service.listTag().forEach(tag -> tagIds.add(tag.getTagId()));
+
+        if (dto.getTagIds() != null) {
+            Set<Long> selectedIds = new HashSet<>();
+
+            for (Long tagId : dto.getTagIds()) {
+                if (!tagIds.contains(tagId) || !selectedIds.add(tagId)) {
+                    model.addAttribute("error", "태그 선택을 확인하세요.");
+                    return "community/communityRecipe-update";
+                }
+            }
         }
 
         try {
@@ -334,7 +576,7 @@ public class CommunityRecipeController {
         }
 
         if (!Objects.equals(dto.getAuthorId(), info.getMember_id())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/recipes";
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -346,7 +588,7 @@ public class CommunityRecipeController {
         return "redirect:/community/recipes";
     }
 
-    // 관리자 레시피 숨김
+    // 관리자 숨김
     @PostMapping("/{recipeId}/hide")
     public String hide(
             @PathVariable("recipeId") long recipeId,
@@ -362,11 +604,11 @@ public class CommunityRecipeController {
                 .anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()));
 
         if (!admin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/recipes";
         }
 
         if (blindReason.length() > 500) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            return "redirect:/community/recipes";
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -378,7 +620,7 @@ public class CommunityRecipeController {
         return "redirect:/community/recipes";
     }
 
-    // 요리모드에서 사용할 단계 조회
+    // 요리모드
     @GetMapping("/{recipeId}/mode")
     public String cookingMode(
             @PathVariable("recipeId") long recipeId,
@@ -529,121 +771,5 @@ public class CommunityRecipeController {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "찜 취소에 실패했습니다."));
         }
-    }
-
-    // 등록·수정 화면에서 공통으로 필요한 선택 목록
-    private void setWriteModel(Model model, String mode) {
-        model.addAttribute("categories", service.listCategory());
-        model.addAttribute("tags", service.listTag());
-        model.addAttribute("ingredientCatalog", service.listIngredient(Map.of()));
-        model.addAttribute("mode", mode);
-        model.addAttribute("pageTitle",
-                mode.equals("write") ? "레시피 작성" : "레시피 수정");
-        model.addAttribute("activeMenu", "recipes");
-    }
-
-    // 등록·수정에서 같은 입력 조건 확인
-    private String validateRecipe(CommunityRecipeDto dto) {
-        if (dto.getTitle() == null || dto.getTitle().isBlank()
-                || dto.getTitle().length() > 200) {
-            return "제목은 1~200자로 입력하세요.";
-        }
-
-        dto.setTitle(dto.getTitle().trim());
-
-        if (dto.getSummary() != null && dto.getSummary().length() > 1000) {
-            return "레시피 소개는 1000자 이내로 입력하세요.";
-        }
-
-        if (dto.getOtherIngredient() != null
-                && dto.getOtherIngredient().length() > 100) {
-            return "기타 재료 설명은 100자 이내로 입력하세요.";
-        }
-
-        if (dto.getCookMinutes() != null && dto.getCookMinutes() < 0) {
-            return "조리 시간은 0 이상으로 입력하세요.";
-        }
-
-        if (dto.getServings() != null && dto.getServings() < 1) {
-            return "인분은 1 이상으로 입력하세요.";
-        }
-
-        if (dto.getIngredients() == null || dto.getIngredients().isEmpty()) {
-            return "재료를 하나 이상 선택하세요.";
-        }
-
-        Set<Long> ingredientIds = new HashSet<>();
-        Set<Long> availableIngredientIds = new HashSet<>();
-
-        service.listIngredient(Map.of()).forEach(
-                ingredient -> availableIngredientIds.add(ingredient.getIngredientId()));
-
-        for (CommunityRecipeIngredientDto ingredient : dto.getIngredients()) {
-            if (ingredient == null
-                    || !availableIngredientIds.contains(ingredient.getIngredientId())) {
-                return "재료는 사용 중인 재료 목록에서 선택하세요.";
-            }
-
-            if (!ingredientIds.add(ingredient.getIngredientId())) {
-                return "같은 재료는 한 번만 선택하세요.";
-            }
-
-            if (ingredient.getAmount() != null
-                    && ingredient.getAmount().signum() < 0) {
-                return "재료 분량은 0 이상으로 입력하세요.";
-            }
-
-            if (ingredient.getRequiredYn() != null
-                    && !ingredient.getRequiredYn().isBlank()
-                    && !List.of("Y", "N").contains(ingredient.getRequiredYn())) {
-                return "필수 재료 선택값을 확인하세요.";
-            }
-        }
-
-        if (dto.getSteps() == null || dto.getSteps().isEmpty()) {
-            return "조리 단계를 하나 이상 입력하세요.";
-        }
-
-        for (CommunityRecipeStepDto step : dto.getSteps()) {
-            if (step == null || step.getDescription() == null
-                    || step.getDescription().isBlank()
-                    || step.getDescription().length() > 2000) {
-                return "각 단계의 조리 방법은 1~2000자로 입력하세요.";
-            }
-
-            if (step.getTimerSeconds() != null && step.getTimerSeconds() < 0) {
-                return "타이머 시간은 0 이상으로 입력하세요.";
-            }
-        }
-
-        Set<Long> categoryIds = new HashSet<>();
-        service.listCategory().forEach(
-                category -> categoryIds.add(category.getCategoryId()));
-
-        if (dto.getCategoryIds() != null) {
-            Set<Long> selectedIds = new HashSet<>();
-
-            for (Long categoryId : dto.getCategoryIds()) {
-                if (!categoryIds.contains(categoryId)
-                        || !selectedIds.add(categoryId)) {
-                    return "카테고리 선택을 확인하세요.";
-                }
-            }
-        }
-
-        Set<Long> tagIds = new HashSet<>();
-        service.listTag().forEach(tag -> tagIds.add(tag.getTagId()));
-
-        if (dto.getTagIds() != null) {
-            Set<Long> selectedIds = new HashSet<>();
-
-            for (Long tagId : dto.getTagIds()) {
-                if (!tagIds.contains(tagId) || !selectedIds.add(tagId)) {
-                    return "태그 선택을 확인하세요.";
-                }
-            }
-        }
-
-        return null;
     }
 }

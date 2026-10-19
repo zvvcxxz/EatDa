@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.sp.app.common.PaginateUtil;
 import com.sp.app.domain.dto.CommunityPostDto;
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequestMapping("/community/free")
 public class CommunityPostController {
-
     private final CommunityPostService service;
     private final PaginateUtil paginateUtil;
 
@@ -56,7 +54,7 @@ public class CommunityPostController {
         }
 
         kwd = kwd.trim();
-        int size = 6; // 카드 목록: 3열 2행
+        int size = 6;
 
         Map<String, Object> map = new HashMap<>();
         map.put("schType", schType);
@@ -86,7 +84,6 @@ public class CommunityPostController {
         model.addAttribute("kwd", kwd);
         model.addAttribute("pageStart", Math.max(1, current_page - 2));
         model.addAttribute("pageEnd", Math.min(totalPage, current_page + 2));
-
         model.addAttribute("pageTitle", "자유 이야기");
         model.addAttribute("activeMenu", "free");
         model.addAttribute("communityMember", userDetails.getMember());
@@ -127,7 +124,6 @@ public class CommunityPostController {
 
         kwd = kwd.trim();
 
-        // 같은 검색 조건 안에서 이전글·다음글 찾기
         Map<String, Object> map = new HashMap<>();
         map.put("postId", postId);
         map.put("schType", schType);
@@ -137,17 +133,13 @@ public class CommunityPostController {
         model.addAttribute("nextPost", service.findByNext(map));
 
         map.put("memberId", info.getMember_id());
-        model.addAttribute("liked", service.hasPostLike(map) > 0);
 
+        model.addAttribute("liked", service.hasPostLike(map) > 0);
         model.addAttribute("post", dto);
         model.addAttribute("page", Math.max(1, page));
         model.addAttribute("schType", schType);
         model.addAttribute("kwd", kwd);
-
-        // 본인 글에만 수정·삭제 버튼 표시
-        model.addAttribute("owner",
-                dto.getAuthorId() == info.getMember_id());
-
+        model.addAttribute("owner", dto.getAuthorId() == info.getMember_id());
         model.addAttribute("pageTitle", "자유 이야기 상세");
         model.addAttribute("activeMenu", "free");
         model.addAttribute("communityMember", info);
@@ -158,7 +150,6 @@ public class CommunityPostController {
     // 등록 화면
     @GetMapping("/write")
     public String writeForm(Model model) {
-
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
         if (info == null) {
@@ -232,8 +223,9 @@ public class CommunityPostController {
             return "redirect:/community/free";
         }
 
+        // 작성자가 아니면 목록으로 이동
         if (dto.getAuthorId() != info.getMember_id()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/free";
         }
 
         model.addAttribute("post", dto);
@@ -264,9 +256,9 @@ public class CommunityPostController {
             return "redirect:/community/free";
         }
 
-        // 주소를 직접 입력해도 작성자 확인
+        // 주소를 직접 입력해도 작성자가 아니면 처리하지 않음
         if (dto.getAuthorId() != info.getMember_id()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/free";
         }
 
         dto.setTitle(title.trim());
@@ -315,8 +307,9 @@ public class CommunityPostController {
             return "redirect:/community/free";
         }
 
+        // 작성자가 아니면 삭제하지 않고 목록으로 이동
         if (dto.getAuthorId() != info.getMember_id()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/free";
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -340,11 +333,11 @@ public class CommunityPostController {
         }
 
         boolean admin = userDetails.getAuthorities().stream()
-                .anyMatch(auth ->
-                        auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()));
 
+        // 관리자가 아니면 숨김 처리하지 않음
         if (!admin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return "redirect:/community/free";
         }
 
         service.hidePost(postId);
@@ -413,7 +406,6 @@ public class CommunityPostController {
             return ResponseEntity.ok(Map.of(
                     "likeCount", service.postLikeCount(postId),
                     "liked", service.hasPostLike(map) > 0));
-
         } catch (Exception e) {
             log.info("deletePostLike : ", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

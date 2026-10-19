@@ -1,23 +1,263 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>후기 수정 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>후기 수정 · 잇다</title>
+</head>
+
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        /* 사진 크기에 맞춰 업로드 영역 표시 */
+        .community-design #reviewForm .ds-photo-upload.wide {
+            width:fit-content;
+            max-width:100%;
+            min-height:0;
+            margin:0 auto;
+            border:0;
+            background:transparent;
+        }
+
+        /* 사진이 잘리거나 가로로 늘어나지 않도록 변경 */
+        .community-design #reviewForm .ds-photo-upload.wide img {
+            position:static;
+            inset:auto;
+            width:auto;
+            height:auto;
+            max-width:100%;
+            max-height:340px;
+            object-fit:contain;
+        }
+
+        /* 사진이 없을 때 표시되는 선택 영역 */
+        .community-design #reviewForm .ds-photo-upload.wide > span {
+            min-width:220px;
+            padding:28px 20px;
+            border:1px dashed #ddb8a4;
+            border-radius:14px;
+            background:#fff9f3;
+        }
+    </style>
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="review-update" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading"><div><p class="ds-eyebrow">EDIT MY STORY</p><h2>후기 수정</h2></div></div><form class="ds-paper ds-form" id="reviewForm"><div id="reviewOriginal" class="ds-original"></div><div class="ds-field"><label for="reviewTitle">후기 제목 <b>*</b></label><input id="reviewTitle" name="title" required maxlength="200" placeholder="예: 처음 만들어 본 파스타, 성공했어요!"></div><div class="ds-field"><label for="reviewPhoto">내가 만든 요리 사진</label><label class="ds-photo-upload wide"><img id="reviewPhotoPreview" alt="결과 사진 미리보기" hidden><span>📷<br>완성한 요리 사진 선택</span><input id="reviewPhoto" name="selectFile" type="file" accept="image/*" data-preview="reviewPhotoPreview"></label></div><div class="ds-field"><label for="reviewContent">요리 후기 <b>*</b></label><textarea id="reviewContent" name="content" rows="5" maxlength="2000" required placeholder="만들면서 느낀 점과 맛있게 먹은 이야기를 들려주세요."></textarea></div><div class="ds-bottom-actions"><a class="ds-button light" data-link="reviews">취소</a><button type="submit" class="ds-button primary" id="reviewSubmit">후기 등록</button></div></form></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+
+                <h1 class="hero-title">
+                    한 끼를 나누고, 맛있는 일상을 잇다.
+                </h1>
+
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">
+                        💬 자유 이야기
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">
+                        🍳 모두의 레시피
+                    </a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/cooking}">
+                        📸 따라 만든 요리
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/questions}">
+                        🙋 요리 질문
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow">EDIT MY STORY</p>
+                    <h2>후기 수정</h2>
+                    <p>직접 만든 한 접시의 이야기를 수정해요.</p>
+                </div>
+            </div>
+
+            <p th:if="${error != null}"
+               th:text="${error}"
+               class="ds-help"
+               style="color:#b42318; margin-bottom:16px;"
+               role="alert"></p>
+
+            <!-- 기존 후기 번호로 수정 요청 -->
+            <form id="reviewForm"
+                  class="ds-paper ds-form"
+                  th:action="@{/community/cooking/{id}/update(
+                              id=${review.reviewId})}"
+                  th:object="${review}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  th:attr="data-original-image=${review.imageUrl},
+                           data-context-path=@{/}">
+
+                <input type="hidden" th:field="*{recipeId}">
+
+                <!-- 삭제 버튼을 누르면 true로 변경 -->
+                <input type="hidden"
+                       id="deleteImage"
+                       th:field="*{deleteImage}">
+
+                <!-- 원본 레시피는 변경하지 않음 -->
+                <div class="ds-original">
+                    <img th:if="${review.originalActive
+                                  and !#strings.isEmpty(review.recipeThumbnailUrl)}"
+                         th:src="@{${review.recipeThumbnailUrl}}"
+                         th:alt="${review.recipeTitle}">
+
+                    <div>
+                        <p>따라 만든 원본 레시피</p>
+
+                        <strong th:text="${#strings.isEmpty(review.recipeTitle)
+                                          ? '원본 레시피'
+                                          : review.recipeTitle}">
+                            원본 레시피 제목
+                        </strong>
+                    </div>
+
+                    <a class="ds-button light"
+                       th:if="${review.originalActive}"
+                       th:href="@{/community/recipes/{id}(
+                                id=${review.recipeId})}">
+                        원본 레시피 보기 →
+                    </a>
+
+                    <span class="ds-pill"
+                          th:if="${!review.originalActive}">
+                        현재 공개되지 않은 레시피
+                    </span>
+                </div>
+
+                <div class="ds-field">
+                    <label for="reviewTitle">후기 제목 <b>*</b></label>
+
+                    <input type="text"
+                           id="reviewTitle"
+                           th:field="*{title}"
+                           maxlength="200"
+                           required
+                           placeholder="후기 제목을 입력하세요.">
+                </div>
+
+                <div class="ds-field">
+                    <label for="reviewPhoto">내가 만든 요리 사진</label>
+
+                    <label class="ds-photo-upload wide">
+                        <!-- 저장된 사진이 있으면 먼저 표시 -->
+                        <img id="reviewPhotoPreview"
+                             th:src="${!review.deleteImage
+                                       and !#strings.isEmpty(review.imageUrl)}
+                                      ? @{${review.imageUrl}} : null"
+                             th:hidden="${review.deleteImage
+                                          or #strings.isEmpty(review.imageUrl)}"
+                             alt="후기 사진 미리보기">
+
+                        <span id="reviewPhotoMessage"
+                              th:hidden="${!review.deleteImage
+                                           and !#strings.isEmpty(review.imageUrl)}">
+                            📷<br>
+                            변경할 사진 선택
+                        </span>
+
+                        <input type="file"
+                               id="reviewPhoto"
+                               name="selectFile"
+                               accept="image/*">
+                    </label>
+
+                    <div class="ds-bottom-actions"
+                         style="justify-content:flex-start; margin-top:10px;">
+
+                        <button type="button"
+                                id="deleteReviewPhoto"
+                                class="ds-button light">
+                            사진 삭제
+                        </button>
+
+                        <button type="button"
+                                id="restoreReviewPhoto"
+                                class="ds-button light">
+                            사진 변경 취소
+                        </button>
+                    </div>
+
+                    <p id="photoChangeMessage"
+                       class="ds-help"
+                       style="margin-top:10px;"
+                       aria-live="polite"></p>
+
+                    <p class="ds-help">
+                        새 사진을 선택하지 않으면 기존 사진을 유지합니다.
+                        사진 변경·삭제는 수정 완료를 눌러야 반영됩니다.
+                    </p>
+                </div>
+
+                <div class="ds-field">
+                    <label for="reviewContent">요리 후기 <b>*</b></label>
+
+                    <textarea id="reviewContent"
+                              th:field="*{content}"
+                              rows="5"
+                              maxlength="2000"
+                              required
+                              placeholder="요리 후기를 입력하세요."></textarea>
+                </div>
+
+                <div class="ds-bottom-actions">
+                    <a class="ds-button light"
+                       th:href="@{/community/cooking/{id}(
+                                id=${review.reviewId})}">
+                        취소
+                    </a>
+
+                    <button type="submit"
+                            id="reviewSubmit"
+                            class="ds-button primary">
+                        수정 완료
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
 </div>
+
 <th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
+    <script th:src="@{/dist/js/community-review-update.js}"></script>
 </th:block>
-</body></html>
+
+</body>
+</html>
