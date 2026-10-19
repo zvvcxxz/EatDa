@@ -64,11 +64,11 @@ public class MyKitchenController {
 		
 		list = myRecipeService.selectMyRecipes(memberId, offset, size, sort);
 		long count = 0;
-    		count = myRecipeService.countMyRecipes(memberId);
-    		int totalPages = (int)Math.ceil((double)count/size);
+    	count = myRecipeService.countMyRecipes(memberId);
+    	int totalPages = (int)Math.ceil((double)count/size);
     		
     		
-    		model.addAttribute("recipes", list);
+    	model.addAttribute("recipes", list);
         model.addAttribute("count", count);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
@@ -91,12 +91,12 @@ public class MyKitchenController {
         List<MyRecipeDto> list = null; 
         int offset = (page-1) * size;
         
-    		list = myRecipeService.selectBookmarkedRecipes(memberId, offset, size, sort);
-    		long count = 0;
-    		count = myRecipeService.countBookmarkedRecipes(memberId);
-    		int totalPages = (int)Math.ceil((double)count/size);
+    	list = myRecipeService.selectBookmarkedRecipes(memberId, offset, size, sort);
+    	long count = 0;
+    	count = myRecipeService.countBookmarkedRecipes(memberId);
+    	int totalPages = (int)Math.ceil((double)count/size);
     		
-    		model.addAttribute("recipes", list);
+    	model.addAttribute("recipes", list);
         model.addAttribute("count", count);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
@@ -150,7 +150,17 @@ public class MyKitchenController {
         return "mykitchen/mymessages";
     }
 
-    // 7. 신고 / 문의
+    // 7. 채팅
+    @GetMapping("/chat")
+    public String chat(Model model) {
+    	model.addAttribute("tab", "chat");
+    	model.addAttribute("pageTitle", "채팅");
+    	
+    	return "mykitchen/mychat";
+    	
+    }
+    
+    // 8. 신고 / 문의
     @GetMapping("/inquiries")
     public String inquiries(Model model) {
         model.addAttribute("tab", "inquiries");
@@ -158,8 +168,9 @@ public class MyKitchenController {
         
         return "mykitchen/myinquiries";
     }
+    
 
-    // 8. 나의 활동
+    // 9. 나의 활동
     @GetMapping("/activity")
     public String activity(Model model) {
         model.addAttribute("tab", "activity");

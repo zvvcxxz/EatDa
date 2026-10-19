@@ -149,6 +149,7 @@ public class MemberController {
 
 		if (dropout == null) {
 			model.addAttribute("mode", "update");
+			model.addAttribute("tab", "memberinfo");
 		} else {
 			model.addAttribute("mode", "dropout");
 		}

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.MyInquiryMapper">
+	
+	<sql id = "where-list">
+		<choose>
+			<when test="inquiryType=='all'">
+			
+			
+			
+			</when>
+		
+		</choose>
+	</sql>
+		
+	<select id="selectMyInquiryList" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto">
+
+	</select>
+	
+    <!-- #{inquiryId}, #{memberId} -->
+    <select id="selectMyInquiryDetail" resultType="com.sp.app.domain.dto.MyInquiryDto">
+    SELECT i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, i.INQUIRY_TYPE as inquiryType,
+    i.TITLE as title, i.CONTENT as content, i.STATUS as status,
+    i.ANSWER_ADMIN_ID as answerAdminId, i.ANSWER_CONTENT as answerContent,
+    i.ANSWERED_AT as answeredAt, i.CREATED_AT as createdAt, i.UPDATED_AT as updatedAt, 
+    i.PARENT_INQUIRY_ID as parentInquiryId,
+    f.INQUIRY_FILE_ID as inquiryFileId, f.INQUIRY_ID as inquiryId,
+    f.ORIGINAL_FILE_NAME as originalFileName, f.FILE_PATH as filePath 
+
+	FROM INQUIRY i
+	LEFT OUTER JOIN INQUIRY_FILE f
+	<where>
+		<if test="kwd !=null and kwd !=''">
+			<include refid="where-list"/>
+		</if>
+		
+		<if test="inquiryId !=null and inquiryId !=''">
+		and inquiryId = #{inquiryId}
+		</if>
+		and memberId = #{memberId}
+	</where>
+
+	</select>
+
+
+	<insert id="insertMyInquiry" parameterType="com.sp.app.domain.dto.MyInquiryDto">
+		<selectKey keyProperty="inquiryId" resultType="Long" order="BEFORE">
+			SELECT SEQ_INQUIRY.NEXTVAL FROM DUAL
+		</selectKey>
+	
+	</insert>
+	
+    <update id="updateMyInquiry" parameterType="com.sp.app.domain.dto.MyInquiryDto">
+	
+	</update>
+
+	<!-- #{inquiryId}, #{memberId} -->
+    <delete id="deleteMyInquiry">
+    
+    </delete>
+    
+
+    <!-- #{parentInquiryId}, #{memberId} -->
+    <select id="selectFollowUpInquiries" resultType="com.sp.app.domain.dto.MyInquiryDto">
+    
+    </select>
+
+
+    <insert id="insertInquiryFile" parameterType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
+    
+    </insert>
+
+
+	<select id="selectInquiryFiles" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
+	
+	</select>
+
+    <!-- #{inquiryFileId}, #{inquiryId} -->
+    <select id="selectInquiryFile" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
+    
+    </select>
+
+
+    <delete id="deleteInquiryFilesByInquiryId" parameterType="Long">
+    
+    </delete>
+
+    <!-- #{inquiryFileId}, #{inquiryId} -->
+    <delete id="deleteInquiryFile">
+    
+    </delete>
+    
+</mapper>

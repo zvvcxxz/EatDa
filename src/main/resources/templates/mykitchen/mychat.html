@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>채팅 - 나의 주방</title>
+    <!-- SockJS 및 STOMP 라이브러리 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <section class="panel chat-panel">
+        <!-- 상단 헤더 및 회원 검색 버튼 -->
+        <div class="section-heading">
+            <h2>💬 1:1 채팅</h2>
+            <button type="button" class="btn btn-primary" id="openSearchModalBtn">
+                🔍 회원 검색 및 새 채팅
+            </button>
+        </div>
+
+        <!-- 채팅 메인 레이아웃 (좌: 방 목록, 우: 대화창) -->
+        <div class="chat-wrapper" th:attr="data-current-member-id=${currentMemberId}">
+            
+            <!-- [좌측] 참여 중인 채팅방 목록 -->
+            <aside class="chat-sidebar">
+                <div class="empty-state" th:if="${#lists.isEmpty(chatRooms)}">
+                    <p class="muted">참여 중인 대화가 없습니다.<br>회원을 검색하여 대화를 시작해 보세요!</p>
+                </div>
+
+                <div class="chat-room-list" th:if="${!#lists.isEmpty(chatRooms)}">
+                    <a th:each="room : ${chatRooms}"
+                       th:href="@{/my/chat(roomId=${room.roomId})}"
+                       class="chat-room-item"
+                       th:classappend="${selectedRoomId == room.roomId} ? 'active'">
+                        <div class="room-avatar" aria-hidden="true">👤</div>
+                        <div class="room-info">
+                            <div class="room-top">
+                                <strong class="target-nickname" th:text="${room.targetNickname}">상대방 닉네임</strong>
+                                <small class="muted" th:text="${room.lastMessageTime}">14:20</small>
+                            </div>
+                            <div class="room-bottom">
+                                <span class="last-message muted" th:text="${room.lastMessage}">마지막 대화 내용...</span>
+                                <span class="badge badge-danger unread-count"
+                                      th:if="${room.unreadCount > 0}"
+                                      th:text="${room.unreadCount}">3</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- [우측] 대화창 영역 -->
+            <main class="chat-main">
+                <!-- 1) 선택된 채팅방이 없을 때 -->
+                <div class="chat-empty-view" th:if="${currentRoom == null}">
+                    <div class="empty-state">
+                        <h3>대화할 채팅방을 선택하세요</h3>
+                        <p class="muted">목록에서 채팅방을 클릭하거나 회원 검색을 통해 새로운 1:1 대화를 시작할 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <!-- 2) 채팅방이 선택되었을 때 -->
+                <div class="chat-box" th:if="${currentRoom != null}" th:attr="data-room-id=${currentRoom.roomId}">
+                    <!-- 대화창 헤더 -->
+                    <div class="chat-header">
+                        <div class="chat-target">
+                            <span class="avatar-sm">👤</span>
+                            <strong th:text="${currentRoom.targetNickname}">상대방 닉네임</strong>
+                        </div>
+                        <button type="button" class="btn btn-danger-light btn-small" id="leaveRoomBtn" th:attr="data-room-id=${currentRoom.roomId}">
+                            나가기
+                        </button>
+                    </div>
+
+                    <!-- 대화 메시지 출력 영역 -->
+                    <div class="chat-messages" id="chatMessageArea">
+                        <div th:each="msg : ${messages}"
+                             class="message-group"
+                             th:classappend="${msg.senderId == currentMemberId} ? 'my-message' : 'other-message'">
+                            <span class="sender-name" th:if="${msg.senderId != currentMemberId}" th:text="${currentRoom.targetNickname}">상대방</span>
+                            <div class="message-body">
+                                <div class="message-bubble" th:text="${msg.content}">대화 내용입니다.</div>
+                                <span class="message-time" th:text="${msg.createdAtText}">14:21</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 메시지 입력 영역 -->
+                    <div class="chat-input-group">
+                        <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." autocomplete="off">
+                        <button type="button" id="btnSend" class="btn btn-primary">전송</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- 회원 검색 모달 -->
+    <div class="modal-backdrop" id="memberSearchModal" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>회원 검색</h3>
+                <button type="button" class="modal-close" id="closeSearchModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-input-box">
+                    <input type="text" id="searchKeyword" placeholder="닉네임으로 검색해 보세요...">
+                    <button type="button" id="btnSearchMember" class="btn btn-primary">검색</button>
+                </div>
+                <ul class="search-result-list" id="searchResultList">
+                    <li class="empty-text muted">검색어를 입력 후 검색 버튼을 눌러주세요.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!--  메시지 구조 탬플릿 -->
+	<template id="chatMessageTemplate">
+	    <div class="message-group">
+	        <span class="sender-name"></span>
+	        <div class="message-body">
+	            <div class="message-bubble"></div>
+	            <span class="message-time"></span>
+	        </div>
+	    </div>
+	</template>
+
+    <script defer th:src="@{/js/mykitchen/mychat.js}"></script>
+</th:block>
+
+</body>
+</html>

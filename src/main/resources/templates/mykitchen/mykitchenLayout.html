@@ -45,7 +45,7 @@
             </a>
             <a th:href="@{/my/bookmarks}"
                th:classappend="${tab == 'favorites'} ? 'active'">
-                <span aria-hidden="true">♡</span> 찜한 레시피
+                <span aria-hidden="true">❤️</span> 찜한 레시피
             </a>
             <a th:href="@{/my/notifications}"
                th:classappend="${tab == 'notifications'} ? 'active'">
@@ -56,15 +56,23 @@
             </a>
             <a th:href="@{/my/preferences}"
                th:classappend="${tab == 'tags'} ? 'active'">
-                <span aria-hidden="true">#</span> 관심 태그
+                <span aria-hidden="true">🏷️</span> 관심 태그
             </a>
             <a th:href="@{/my/messages}"
                th:classappend="${tab == 'messages'} ? 'active'">
-                <span aria-hidden="true">✉</span> 쪽지
+                <span aria-hidden="true">📩</span> 쪽지
+            </a>
+            <a th:href="@{/my/chat}"
+               th:classappend="${tab == 'chat'} ? 'active'">
+                <span aria-hidden="true">💬</span> 채팅
             </a>
             <a th:href="@{/my/inquiries}"
                th:classappend="${tab == 'inquiries'} ? 'active'">
-                <span aria-hidden="true">💬</span> 신고 / 문의
+                <span aria-hidden="true">📝</span> 신고 / 문의
+            </a>
+            <a th:href="@{/member/pwd}"
+            	th:classappend="${tab == 'memberinfo'} ? 'active'">
+            	<span aria-hidden="true">👤</span> 나의 정보
             </a>
             <a th:href="@{/my/activity}"
                th:classappend="${tab == 'activity'} ? 'active'">
@@ -91,8 +99,8 @@
         </header>
 
         <!-- 활동 요약 공통 영역 -->
-        <section class="summary-grid" aria-label="나의 활동 요약">
-            <a class="summary-card" th:href="@{/my/activity}">
+        <section class="summary-grid" aria-label="나의 레시피">
+            <a class="summary-card" th:href="@{/my/recipes}">
                 <span>작성한 레시피</span>
                 <strong th:text="${summary?.recipeCount}">0</strong>
             </a>
