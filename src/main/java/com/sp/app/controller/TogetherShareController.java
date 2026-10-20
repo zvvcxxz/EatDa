@@ -156,4 +156,83 @@ public class TogetherShareController {
 
         return "together/share/detail";
     }
+
+    // 재료나눔 수정폼
+    @GetMapping("/together/share/update/{share_id}")
+    public String updateForm (
+            @PathVariable("share_id") Long share_id,
+            Model model,
+            RedirectAttributes redirectAttributes) throws Exception {
+
+        SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+        if(info == null) {
+            return "redirect:/member/login";
+        }
+
+        TogetherShareDto share = service.findShareById(share_id);
+
+        if(share == null) {
+            redirectAttributes.addFlashAttribute(
+                    "message" , "게시글이 없거나 삭제되었습니다.");
+            return "redirect:/together/share";
+        }
+
+        // 실제 글 작성자 확인
+        if(!Objects.equals(share.getAuthor_id(), info.getMember_id())) {
+            redirectAttributes.addFlashAttribute(
+                    "message" , "글 작성자만 수정할 수 있습니다.");
+                return "redirect:/together/share";
+        }
+
+        // 저장 실패 후 돌아오면 입력값 유지
+        if(!model.containsAttribute("share")) {
+            model.addAttribute("share", share);
+        }
+
+        model.addAttribute("items", service.listShareItems(share_id));
+
+        return "together/share/edit";
+    }
+
+    // 재료나눔 글 수정
+    @PostMapping("/together/share/update/{share_id}")
+    public String updateSubmit(
+            @PathVariable("share_id") Long share_id,
+            @ModelAttribute TogetherShareDto dto,
+            RedirectAttributes redirectAttributes) {
+
+        SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+        if (info == null) {
+            return "redirect:/member/login";
+        }
+
+        // 글 번호와 작성자는 서버에서 설정
+        dto.setShare_id(share_id);
+        dto.setAuthor_id(info.getMember_id());
+
+        try {
+            service.updateShare(dto);
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "나눔 글을 수정했습니다.");
+
+            return "redirect:/together/share/detail/" + share_id;
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(
+                    "message", e.getMessage());
+
+        } catch (Exception e) {
+            log.error("재료나눔 글 수정 실패", e);
+            redirectAttributes.addFlashAttribute(
+                    "message", "나눔 글 수정 중 오류가 발생했습니다.");
+        }
+
+        // 실패하면 입력한 게시글과 재료를 수정폼에 다시 전달
+        redirectAttributes.addFlashAttribute("share", dto);
+
+        return "redirect:/together/share/update/" + share_id;
+    }
 }

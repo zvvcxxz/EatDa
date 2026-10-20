@@ -25,4 +25,10 @@ public interface TogetherShareMapper {
     public TogetherShareDto findShareById(@Param("share_id") Long share_id) throws Exception; // 재료나눔 글 상세보기
 
     public List<TogetherShareItemDto> listShareItems(@Param("share_id") Long share_id) throws Exception; // 해당 글의 나눔 재료 목록
+
+    public int updateShare(TogetherShareDto dto) throws Exception; // 재료나눔 글 수정
+
+    public int updateShareItem(TogetherShareItemDto dto) throws Exception; // 기존 나눔 재료 수정
+
+    public int deleteShareItem(@Param("share_id") Long share_id, @Param("share_item_id") Long share_item_id) throws Exception; // 나눔 글에서 재료 삭제
 }

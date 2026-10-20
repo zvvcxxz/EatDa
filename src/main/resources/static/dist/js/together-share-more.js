@@ -40,6 +40,17 @@
         return link;
     }
 
+    // 작성자에게 보여줄 수정 링크
+    function makeUpdateLink(shareId) {
+        const url = new URL(page.dataset.updateBase, location.origin);
+        url.pathname += encodeURIComponent(String(shareId));
+        const link = document.createElement('a');
+        link.className = 'tg-card-action';
+        link.href = url.href;
+        link.textContent = '수정';
+        return link;
+    }
+
     // 기존 카드 디자인은 유지하고 내용만 바꾸기
     function makeCard(post) {
         const card = template.cloneNode(true);
@@ -76,7 +87,7 @@
             );
             if (loginMemberId && loginMemberId === String(post.author_id)) {
                 menu.append(
-                    makeAction('수정', '', 'fa-solid fa-pen'),
+                    makeUpdateLink(post.share_id),
                     makeAction('삭제', 'is-delete', 'fa-regular fa-trash-can')
                 );
             }

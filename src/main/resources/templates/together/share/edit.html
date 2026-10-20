@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+<head>
+<title>나눔 글 수정 · 잇다</title>
+<th:block layout:fragment="css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&amp;family=Noto+Serif+KR:wght@400;500;600&amp;display=swap">
+    <link rel="stylesheet" th:href="@{/dist/css/together-share-edit.css}">
+</th:block>
+</head>
+<body>
+    <main layout:fragment="content" class="se-page">
+        <th:block th:if="${share != null}">
+            <!-- 상세보기로 이동 -->
+            <nav class="se-nav">
+                <a th:href="@{/together/share/detail/{id}(id=${share.share_id})}">←
+                    상세보기로 돌아가기</a> <span>함께하는 주방 / 재료 나눔</span>
+            </nav>
+
+            <header class="se-heading">
+                <p>재료 나눔</p>
+                <h1>
+                    나눔의 약속을<br>조금 다듬어 볼까요.
+                </h1>
+                <div class="se-heading-bottom">
+                    <span>이웃에게 전할 나눔 내용과 재료, 약속을 수정해 주세요.</span><small>필수 입력 *</small>
+                </div>
+            </header>
+
+            <p class="se-alert" th:if="${message != null}" th:text="${message}"
+                role="alert"></p>
+            <div class="se-layout">
+                <!-- 게시글과 재료 함께 수정 -->
+                <form method="post" data-share-edit
+                    th:action="@{/together/share/update/{id}(id=${share.share_id})}">
+                    <section class="se-section" aria-labelledby="se-basic-heading">
+                        <h2 id="se-basic-heading">
+                            <span>01</span> 나눔 이야기
+                        </h2>
+                        <label class="se-field" for="se-title">제목 *</label> <input
+                            id="se-title" name="title" type="text" maxlength="200" required
+                            th:value="${share.title}">
+
+                        <div class="se-label-row">
+                            <label class="se-field" for="se-content">상세 내용 *</label><span
+                                data-content-count></span>
+                        </div>
+                        <textarea id="se-content" name="content" rows="8" required
+                            th:text="${share.content}"></textarea>
+
+                        <label class="se-field se-spaced" for="se-type">나눔 유형 *</label> <select
+                            id="se-type" name="share_type" required>
+                            <option value="">나눔 유형 선택</option>
+                            <option value="0" th:selected="${share.share_type == 0}">무료
+                                나눔</option>
+                            <option value="1" th:selected="${share.share_type == 1}">교환</option>
+                        </select> <label class="se-field se-spaced" for="se-exchange">교환 조건
+                            <small>교환일 때 필수</small>
+                        </label> <input id="se-exchange" name="exchange_note" type="text"
+                            maxlength="500" th:value="${share.exchange_note}"
+                            aria-describedby="se-exchange-note">
+                        <p class="se-help" id="se-exchange-note">무료 나눔으로 저장하면 기존 교환
+                            조건은 지워집니다.</p>
+                    </section>
+
+                    <section class="se-section" aria-labelledby="se-plan-heading">
+                        <h2 id="se-plan-heading">
+                            <span>02</span> 건네는 장소와 시간
+                        </h2>
+                        <label class="se-field" for="se-location">나눔 장소 *</label> <input
+                            id="se-location" name="location_text" type="text" maxlength="300"
+                            required th:value="${share.location_text}">
+
+                        <div class="se-grid">
+                            <div>
+                                <label class="se-field" for="se-from">나눔 시작일 *</label><input
+                                    id="se-from" name="available_from" type="datetime-local"
+                                    required
+                                    th:value="${share.available_from == null ? '' : #strings.replace(share.available_from, ' ', 'T')}">
+                            </div>
+                            <div>
+                                <label class="se-field" for="se-until">나눔 종료일 *</label><input
+                                    id="se-until" name="available_until" type="datetime-local"
+                                    required
+                                    th:value="${share.available_until == null ? '' : #strings.replace(share.available_until, ' ', 'T')}"
+                                    aria-describedby="se-period-help">
+                            </div>
+                        </div>
+                        <p class="se-help" id="se-period-help">종료일은 시작일보다 이후로 설정해 주세요.</p>
+                    </section>
+
+                    <section class="se-section" aria-labelledby="se-people-heading">
+                        <h2 id="se-people-heading">
+                            <span>03</span> 함께 나눌 인원
+                        </h2>
+                        <div class="se-people">
+                            <div>
+                                <label class="se-field" for="se-max">최대 수령 인원 *</label>
+                                <p class="se-help">나눔을 받을 수 있는 최대 인원이에요.</p>
+                            </div>
+                            <div class="se-number">
+                                <input id="se-max" name="max_recipients" type="number" min="1"
+                                    max="99999" step="1" required
+                                    th:value="${share.max_recipients}"><span>명</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 나눔 재료 편집 -->
+                    <section class="se-section se-materials"
+                        aria-labelledby="se-items-heading"
+                        th:with="editItems=${share.items != null ? share.items : items}">
+                        <div class="se-materials-head">
+                            <h2 id="se-items-heading">
+                                <span>04</span> 나눔할 재료
+                            </h2>
+                            <button type="button" class="se-add-item" data-add-edit-item>재료
+                                추가 +</button>
+                        </div>
+                        <p class="se-help se-materials-note">기존 재료를 고치거나 새 재료를 추가해
+                            주세요. 목록에서 뺀 재료는 저장할 때 삭제됩니다.</p>
+                        <div class="se-edit-items" data-edit-items
+                            th:attr="data-search-url=@{/together/share/ingredients/search}">
+                            <fieldset class="se-item-row" data-edit-item
+                                th:each="item, row : ${editItems}">
+                                <legend class="se-item-title" data-item-title>나눔 재료</legend>
+                                <div class="se-item-top">
+                                    <button type="button" class="se-remove-item"
+                                        data-remove-edit-item>목록에서 빼기</button>
+                                </div>
+                                <input type="hidden" data-item-field="share_item_id"
+                                    th:name="${'items[' + row.index + '].share_item_id'}"
+                                    th:value="${item.share_item_id}"> <input type="hidden"
+                                    data-item-field="ingredient_id"
+                                    th:name="${'items[' + row.index + '].ingredient_id'}"
+                                    th:value="${item.ingredient_id}"> <label
+                                    class="se-item-field"><span>재료 검색 *</span><input
+                                    type="search" data-edit-search
+                                    data-item-field="ingredient_name"
+                                    th:name="${'items[' + row.index + '].ingredient_name'}"
+                                    th:value="${item.ingredient_name}" placeholder="재료명이나 별칭으로 검색"
+                                    maxlength="100" autocomplete="off" required></label>
+                                <div class="se-edit-results" data-edit-results hidden
+                                    aria-label="재료 검색 결과"></div>
+                                <p class="se-item-status" data-item-status role="status">등록된
+                                    재료입니다. 이름을 바꾸면 검색 결과에서 다시 선택해 주세요.</p>
+                                <div class="se-item-grid">
+                                    <label class="se-item-field"><span>수량 *</span><input
+                                        type="number" data-item-field="quantity"
+                                        th:name="${'items[' + row.index + '].quantity'}"
+                                        th:value="${item.quantity}" min="0.001" max="999999999.999"
+                                        step="0.001" required></label> <label class="se-item-field"><span>단위
+                                            *</span><input type="text" data-item-field="unit"
+                                        th:name="${'items[' + row.index + '].unit'}"
+                                        th:value="${item.unit}" maxlength="20"
+                                        placeholder="예) 개, g, kg" required></label> <label
+                                        class="se-item-field"><span>소비기한 <small>선택</small></span><input
+                                        type="date" data-item-field="expires_on"
+                                        th:name="${'items[' + row.index + '].expires_on'}"
+                                        th:value="${item.expires_on}"></label>
+                                </div>
+                                <label class="se-item-field"><span>재료 설명 <small>선택</small></span><input
+                                    type="text" data-item-field="item_note"
+                                    th:name="${'items[' + row.index + '].item_note'}"
+                                    th:value="${item.item_note}" maxlength="300"
+                                    placeholder="보관 상태나 전달할 내용을 적어 주세요."></label>
+                            </fieldset>
+                        </div>
+                        <p class="se-item-status" data-items-feedback role="status"></p>
+                        <template id="se-item-template">
+                            <fieldset class="se-item-row" data-edit-item>
+                                <legend class="se-item-title" data-item-title>나눔 재료</legend>
+                                <div class="se-item-top">
+                                    <button type="button" class="se-remove-item"
+                                        data-remove-edit-item>목록에서 빼기</button>
+                                </div>
+                                <input type="hidden" data-item-field="share_item_id"
+                                    name="items[0].share_item_id"> <input type="hidden"
+                                    data-item-field="ingredient_id" name="items[0].ingredient_id">
+                                <label class="se-item-field"><span>재료 검색 *</span><input
+                                    type="search" data-edit-search
+                                    data-item-field="ingredient_name"
+                                    name="items[0].ingredient_name" placeholder="재료명이나 별칭으로 검색"
+                                    maxlength="100" autocomplete="off" required></label>
+                                <div class="se-edit-results" data-edit-results hidden
+                                    aria-label="재료 검색 결과"></div>
+                                <p class="se-item-status" data-item-status role="status">재료명을
+                                    입력하고 검색 결과에서 선택해 주세요.</p>
+                                <div class="se-item-grid">
+                                    <label class="se-item-field"><span>수량 *</span><input
+                                        type="number" data-item-field="quantity"
+                                        name="items[0].quantity" value="1" min="0.001"
+                                        max="999999999.999" step="0.001" required></label> <label
+                                        class="se-item-field"><span>단위 *</span><input
+                                        type="text" data-item-field="unit" name="items[0].unit"
+                                        maxlength="20" placeholder="예) 개, g, kg" required></label> <label
+                                        class="se-item-field"><span>소비기한 <small>선택</small></span><input
+                                        type="date" data-item-field="expires_on"
+                                        name="items[0].expires_on"></label>
+                                </div>
+                                <label class="se-item-field"><span>재료 설명 <small>선택</small></span><input
+                                    type="text" data-item-field="item_note"
+                                    name="items[0].item_note" maxlength="300"
+                                    placeholder="보관 상태나 전달할 내용을 적어 주세요."></label>
+                            </fieldset>
+                        </template>
+                    </section>
+
+                    <!-- 저장과 취소 -->
+                    <footer class="se-actions">
+                        <a th:href="@{/together/share/detail/{id}(id=${share.share_id})}">취소하고
+                            돌아가기</a>
+                        <button type="submit">수정 내용 저장</button>
+                    </footer>
+                </form>
+
+                <!-- 저장 전 안내 -->
+                <aside class="se-aside">
+                    <p class="se-kicker">수정 전 확인해 주세요</p>
+                    <h2>
+                        나눌 재료도,<br>약속도 함께.
+                    </h2>
+                    <p>재료를 바꾸려면 이름으로 검색한 뒤 결과에서 선택해 주세요. 수량과 단위, 소비기한도 수정할 수 있어요.</p>
+                    <p>목록에서 빼더라도 아직 저장된 글은 바뀌지 않습니다. 맨 아래 저장 버튼을 눌러야 반영돼요.</p>
+                    <div class="se-item-summary">
+                        <span>편집 중인 재료</span><strong><b data-edit-item-count>0</b>가지</strong>
+                    </div>
+                    <p>저장하지 않고 돌아가면 이번 변경은 반영되지 않습니다.</p>
+                </aside>
+            </div>
+        </th:block>
+        <section class="se-missing" th:if="${share == null}">
+            <h1>게시글을 찾을 수 없습니다.</h1>
+            <a th:href="@{/together/share}">나눔 목록으로 돌아가기</a>
+        </section>
+    </main>
+    <th:block layout:fragment="script">
+        <script defer th:src="@{/dist/js/together-share-edit.js}"></script>
+    </th:block>
+</body>
+</html>

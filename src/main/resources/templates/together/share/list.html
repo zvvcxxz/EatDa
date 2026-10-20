@@ -1,89 +1,141 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 <head>
-    <title>재료 나눔 · 잇다</title>
-    <th:block layout:fragment="css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap">
-        <link rel="stylesheet" th:href="@{/dist/css/together-share.css}">
-        <link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}">
-    </th:block>
+<title>재료 나눔 · 잇다</title>
+<th:block layout:fragment="css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap">
+    <link rel="stylesheet" th:href="@{/dist/css/together-share.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}">
+</th:block>
 </head>
 <body>
-<main layout:fragment="content" class="sl-page share-page together-page is-share"
-      th:data-detail-base="@{/together/share/detail/}"
-      th:attr="data-login-member-id=${loginMemberId}">
-    <!-- 재료나눔 소개 -->
-    <div class="sl-path"><span>함께하는 주방 / 재료 나눔</span><span>잇다 EAT-DA</span></div>
-    <header class="sl-intro">
-        <div><p class="sl-kicker">이웃의 식탁을 잇는 일</p><h1>조금 남은 재료,<br><em>새로운 한 끼로.</em></h1></div>
-        <div class="sl-intro-note"><p>혼자 먹기엔 넉넉한 재료를<br>가까운 이웃과 나눠 보세요.</p><small>필요한 만큼 나누고, 남김없이 맛있게.</small></div>
-    </header>
-    <!-- 게시판 이동과 글쓰기 -->
-    <div class="sl-toolbar">
-        <nav class="sl-tabs" aria-label="함께하는 주방 게시판">
-            <a class="sl-tab" th:href="@{/together/meet}">같이 먹어요</a>
-            <a class="sl-tab is-active" aria-current="page" th:href="@{/together/share}">재료 나눔</a>
-        </nav>
-        <button type="button" class="sl-write" onclick="openShareModal()">나눔 글 쓰기</button>
-    </div>
-    <!-- 등록 결과 알림 -->
-    <div class="tg-result-toast" data-list-result-toast role="status" aria-live="polite" aria-atomic="true" th:if="${message != null}">
-        <span th:text="${message}"></span>
-    </div>
-    <div class="sl-list-head"><h2>새로 올라온 나눔</h2><span>최신 등록순 · 10개씩</span></div>
-    <!-- 나눔 글 목록 -->
-    <section class="tg-list" aria-label="재료 나눔 게시글">
-        <p class="tg-empty" th:if="${posts == null or #lists.isEmpty(posts)}">아직 등록된 나눔이 없어요. 첫 번째 이야기를 남겨 주세요.</p>
-        <article class="tg-card" th:each="post : ${posts}" th:attr="data-share-id=${post.share_id}">
+    <main layout:fragment="content"
+        class="sl-page share-page together-page is-share"
+        th:data-detail-base="@{/together/share/detail/}"
+        th:data-update-base="@{/together/share/update/}"
+        th:attr="data-login-member-id=${loginMemberId}">
+        <!-- 재료나눔 소개 -->
+        <div class="sl-path">
+            <span>함께하는 주방 / 재료 나눔</span><span>잇다 EAT-DA</span>
+        </div>
+        <header class="sl-intro">
             <div>
-                <div class="tg-card-top">
-                    <span class="sl-type" th:text="${post.share_type == 0 ? '무료 나눔' : (post.share_type == 1 ? '교환' : '재료 나눔')}"></span>
-                    <span class="tg-status" th:text="${post.share_status == 0 ? '나눔 진행 중' : '진행 상태 확인 필요'}"></span>
+                <p class="sl-kicker">이웃의 식탁을 잇는 일</p>
+                <h1>
+                    조금 남은 재료,<br> <em>새로운 한 끼로.</em>
+                </h1>
+            </div>
+            <div class="sl-intro-note">
+                <p>
+                    혼자 먹기엔 넉넉한 재료를<br>가까운 이웃과 나눠 보세요.
+                </p>
+                <small>필요한 만큼 나누고, 남김없이 맛있게.</small>
+            </div>
+        </header>
+        <!-- 게시판 이동과 글쓰기 -->
+        <div class="sl-toolbar">
+            <nav class="sl-tabs" aria-label="함께하는 주방 게시판">
+                <a class="sl-tab" th:href="@{/together/meet}">같이 먹어요</a> <a
+                    class="sl-tab is-active" aria-current="page"
+                    th:href="@{/together/share}">재료 나눔</a>
+            </nav>
+            <button type="button" class="sl-write" onclick="openShareModal()">나눔
+                글 쓰기</button>
+        </div>
+        <!-- 등록 결과 알림 -->
+        <div class="tg-result-toast" data-list-result-toast role="status"
+            aria-live="polite" aria-atomic="true" th:if="${message != null}">
+            <span th:text="${message}"></span>
+        </div>
+        <div class="sl-list-head">
+            <h2>새로 올라온 나눔</h2>
+            <span>최신 등록순 · 10개씩</span>
+        </div>
+        <!-- 나눔 글 목록 -->
+        <section class="tg-list" aria-label="재료 나눔 게시글">
+            <p class="tg-empty" th:if="${posts == null or #lists.isEmpty(posts)}">아직
+                등록된 나눔이 없어요. 첫 번째 이야기를 남겨 주세요.</p>
+            <article class="tg-card" th:each="post : ${posts}"
+                th:attr="data-share-id=${post.share_id}">
+                <div>
+                    <div class="tg-card-top">
+                        <span class="sl-type"
+                            th:text="${post.share_type == 0 ? '무료 나눔' : (post.share_type == 1 ? '교환' : '재료 나눔')}"></span>
+                        <span class="tg-status"
+                            th:text="${post.share_status == 0 ? '나눔 진행 중' : '진행 상태 확인 필요'}"></span>
+                    </div>
+                    <a class="tg-title"
+                        th:href="@{/together/share/detail/{id}(id=${post.share_id})}"
+                        th:text="${post.title}"></a>
+                    <p class="tg-excerpt" th:text="${post.content}"></p>
+                    <dl class="tg-meta">
+                        <div>
+                            <dt>나눔 장소</dt>
+                            <dd th:text="${post.location_text}"></dd>
+                        </div>
+                        <div>
+                            <dt>시작</dt>
+                            <dd th:text="${post.available_from}"></dd>
+                        </div>
+                        <div>
+                            <dt>종료</dt>
+                            <dd th:text="${post.available_until}"></dd>
+                        </div>
+                    </dl>
                 </div>
-                <a class="tg-title" th:href="@{/together/share/detail/{id}(id=${post.share_id})}" th:text="${post.title}"></a>
-                <p class="tg-excerpt" th:text="${post.content}"></p>
-                <dl class="tg-meta">
-                    <div><dt>나눔 장소</dt><dd th:text="${post.location_text}"></dd></div>
-                    <div><dt>시작</dt><dd th:text="${post.available_from}"></dd></div>
-                    <div><dt>종료</dt><dd th:text="${post.available_until}"></dd></div>
-                </dl>
-            </div>
-            <div class="tg-card-side">
-                <div class="tg-author"><span th:text="${post.name}"></span></div>
-                <p>최대 수령 <strong th:text="${post.max_recipients}"></strong>명</p>
-                <p class="tg-date">작성 <span th:text="${post.created_at}"></span></p>
-                <p class="tg-date">조회 <span th:text="${post.view_count}"></span></p>
-            </div>
-            <!-- 상세보기와 작성자 메뉴 -->
-            <div class="tg-card-overlay">
-                <div class="tg-card-menu">
-                    <button type="button" class="tg-card-action is-like" disabled title="기능 연결 준비 중">좋아요</button>
-                    <th:block th:if="${loginMemberId != null and loginMemberId == post.author_id}">
-                        <button type="button" class="tg-card-action" disabled title="기능 연결 준비 중">수정</button>
-                        <button type="button" class="tg-card-action is-delete" disabled title="기능 연결 준비 중">삭제</button>
-                    </th:block>
-                    <a class="tg-card-action is-detail" th:href="@{/together/share/detail/{id}(id=${post.share_id})}">상세보기</a>
+                <div class="tg-card-side">
+                    <div class="tg-author">
+                        <span th:text="${post.name}"></span>
+                    </div>
+                    <p>
+                        최대 수령 <strong th:text="${post.max_recipients}"></strong>명
+                    </p>
+                    <p class="tg-date">
+                        작성 <span th:text="${post.created_at}"></span>
+                    </p>
+                    <p class="tg-date">
+                        조회 <span th:text="${post.view_count}"></span>
+                    </p>
                 </div>
-            </div>
-        </article>
-    </section>
-    <!-- 게시글 더보기 -->
-    <div class="tg-more-wrap" th:if="${hasMore == true}">
-        <button type="button" class="tg-btn-more" id="btnLoadMoreShares"
-                th:attr="data-offset=${nextOffset}, data-url=@{/together/share/more}"><span>게시글 더보기</span></button>
-    </div>
-    <p class="sl-end">작은 재료가 새로운 한 끼로. 이웃의 식탁을 이어 주세요.</p>
-    <!-- 글쓰기 모달 -->
-<dialog class="tg-dialog" id="shareWriteDialog"
+
+                <!-- 상세보기와 작성자 메뉴 -->
+                <div class="tg-card-overlay">
+                    <div class="tg-card-menu">
+                        <button type="button" class="tg-card-action is-like" disabled
+                            title="기능 연결 준비 중">좋아요</button>
+                        <th:block
+                            th:if="${loginMemberId != null and loginMemberId == post.author_id}">
+                            <a class="tg-card-action"
+                                th:href="@{/together/share/update/{id}(id=${post.share_id})}">수정</a>
+                            <button type="button" class="tg-card-action is-delete" disabled
+                                title="기능 연결 준비 중">삭제</button>
+                        </th:block>
+                        <a class="tg-card-action is-detail"
+                            th:href="@{/together/share/detail/{id}(id=${post.share_id})}">상세보기</a>
+                    </div>
+                </div>
+            </article>
+        </section>
+        <!-- 게시글 더보기 -->
+        <div class="tg-more-wrap" th:if="${hasMore == true}">
+            <button type="button" class="tg-btn-more" id="btnLoadMoreShares"
+                th:attr="data-offset=${nextOffset}, data-url=@{/together/share/more}">
+                <span>게시글 더보기</span>
+            </button>
+        </div>
+        <p class="sl-end">작은 재료가 새로운 한 끼로. 이웃의 식탁을 이어 주세요.</p>
+        <!-- 글쓰기 모달 -->
+        <dialog class="tg-dialog" id="shareWriteDialog"
             aria-labelledby="share-write-title"> <!-- 모달 안쪽만 스크롤 -->
         <div class="tg-dialog-scroll">
             <div class="tg-dialog-head">
                 <div class="tg-dialog-title-group">
-                    <span class="tg-modal-badge">
-                        이웃 식재료 나눔</span>
+                    <span class="tg-modal-badge"> 이웃 식재료 나눔</span>
                     <h2 id="share-write-title">재료 나눔 글쓰기</h2>
                 </div>
                 <button type="button" class="tg-close" onclick="closeShareModal()"
@@ -96,7 +148,7 @@
                 <!-- 제목 / 나눔 장소 -->
                 <div class="tg-form-section">
                     <div class="tg-section-header">
-                         <span>기본 정보</span>
+                        <span>기본 정보</span>
                     </div>
 
                     <label class="tg-field"> <span class="tg-field-label">제목
@@ -106,11 +158,13 @@
                     </label>
 
                     <div class="tg-form-grid col-2">
-                        <label class="tg-field"> <span class="tg-field-label"> 나눔 장소 <mark>*</mark></span> <input
-                            type="text" name="location_text" maxlength="300"
+                        <label class="tg-field"> <span class="tg-field-label">
+                                나눔 장소 <mark>*</mark>
+                        </span> <input type="text" name="location_text" maxlength="300"
                             placeholder="예) 홍대입구역 3번 출구 앞" required>
-                        </label> <label class="tg-field"> <span class="tg-field-label"> 나눔 유형 <mark>*</mark></span> <select
-                            name="share_type" required
+                        </label> <label class="tg-field"> <span class="tg-field-label">
+                                나눔 유형 <mark>*</mark>
+                        </span> <select name="share_type" required
                             th:disabled="${shareTypeOptions == null or #maps.isEmpty(shareTypeOptions)}">
                                 <option value="">나눔 유형 선택</option>
                                 <option th:each="option : ${shareTypeOptions}"
@@ -123,7 +177,7 @@
                 <!-- 나눔 일정 / 조건 -->
                 <div class="tg-form-section">
                     <div class="tg-section-header">
-                         <span>일정 및 조건</span>
+                        <span>일정 및 조건</span>
                     </div>
 
                     <div class="tg-form-grid col-2">
@@ -137,12 +191,14 @@
                     </div>
 
                     <div class="tg-form-grid col-2">
-                        <label class="tg-field"> <span class="tg-field-label"> 최대 수령 인원 <mark>*</mark></span> <input
-                            type="number" name="max_recipients" min="1" max="99999" value="2"
-                            placeholder="예) 2" required>
-                        </label> <label class="tg-field"> <span class="tg-field-label"> 교환 조건 <small>(교환
-                                    유형 시 필수)</small></span> <input type="text" name="exchange_note"
-                            maxlength="500" placeholder="예) 감자나 당근과 교환 희망합니다">
+                        <label class="tg-field"> <span class="tg-field-label">
+                                최대 수령 인원 <mark>*</mark>
+                        </span> <input type="number" name="max_recipients" min="1" max="99999"
+                            value="2" placeholder="예) 2" required>
+                        </label> <label class="tg-field"> <span class="tg-field-label">
+                                교환 조건 <small>(교환 유형 시 필수)</small>
+                        </span> <input type="text" name="exchange_note" maxlength="500"
+                            placeholder="예) 감자나 당근과 교환 희망합니다">
                         </label>
                     </div>
                 </div>
@@ -151,32 +207,27 @@
                 <div class="tg-form-section ingredients-section">
                     <div class="tg-section-header-flex">
                         <div class="tg-section-header">
-                             <span>나눔할 재료 세부 사항</span>
+                            <span>나눔할 재료 세부 사항</span>
                         </div>
                         <button type="button" class="tg-btn-add-item"
-                            onclick="addIngredientItem()">
-                             재료 추가
-                        </button>
+                            onclick="addIngredientItem()">재료 추가</button>
                     </div>
 
                     <div id="ingredientsContainer" class="tg-ingredients-container">
                         <!-- 나눔 재료 입력 -->
                         <fieldset class="tg-ingredient-card" data-share-item>
                             <div class="tg-item-card-header">
-                                <span class="tg-item-badge">
-                                    나눔 재료 1</span>
+                                <span class="tg-item-badge"> 나눔 재료 1</span>
                                 <button type="button" class="tg-btn-remove-item"
-                                    onclick="removeIngredientItem(this)" hidden>
-                                     삭제
-                                </button>
+                                    onclick="removeIngredientItem(this)" hidden>삭제</button>
                             </div>
 
                             <!-- 재료명 검색하고 선택 -->
                             <label class="tg-field"> <span class="tg-field-label">재료
                                     검색 <mark>*</mark>
-                            </span> <span class="tg-search-input">  <input
-                                    type="search" data-ingredient-search autocomplete="off"
-                                    maxlength="100" placeholder="재료명을 입력해 주세요. 예) 대파, 양파" required
+                            </span> <span class="tg-search-input"> <input type="search"
+                                    data-ingredient-search autocomplete="off" maxlength="100"
+                                    placeholder="재료명을 입력해 주세요. 예) 대파, 양파" required
                                     th:attr="data-search-url=@{/together/share/ingredients/search}">
                             </span>
                             </label> <input type="hidden" name="items[0].ingredient_id">
@@ -209,7 +260,7 @@
                 <!-- 상세 내용 -->
                 <div class="tg-form-section">
                     <div class="tg-section-header">
-                         <span>상세 안내 및 전달사항</span>
+                        <span>상세 안내 및 전달사항</span>
                     </div>
 
                     <label class="tg-field"> <textarea name="content" rows="4"
@@ -218,27 +269,24 @@
                     </label>
                 </div>
 
-                <p class="tg-note footer-note">
-                     필수 입력(*) 항목입니다. 등록을
-                    완료하려면 로그인이 필요합니다.
-                </p>
+                <p class="tg-note footer-note">필수 입력(*) 항목입니다. 등록을 완료하려면 로그인이
+                    필요합니다.</p>
 
                 <!-- 취소 / 등록 -->
                 <div class="tg-actions">
                     <button type="button" class="tg-button secondary"
                         onclick="closeShareModal()">취소</button>
-                    <button type="submit" class="tg-button primary-share">
-                         나눔 글 등록하기
-                    </button>
+                    <button type="submit" class="tg-button primary-share">나눔 글
+                        등록하기</button>
                 </div>
             </form>
         </div>
         </dialog>
-</main>
-<th:block layout:fragment="script">
-    <script defer th:src="@{/dist/js/together-share.js}"></script>
-    <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
-    <script defer th:src="@{/dist/js/together-share-more.js}"></script>
-</th:block>
+    </main>
+    <th:block layout:fragment="script">
+        <script defer th:src="@{/dist/js/together-share.js}"></script>
+        <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
+        <script defer th:src="@{/dist/js/together-share-more.js}"></script>
+    </th:block>
 </body>
 </html>

@@ -141,6 +141,46 @@
         ORDER BY si.share_item_id ASC
     </select>
 
+    <!-- 재료나눔 글 수정 -->
+    <update id="updateShare" parameterType="TogetherShareDto">
+        UPDATE ingredient_share
+        SET	title = #{title},
+            content = #{content},
+            share_type = #{share_type},
+            location_text = #{location_text},
+            available_from = TO_TIMESTAMP(
+                #{available_from} , 'YYYY-MM-DD"T"HH24:MI'),
+            available_until = TO_TIMESTAMP(
+                #{available_until}, 'YYYY-MM-DD"T"HH24:MI'),
+            max_recipients = #{max_recipients},
+            exchange_note = #{exchange_note, jdbcType=VARCHAR},
+            updated_at = SYSTIMESTAMP
+        WHERE share_id = #{share_id}
+        AND author_id = #{author_id}
+        AND status = 0
+        AND deleted_at IS NULL
+    </update>
+
+    <!-- 기존 나눔 재료 수정 -->
+    <update id="updateShareItem" parameterType="TogetherShareItemDto">
+        UPDATE share_item
+        SET ingredient_id = #{ingredient_id},
+            quantity = #{quantity},
+            unit = #{unit},
+            expires_on = TO_DATE(
+                #{expires_on, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+            item_note = #{item_note, jdbcType=VARCHAR}
+        WHERE share_item_id = #{share_item_id}
+        AND share_id = #{share_id}
+    </update>
+
+    <!-- 나눔 글에서 재료 삭제 -->
+    <delete id="deleteShareItem">
+        DELETE FROM share_item
+        WHERE share_item_id = #{share_item_id}
+        AND share_id = #{share_id}
+    </delete>
+
     <!-- 재료명이나 별칭으로 검색 -->
     <select id="searchIngredients" resultType="TogetherShareItemDto">
         SELECT

@@ -18,4 +18,7 @@ public interface TogetherShareService {
     public TogetherShareDto findShareById(Long share_id) throws Exception; // 나눔 글 상세보기
 
     public List<TogetherShareItemDto> listShareItems(Long share_id) throws Exception; // 상세보기 나눔 재료 목록
+
+    public int updateShare(TogetherShareDto dto) throws Exception; // 재료나눔 글 수정
+
 }
