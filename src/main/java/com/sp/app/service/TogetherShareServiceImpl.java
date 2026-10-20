@@ -273,6 +273,48 @@ public class TogetherShareServiceImpl implements TogetherShareService {
         }
     }
 
+    // 재료나눔 글 삭제
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteShare(Long share_id, Long author_id) throws Exception {
+        try {
+            // 글 번호 확인
+            if(share_id == null || share_id < 1) {
+                throw new IllegalArgumentException("게시글 번호가 올바르지 않습니다.");
+            }
+
+            // 로그인 정보 확인
+            if(author_id == null) {
+                throw new IllegalArgumentException("로그인이 필요합니다.");
+            }
+
+            // 삭제할 글 확인
+            TogetherShareDto share = mapper.findShareById(share_id);
+
+            if (share == null) {
+                throw new IllegalArgumentException("게시글이 없거나 삭제되었습니다.");
+            }
+
+            // 작성자 확인
+            if (!Objects.equals(share.getAuthor_id(), author_id)) {
+                throw new IllegalStateException("글 작성자만 삭제할 수 있습니다.");
+            }
+
+            // 삭제일 기록
+            int count = mapper.deleteShare(share_id, author_id);
+
+            if(count != 1) {
+                throw new IllegalStateException("게시글을 삭제하지 못했습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            log.error("재료나눔 글 삭제 실패" , e);
+            throw e;
+        }
+    }
+
     // 재료 목록 비교해서 수정 / 추가 / 삭제
     private void updateShareItem(TogetherShareDto dto) throws Exception {
 
@@ -407,4 +449,6 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             throw e;
         }
     }
+
+
 }

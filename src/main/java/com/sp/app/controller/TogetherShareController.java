@@ -235,4 +235,38 @@ public class TogetherShareController {
 
         return "redirect:/together/share/update/" + share_id;
     }
+
+    // 재료나눔 글 삭제
+    @PostMapping("/together/share/delete/{share_id}")
+    public String delete(
+            @PathVariable("share_id") Long share_id,
+            RedirectAttributes redirectAttributes) {
+
+        SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+        if(info == null) {
+            return "redirect:/member/login";
+        }
+
+        try {
+            // 로그인한 회원의 작성자 권한을 확인한 뒤 삭제
+            service.deleteShare(share_id, info.getMember_id());
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "나눔 글이 삭제 되었습니다.");
+
+            return "redirect:/together/share";
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(
+                    "message" , e.getMessage());
+        } catch (Exception e) {
+            log.error("재료나눔 글 삭제 실패" , e);
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "나눔 글 삭제 중 오류가 발생했습니다.");
+        }
+
+        return "redirect:/together/share/detail/" + share_id;
+    }
 }

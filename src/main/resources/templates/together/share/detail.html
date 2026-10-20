@@ -92,7 +92,7 @@
                     </div>
                 </section>
 
-                <!-- 작성자 메뉴는 기능 연결 전 -->
+                <!-- 작성자 수정과 삭제 -->
                 <div class="sdd-owner-actions" th:if="${isAuthor == true}">
                     <span>작성자 메뉴</span>
                     <div>
@@ -100,8 +100,11 @@
                             th:href="@{/together/share/update/{id}(id=${share.share_id})}">
                             글 수정 </a>
 
-                        <button type="button" class="sdd-text-action sdd-delete" disabled>
-                            글 삭제</button>
+                        <form method="post" style="display: inline; margin: 0;"
+                            th:action="@{/together/share/delete/{id}(id=${share.share_id})}"
+                            onsubmit="return confirm('이 나눔 글을 삭제하시겠습니까?');">
+                            <button type="submit" class="sdd-text-action sdd-delete">글 삭제</button>
+                        </form>
                     </div>
                 </div>
             </article>

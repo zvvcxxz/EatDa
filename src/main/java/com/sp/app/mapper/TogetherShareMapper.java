@@ -31,4 +31,6 @@ public interface TogetherShareMapper {
     public int updateShareItem(TogetherShareItemDto dto) throws Exception; // 기존 나눔 재료 수정
 
     public int deleteShareItem(@Param("share_id") Long share_id, @Param("share_item_id") Long share_item_id) throws Exception; // 나눔 글에서 재료 삭제
+
+    public int deleteShare(@Param("share_id") Long share_id, @Param("author_id") Long author_id) throws Exception; // 재료나눔 글 삭제
 }

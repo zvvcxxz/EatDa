@@ -21,4 +21,6 @@ public interface TogetherShareService {
 
     public int updateShare(TogetherShareDto dto) throws Exception; // 재료나눔 글 수정
 
+    public int deleteShare(Long share_id, Long author_id) throws Exception;	// 재료나눔 글 삭제
+
 }

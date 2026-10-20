@@ -52,6 +52,17 @@
     }
 
     // 기존 카드 디자인은 유지하고 내용만 바꾸기
+    function makeDeleteForm(shareId) {
+        // 서버에서 렌더링한 폼을 복제하여 CSRF 토큰도 유지
+        const source = document.getElementById('share-delete-form-template');
+        const form = source.content.querySelector('form').cloneNode(true);
+        const url = new URL(page.dataset.deleteBase, location.origin);
+        url.pathname += encodeURIComponent(String(shareId));
+        form.action = url.href;
+        return form;
+    }
+
+    // 기존 카드 디자인은 유지하고 내용만 바꾸기
     function makeCard(post) {
         const card = template.cloneNode(true);
         card.dataset.shareId = String(post.share_id);
@@ -88,7 +99,7 @@
             if (loginMemberId && loginMemberId === String(post.author_id)) {
                 menu.append(
                     makeUpdateLink(post.share_id),
-                    makeAction('삭제', 'is-delete', 'fa-regular fa-trash-can')
+                    makeDeleteForm(post.share_id)
                 );
             }
         }

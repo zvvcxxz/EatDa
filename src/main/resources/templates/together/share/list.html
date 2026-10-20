@@ -18,7 +18,16 @@
         class="sl-page share-page together-page is-share"
         th:data-detail-base="@{/together/share/detail/}"
         th:data-update-base="@{/together/share/update/}"
+        th:data-delete-base="@{/together/share/delete/}"
         th:attr="data-login-member-id=${loginMemberId}">
+        <!-- 더보기 카드에서도 사용할 삭제 폼 -->
+        <template id="share-delete-form-template">
+            <form method="post" style="display: inline; margin: 0;"
+                th:action="@{/together/share/delete/0}"
+                onsubmit="return confirm('이 나눔 글을 삭제하시겠습니까?');">
+                <button type="submit" class="tg-card-action is-delete">삭제</button>
+            </form>
+        </template>
         <!-- 재료나눔 소개 -->
         <div class="sl-path">
             <span>함께하는 주방 / 재료 나눔</span><span>잇다 EAT-DA</span>
@@ -112,8 +121,11 @@
                             th:if="${loginMemberId != null and loginMemberId == post.author_id}">
                             <a class="tg-card-action"
                                 th:href="@{/together/share/update/{id}(id=${post.share_id})}">수정</a>
-                            <button type="button" class="tg-card-action is-delete" disabled
-                                title="기능 연결 준비 중">삭제</button>
+                            <form method="post" style="display: inline; margin: 0;"
+                                th:action="@{/together/share/delete/{id}(id=${post.share_id})}"
+                                onsubmit="return confirm('이 나눔 글을 삭제하시겠습니까?');">
+                                <button type="submit" class="tg-card-action is-delete">삭제</button>
+                            </form>
                         </th:block>
                         <a class="tg-card-action is-detail"
                             th:href="@{/together/share/detail/{id}(id=${post.share_id})}">상세보기</a>

@@ -181,6 +181,17 @@
         AND share_id = #{share_id}
     </delete>
 
+    <!-- 재료나눔 글 삭제 -->
+    <update id="deleteShare">
+        UPDATE ingredient_share
+        SET deleted_at = SYSTIMESTAMP,
+            updated_at = SYSTIMESTAMP
+        WHERE share_id =#{share_id}
+        AND author_id = #{author_id}
+        AND status = 0
+        AND deleted_at IS NULL
+    </update>
+
     <!-- 재료명이나 별칭으로 검색 -->
     <select id="searchIngredients" resultType="TogetherShareItemDto">
         SELECT
