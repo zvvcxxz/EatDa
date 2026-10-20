@@ -28,11 +28,11 @@ dialog.addEventListener('click', (e) => {
 function updateIngredientCardNumbers() {
     const container = document.getElementById('ingredientsContainer');
     const cards = container.querySelectorAll('.tg-ingredient-card');
-    
+
     cards.forEach((card, index) => {
         const badge = card.querySelector('.tg-item-badge');
         if (badge) {
-            badge.innerHTML = `<i class="fa-solid fa-leaf"></i> 나눔 재료 ${index + 1}`;
+            badge.textContent = `나눔 재료 ${index + 1}`;
         }
 
         // 재료 입력 순서 다시 맞추기
@@ -177,4 +177,3 @@ dialog.addEventListener('close', () => {
 
 // 처음에는 목록을 보여주고 글쓰기 버튼으로 열기
 updateIngredientCardNumbers();
-

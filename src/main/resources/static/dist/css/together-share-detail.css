@@ -1,0 +1,609 @@
+body:has(.sd-detail) {
+    background: #f3efe5;
+}
+
+.sd-detail {
+    --paper: #f3efe5;
+    --ink: #24392e;
+    --muted: #74786b;
+    --line: #d4d3c4;
+    --green: #2f7d4b;
+    --sage: #e0eadb;
+    --rust: #91543c
+}
+
+.sd-detail, .sd-detail * {
+    box-sizing: border-box
+}
+
+.sd-detail {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    line-height: 1.7
+}
+
+.sd-detail a {
+    color: inherit;
+    text-decoration: none
+}
+
+.sd-detail button {
+    font: inherit
+}
+
+.sd-detail button:disabled {
+    cursor: not-allowed
+}
+
+.sd-detail a:focus-visible, .sd-detail button:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 5px
+}
+
+.sd-detail {
+    max-width: 1200px;
+    padding: 0 40px;
+    margin: auto
+}
+
+.sd-detail .sdd-breadcrumb {
+    padding: 30px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-breadcrumb a {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line)
+}
+
+.sd-detail .sdd-breadcrumb span {
+    letter-spacing: 1px
+}
+
+.sd-detail .sdd-hero {
+    position: relative;
+    padding: 30px 0 44px;
+    border-bottom: 1px solid var(--ink)
+}
+
+.sd-detail .sdd-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 600
+}
+
+.sd-detail .sdd-eyebrow .sdd-type {
+    color: var(--rust)
+}
+
+.sd-detail .sdd-eyebrow .sdd-divider {
+    height: 10px;
+    width: 1px;
+    background: var(--line)
+}
+
+.sd-detail .sdd-hero h1 {
+    font-family: 'Noto Serif KR', 'AppleMyungjo', serif;
+    font-size: clamp(34px, 4.1vw, 57px);
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -2.4px;
+    margin: 23px 0 26px;
+    max-width: 850px;
+    word-break: keep-all
+}
+
+.sd-detail .sdd-hero-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center
+}
+
+.sd-detail .sdd-author {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.sd-detail .sdd-author-initial {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: var(--green);
+    color: var(--paper);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 14px
+}
+
+.sd-detail .sdd-author strong {
+    font-size: 12px;
+    font-weight: 600
+}
+
+.sd-detail .sdd-author small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-post-meta {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 22px
+}
+
+.sd-detail .sdd-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 72px;
+    padding-top: 46px;
+    align-items: start
+}
+
+.sd-detail .sdd-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line)
+}
+
+.sd-detail .sdd-section-heading h2 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -.7px
+}
+
+.sd-detail .sdd-section-heading .sdd-count {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--green)
+}
+
+.sd-detail .sdd-section-heading .sdd-count small {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    margin-left: 8px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-ingredients {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.sd-detail .sdd-ingredient {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 14px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--line)
+}
+
+.sd-detail .sdd-ingredient-number {
+    font-size: 10px;
+    color: var(--muted);
+    padding-top: 8px
+}
+
+.sd-detail .sdd-ingredient h3 {
+    font-size: 25px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: -1px;
+    margin: 0 0 10px
+}
+
+.sd-detail .sdd-ingredient p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+    word-break: keep-all
+}
+
+.sd-detail .sdd-ingredient .sdd-expiry {
+    display: block;
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--rust)
+}
+
+.sd-detail .sdd-quantity {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 32px;
+    line-height: 1.3;
+    white-space: nowrap;
+    padding-top: 0
+}
+
+.sd-detail .sdd-quantity small {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    margin-left: 5px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-body-section {
+    padding: 42px 0 24px
+}
+
+.sd-detail .sdd-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin: 0 0 18px
+}
+
+.sd-detail .sdd-body-section h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 23px;
+    font-weight: 500;
+    margin: 0 0 20px;
+    letter-spacing: -.8px
+}
+
+.sd-detail .sdd-body-section .sdd-prose {
+    font-size: 14px;
+    line-height: 2.05;
+    word-break: keep-all
+}
+
+.sd-detail .sdd-prose p {
+    margin: 0 0 18px
+}
+
+.sd-detail .sdd-exchange {
+    padding: 22px 24px;
+    border-left: 2px solid var(--rust);
+    background: #ebe4d8;
+    margin: 25px 0
+}
+
+.sd-detail .sdd-exchange strong {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--rust)
+}
+
+.sd-detail .sdd-exchange p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.8
+}
+
+.sd-detail .sdd-owner-actions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+    align-items: center;
+    margin-top: 25px
+}
+
+.sd-detail .sdd-owner-actions span {
+    font-size: 10px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-owner-actions div {
+    display: flex;
+    gap: 20px
+}
+
+.sd-detail .sdd-text-action {
+    border: 0;
+    background: none;
+    padding: 6px 0;
+    color: var(--muted);
+    font-size: 11px
+}
+
+.sd-detail .sdd-text-action.sdd-delete {
+    color: var(--rust)
+}
+
+.sd-detail .sdd-handover {
+    position: sticky;
+    top: 28px;
+    background: var(--sage);
+    padding: 26px 26px 23px
+}
+
+.sd-detail .sdd-handover-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #c5cdbb;
+    padding-bottom: 19px
+}
+
+.sd-detail .sdd-handover h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 23px;
+    letter-spacing: -1px;
+    font-weight: 500;
+    margin: 0
+}
+
+.sd-detail .sdd-status {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px
+}
+
+.sd-detail .sdd-status::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--green);
+    border-radius: 50%
+}
+
+.sd-detail .sdd-handover dl {
+    margin: 0
+}
+
+.sd-detail .sdd-handover dl>div {
+    padding: 19px 0;
+    border-bottom: 1px solid #cbd1c1
+}
+
+.sd-detail .sdd-handover dt {
+    font-size: 10px;
+    color: #6c7864;
+    margin-bottom: 7px
+}
+
+.sd-detail .sdd-handover dd {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    font-weight: 500;
+    word-break: keep-all
+}
+
+.sd-detail .sdd-handover dd small {
+    display: block;
+    font-size: 10px;
+    color: #6c7864;
+    font-weight: 400;
+    margin-top: 3px
+}
+
+.sd-detail .sdd-date-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px
+}
+
+.sd-detail .sdd-date-line span:last-child {
+    font-variant-numeric: tabular-nums
+}
+
+.sd-detail .sdd-handover .sdd-capacity {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline
+}
+
+.sd-detail .sdd-capacity b {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 24px;
+    font-weight: 500
+}
+
+.sd-detail .sdd-capacity b small {
+    display: inline;
+    margin-left: 4px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 11px
+}
+
+.sd-detail .sdd-handover-note {
+    font-size: 10px;
+    line-height: 1.9;
+    color: #63745e;
+    margin: 17px 0 0
+}
+
+.sd-detail .sdd-aside-note {
+    padding: 20px 2px;
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.9
+}
+
+.sd-detail .sdd-aside-note strong {
+    font-weight: 500;
+    color: var(--ink)
+}
+
+.sd-detail .sdd-end-note {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--ink);
+    margin-top: 40px;
+    padding: 23px 0 48px;
+    font-size: 11px;
+    color: var(--muted)
+}
+
+.sd-detail .sdd-end-note a {
+    color: var(--ink);
+    border-bottom: 1px solid var(--line)
+}
+
+@media ( max-width :980px) {
+    .sd-detail .sdd-detail-layout {
+        gap: 36px;
+        grid-template-columns: minmax(0, 1fr) 280px
+    }
+    .sd-detail .sdd-hero h1 {
+        font-size: 44px
+    }
+    .sd-detail .sdd-handover {
+        padding: 22px
+    }
+}
+
+@media ( max-width :740px) {
+    .sd-detail {
+        padding: 0 22px
+    }
+    .sd-detail .sdd-breadcrumb {
+        padding: 20px 0;
+        font-size: 10px
+    }
+    .sd-detail .sdd-hero {
+        padding: 20px 0 28px
+    }
+    .sd-detail .sdd-hero h1 {
+        font-size: 34px;
+        letter-spacing: -1.5px
+    }
+    .sd-detail .sdd-hero-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 17px
+    }
+    .sd-detail .sdd-post-meta {
+        font-size: 10px
+    }
+    .sd-detail .sdd-detail-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        padding-top: 30px
+    }
+    .sd-detail .sdd-detail-layout>aside {
+        order: -1;
+        width: 100%
+    }
+    .sd-detail .sdd-detail-layout>article {
+        width: 100%
+    }
+    .sd-detail .sdd-handover {
+        position: static;
+        padding: 23px
+    }
+    .sd-detail .sdd-handover dl {
+        display: block
+    }
+    .sd-detail .sdd-aside-note {
+        display: none
+    }
+    .sd-detail .sdd-section-heading h2 {
+        font-size: 18px
+    }
+    .sd-detail .sdd-ingredient {
+        gap: 10px;
+        grid-template-columns: 20px minmax(0, 1fr) auto
+    }
+    .sd-detail .sdd-ingredient h3 {
+        font-size: 23px
+    }
+    .sd-detail .sdd-quantity {
+        font-size: 28px
+    }
+    .sd-detail .sdd-owner-actions {
+        align-items: flex-start;
+        gap: 15px
+    }
+    .sd-detail .sdd-end-note {
+        margin-top: 20px;
+        gap: 20px
+    }
+    .sd-detail .sdd-body-section {
+        padding-top: 32px
+    }
+}
+
+.sd-detail .sdd-prose {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.sd-detail .sdd-hero h1, .sd-detail .sdd-ingredient h3, .sd-detail .sdd-handover dd
+    {
+    overflow-wrap: anywhere;
+}
+
+.sd-detail .sdd-hero h1 {
+    white-space: pre-line;
+}
+
+.sd-detail .sdd-ingredient .sdd-expiry {
+    color: var(--rust);
+}
+
+.sd-detail .sdd-ingredient .sdd-expiry.sdd-is-empty {
+    color: var(--muted);
+}
+
+.sd-detail .sdd-empty-items {
+    padding: 24px 0;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+}
+
+.sd-detail .sdd-end-note {
+    margin-bottom: 0;
+}
+
+.sd-detail .sdd-detail-layout>aside {
+    position: sticky;
+    top: 28px;
+}
+
+.sd-detail .sdd-handover {
+    position: static;
+}
+
+.sd-detail .sdd-exchange p {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media ( max-width :740px) {
+    .sd-detail .sdd-detail-layout>aside {
+        position: static;
+    }
+}
+
+.sd-detail .sdd-hero {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--ink);
+}
+
+.sd-detail .sdd-hero h1 {
+    color: var(--ink);
+}
+
+.sd-detail .sdd-quantity {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.sd-detail .sdd-quantity small {
+    margin-left: 0;
+}

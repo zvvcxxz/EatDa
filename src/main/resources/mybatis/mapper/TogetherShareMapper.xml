@@ -1,106 +1,230 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sp.app.mapper.TogetherShareMapper">
-	<!-- 재료나눔 글 등록 -->
-	<insert id="insertShare" parameterType="TogetherShareDto">
-		<selectKey keyProperty="share_id" resultType="long" order="BEFORE">
-			SELECT SEQ_INGREDIENT_SHARE.NEXTVAL
-			FROM dual
-		</selectKey>
-		
-		INSERT INTO ingredient_share (
-			share_id,
-			author_id,
-			title,
-			content,
-			status,
-			view_count,
-			share_type,
-			location_text,
-			available_from,
-			available_until,
-			max_recipients,
-			exchange_note,
-			share_status,
-			created_at,
-			updated_at
-		)
-		VALUES (
-			#{share_id},
-			#{author_id},
-			#{title},
-			#{content},
-			#{status},
-			0,
-			#{share_type},
-			#{location_text},
-			TO_TIMESTAMP(#{available_from} , 'YYYY-MM-DD"T"HH24:MI'),
-			TO_TIMESTAMP(
-  			  #{available_until, jdbcType=VARCHAR},
-    			'YYYY-MM-DD"T"HH24:MI'
-			),
-			#{max_recipients},
-			#{exchange_note, jdbcType=VARCHAR},
-			#{share_status},
-			SYSTIMESTAMP,
-			SYSTIMESTAMP
-			
-		)
-	</insert>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-	<!-- 재료명 / 별칭 검색 -->
-	<select id="searchIngredients" resultType="TogetherShareItemDto">
-  	  SELECT
-     	   i.ingredient_id,
-    	    i.ingredient_name,
-      	  i.default_unit AS unit
-   	 FROM ingredient i
-  	  WHERE i.active_yn = 'Y'
-  	    AND (
-       	   LOWER(i.ingredient_name)
-           	   LIKE '%' || LOWER(#{keyword}) || '%'
-       	   OR EXISTS (
-          	    SELECT 1
-              	FROM ingredient_alias a
-              	WHERE a.ingredient_id = i.ingredient_id
-                	AND a.active_yn = 'Y'
-                	AND LOWER(a.alias_name)
-            	        LIKE '%' || LOWER(#{keyword}) || '%'
-        	  )
-      	)
-    	ORDER BY i.ingredient_name, i.ingredient_id
-	</select>	
-	<!-- 분류별 재료 목록 -->
-	<select id="listIngredientsByType" resultType="TogetherShareItemDto">
-		SELECT
-			i.ingredient_id,
-			i.ingredient_name,
-			i.default_unit AS unit
-		FROM ingredient i
-		WHERE i.active_yn = 'Y'
-		AND i.ingredient_type = #{type}
-		ORDER BY i.ingredient_name , i.ingredient_id
-	</select>
-	
-	<insert id="insertShareItem" parameterType="TogetherShareItemDto">
-		INSERT INTO share_item (
-			share_item_id,
-			share_id,
-			ingredient_id,
-			quantity,
-			unit,
-			expires_on,
-			item_note
-		)
-		VALUES (
-			SEQ_SHARE_ITEM.NEXTVAL,
-			#{share_id},
-			#{ingredient_id},
-			#{quantity},
-			#{unit},
-			TO_DATE(#{expires_on, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-			#{item_note, jdbcType=VARCHAR}
-		)
-	</insert>
+<mapper namespace="com.sp.app.mapper.TogetherShareMapper">
+
+    <!-- 나눔 글 등록 -->
+    <insert id="insertShare" parameterType="TogetherShareDto">
+        <selectKey keyProperty="share_id" resultType="long" order="BEFORE">
+            SELECT SEQ_INGREDIENT_SHARE.NEXTVAL
+            FROM dual
+        </selectKey>
+
+        INSERT INTO ingredient_share (
+            share_id,
+            author_id,
+            title,
+            content,
+            status,
+            view_count,
+            share_type,
+            location_text,
+            available_from,
+            available_until,
+            max_recipients,
+            exchange_note,
+            share_status,
+            created_at,
+            updated_at
+        )
+        VALUES (
+            #{share_id},
+            #{author_id},
+            #{title},
+            #{content},
+            #{status},
+            0,
+            #{share_type},
+            #{location_text},
+            TO_TIMESTAMP(#{available_from}, 'YYYY-MM-DD"T"HH24:MI'),
+            TO_TIMESTAMP(
+                #{available_until, jdbcType=VARCHAR},
+                'YYYY-MM-DD"T"HH24:MI'
+            ),
+            #{max_recipients},
+            #{exchange_note, jdbcType=VARCHAR},
+            #{share_status},
+            SYSTIMESTAMP,
+            SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 글에 선택한 나눔 재료 저장 -->
+    <insert id="insertShareItem" parameterType="TogetherShareItemDto">
+        INSERT INTO share_item (
+            share_item_id,
+            share_id,
+            ingredient_id,
+            quantity,
+            unit,
+            expires_on,
+            item_note
+        )
+        VALUES (
+            SEQ_SHARE_ITEM.NEXTVAL,
+            #{share_id},
+            #{ingredient_id},
+            #{quantity},
+            #{unit},
+            TO_DATE(#{expires_on, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+            #{item_note, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 나눔 글 목록 / 더보기 -->
+    <select id="listShare" resultType="TogetherShareDto">
+        SELECT
+            s.share_id,
+            s.author_id,
+            s.title,
+            s.content,
+            s.share_type,
+            s.location_text,
+            TO_CHAR(s.available_from, 'YYYY-MM-DD HH24:MI') AS available_from,
+            TO_CHAR(s.available_until, 'YYYY-MM-DD HH24:MI') AS available_until,
+            s.max_recipients,
+            s.exchange_note,
+            s.share_status,
+            TO_CHAR(s.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+            s.view_count,
+            m.name
+        FROM ingredient_share s
+        JOIN member m ON s.author_id = m.member_id
+        WHERE s.status = 0
+          AND s.deleted_at IS NULL
+        ORDER BY s.created_at DESC, s.share_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 나눔 글 상세보기 -->
+    <select id="findShareById" resultType="TogetherShareDto">
+        SELECT
+            s.share_id,
+            s.author_id,
+            m.name,
+            s.title,
+            s.content,
+            s.share_type,
+            s.location_text,
+            TO_CHAR(s.available_from, 'YYYY-MM-DD HH24:MI') AS available_from,
+            TO_CHAR(s.available_until, 'YYYY-MM-DD HH24:MI') AS available_until,
+            s.max_recipients,
+            s.exchange_note,
+            s.share_status,
+            s.view_count,
+            TO_CHAR(s.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+            TO_CHAR(s.updated_at, 'YYYY-MM-DD HH24:MI') AS updated_at
+        FROM ingredient_share s
+        JOIN member m ON s.author_id = m.member_id
+        WHERE s.share_id = #{share_id}
+          AND s.status = 0
+          AND s.deleted_at IS NULL
+    </select>
+
+    <!-- 상세보기에서 보여줄 나눔 재료 -->
+    <select id="listShareItems" resultType="TogetherShareItemDto">
+        SELECT
+            si.share_item_id,
+            si.share_id,
+            si.ingredient_id,
+            i.ingredient_name,
+            si.quantity,
+            si.unit,
+            TO_CHAR(si.expires_on, 'YYYY-MM-DD') AS expires_on,
+            si.item_note
+        FROM share_item si
+        JOIN ingredient i ON si.ingredient_id = i.ingredient_id
+        WHERE si.share_id = #{share_id}
+        ORDER BY si.share_item_id ASC
+    </select>
+
+    <!-- 재료나눔 글 수정 -->
+    <update id="updateShare" parameterType="TogetherShareDto">
+        UPDATE ingredient_share
+        SET	title = #{title},
+            content = #{content},
+            share_type = #{share_type},
+            location_text = #{location_text},
+            available_from = TO_TIMESTAMP(
+                #{available_from} , 'YYYY-MM-DD"T"HH24:MI'),
+            available_until = TO_TIMESTAMP(
+                #{available_until}, 'YYYY-MM-DD"T"HH24:MI'),
+            max_recipients = #{max_recipients},
+            exchange_note = #{exchange_note, jdbcType=VARCHAR},
+            updated_at = SYSTIMESTAMP
+        WHERE share_id = #{share_id}
+        AND author_id = #{author_id}
+        AND status = 0
+        AND deleted_at IS NULL
+    </update>
+
+    <!-- 기존 나눔 재료 수정 -->
+    <update id="updateShareItem" parameterType="TogetherShareItemDto">
+        UPDATE share_item
+        SET ingredient_id = #{ingredient_id},
+            quantity = #{quantity},
+            unit = #{unit},
+            expires_on = TO_DATE(
+                #{expires_on, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+            item_note = #{item_note, jdbcType=VARCHAR}
+        WHERE share_item_id = #{share_item_id}
+        AND share_id = #{share_id}
+    </update>
+
+    <!-- 나눔 글에서 재료 삭제 -->
+    <delete id="deleteShareItem">
+        DELETE FROM share_item
+        WHERE share_item_id = #{share_item_id}
+        AND share_id = #{share_id}
+    </delete>
+
+    <!-- 재료나눔 글 삭제 -->
+    <update id="deleteShare">
+        UPDATE ingredient_share
+        SET deleted_at = SYSTIMESTAMP,
+            updated_at = SYSTIMESTAMP
+        WHERE share_id =#{share_id}
+        AND author_id = #{author_id}
+        AND status = 0
+        AND deleted_at IS NULL
+    </update>
+
+    <!-- 재료명이나 별칭으로 검색 -->
+    <select id="searchIngredients" resultType="TogetherShareItemDto">
+        SELECT
+            i.ingredient_id,
+            i.ingredient_name,
+            i.default_unit AS unit
+        FROM ingredient i
+        WHERE i.active_yn = 'Y'
+          AND (
+              LOWER(i.ingredient_name)
+                  LIKE '%' || LOWER(#{keyword}) || '%'
+              OR EXISTS (
+                  SELECT 1
+                  FROM ingredient_alias a
+                  WHERE a.ingredient_id = i.ingredient_id
+                    AND a.active_yn = 'Y'
+                    AND LOWER(a.alias_name)
+                        LIKE '%' || LOWER(#{keyword}) || '%'
+              )
+          )
+        ORDER BY i.ingredient_name, i.ingredient_id
+    </select>
+
+    <!-- 분류별 재료 목록 -->
+    <select id="listIngredientsByType" resultType="TogetherShareItemDto">
+        SELECT
+            i.ingredient_id,
+            i.ingredient_name,
+            i.default_unit AS unit
+        FROM ingredient i
+        WHERE i.active_yn = 'Y'
+          AND i.ingredient_type = #{type}
+        ORDER BY i.ingredient_name, i.ingredient_id
+    </select>
+
 </mapper>
