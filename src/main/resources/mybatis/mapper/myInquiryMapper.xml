@@ -2,93 +2,150 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.mapper.MyInquiryMapper">
-	
+
 	<sql id = "where-list">
+		<if test="inquiryType != null">
+    		AND i.INQUIRY_TYPE = #{inquiryType}
+		</if>
+	
+		<if test="kwd !=null and kwd !='' ">
 		<choose>
-			<when test="inquiryType=='all'">
-			
-			
-			
+			<when test="schType=='all'">
+				<![CDATA[ and (INSTR(i.TITLE, #{kwd})>0 OR 
+				DBMS_LOB.INSTR(REGEXP_REPLACE(i.CONTENT, '<[^>]+>', ''), #{kwd})>0)
+				]]>		
 			</when>
-		
+			<when test="schType == 'content'">
+				<![CDATA[ and
+					DBMS_LOB.INSTR(REGEXP_REPLACE(i.content, '<[^>]+>', ''), #{kwd}) > 0
+				]]>
+			</when>
+			<when test="schType == 'title'">
+                <![CDATA[
+                    AND INSTR(i.TITLE, #{kwd}) > 0
+                ]]>
+            </when>
+			<when test="schType=='reg_date'">
+				and (INSTR(TO_CHAR(i.CREATED_AT, 'YYYYMMDD'), #{kwd}) &gt; 0
+					OR TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD') = #{kwd})
+			</when>
+
 		</choose>
+		</if>
 	</sql>
 		
-	<select id="selectMyInquiryList" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto">
-
+	<!-- 내 문의 목록: 검색 + 유형 필터 + 페이징 -->
+	<select id="selectMyInquiryList" parameterType="Map" resultType="com.sp.app.domain.dto.MyInquiryDto">
+	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId,
+	        i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title, i.STATUS AS status,
+	        i.CREATED_AT AS createdAt, i.PARENT_INQUIRY_ID AS parentInquiryId
+	    FROM INQUIRY i
+		<where>
+			i.MEMBER_ID = #{memberId}
+			<include refid="where-list"/>	
+		</where>
+		order by i.CREATED_AT desc, i.INQUIRY_ID desc
+		offset #{offset} rows fetch first #{size} rows only
 	</select>
 	
-    <!-- #{inquiryId}, #{memberId} -->
+	
+	<!-- 검색 조건에 맞는 전체 문의 개수 -->
+	<select id="countMyInquiryList" parameterType="map" resultType="long">
+    select count(*) from INQUIRY i
+	    <where>
+	    	i.MEMBER_ID = #{memberId}
+	    	<include refid="where-list"/>
+	    </where>    
+    </select>
+	
+    <!-- #{inquiryId}, #{memberId} 내 문의 상세-->
     <select id="selectMyInquiryDetail" resultType="com.sp.app.domain.dto.MyInquiryDto">
-    SELECT i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, i.INQUIRY_TYPE as inquiryType,
-    i.TITLE as title, i.CONTENT as content, i.STATUS as status,
-    i.ANSWER_ADMIN_ID as answerAdminId, i.ANSWER_CONTENT as answerContent,
-    i.ANSWERED_AT as answeredAt, i.CREATED_AT as createdAt, i.UPDATED_AT as updatedAt, 
-    i.PARENT_INQUIRY_ID as parentInquiryId,
-    f.INQUIRY_FILE_ID as inquiryFileId, f.INQUIRY_ID as inquiryId,
-    f.ORIGINAL_FILE_NAME as originalFileName, f.FILE_PATH as filePath 
-
-	FROM INQUIRY i
-	LEFT OUTER JOIN INQUIRY_FILE f
-	<where>
-		<if test="kwd !=null and kwd !=''">
-			<include refid="where-list"/>
-		</if>
-		
-		<if test="inquiryId !=null and inquiryId !=''">
-		and inquiryId = #{inquiryId}
-		</if>
-		and memberId = #{memberId}
-	</where>
-
+	    SELECT i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, 
+		    i.INQUIRY_TYPE as inquiryType, i.TITLE as title, i.CONTENT as content, 
+		    i.STATUS as status, i.ANSWER_ADMIN_ID as answerAdminId, 
+		    i.ANSWER_CONTENT as answerContent, i.ANSWERED_AT as answeredAt, 
+		    i.CREATED_AT as createdAt, i.UPDATED_AT as updatedAt, 
+		    i.PARENT_INQUIRY_ID as parentInquiryId
+	
+		FROM INQUIRY i
+		where i.INQUIRY_ID = #{inquiryId} and i.MEMBER_ID = #{memberId}
 	</select>
 
-
+	<!-- 문의 등록 -->
 	<insert id="insertMyInquiry" parameterType="com.sp.app.domain.dto.MyInquiryDto">
 		<selectKey keyProperty="inquiryId" resultType="Long" order="BEFORE">
 			SELECT SEQ_INQUIRY.NEXTVAL FROM DUAL
 		</selectKey>
-	
+		insert into Inquiry(INQUIRY_ID, MEMBER_ID, INQUIRY_TYPE, TITLE, 
+			CONTENT, STATUS, CREATED_AT, UPDATED_AT, PARENT_INQUIRY_ID)
+		values(#{inquiryId}, #{memberId},#{inquiryType},#{title},
+			#{content}, 0, SYSTIMESTAMP, SYSTIMESTAMP, #{parentInquiryId})	
 	</insert>
 	
+	<!-- 문의 수정 -->
     <update id="updateMyInquiry" parameterType="com.sp.app.domain.dto.MyInquiryDto">
-	
+		UPDATE Inquiry SET INQUIRY_TYPE = #{inquiryType}, TITLE = #{title},
+			CONTENT = #{content}, UPDATED_AT = SYSTIMESTAMP
+		where INQUIRY_ID = #{inquiryId} and MEMBER_ID = #{memberId} 
+		AND STATUS = 0
 	</update>
-
-	<!-- #{inquiryId}, #{memberId} -->
+	
+	<!--문의 삭제 #{inquiryId}, #{memberId} -->
     <delete id="deleteMyInquiry">
-    
+    	delete from Inquiry 
+		where INQUIRY_ID = #{inquiryId} and MEMBER_ID = #{memberId} 
+		AND STATUS = 0
     </delete>
     
 
-    <!-- #{parentInquiryId}, #{memberId} -->
+    <!--추가 문의 목록 #{parentInquiryId}, #{memberId} -->
     <select id="selectFollowUpInquiries" resultType="com.sp.app.domain.dto.MyInquiryDto">
-    
+    	select i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, 
+    	i.INQUIRY_TYPE as inquiryType, i.TITLE as title, i.STATUS as status, 
+    	i.PARENT_INQUIRY_ID AS parentInquiryId, i.CREATED_AT as createdAt
+    	from inquiry i
+    	where PARENT_INQUIRY_ID = #{parentInquiryId} and MEMBER_ID = #{memberId}
     </select>
 
-
+	<!-- 첨부파일 등록 -->
     <insert id="insertInquiryFile" parameterType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
-    
+		INSERT INTO INQUIRY_FILE
+		(INQUIRY_FILE_ID, INQUIRY_ID, ORIGINAL_FILE_NAME, FILE_PATH)
+		VALUES (SEQ_INQUIRY_FILE.NEXTVAL, #{inquiryId}, 
+		#{originalFileName}, #{filePath})
     </insert>
 
-
+	<!-- 문의의 첨부파일 목록 -->
 	<select id="selectInquiryFiles" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
-	
+		SELECT f.INQUIRY_FILE_ID as inquiryFileId, f.INQUIRY_ID as inquiryId,
+	    f.ORIGINAL_FILE_NAME as originalFileName, f.FILE_PATH as filePath  
+	    FROM INQUIRY_FILE f 
+    	WHERE INQUIRY_ID = #{inquiryId}
 	</select>
 
-    <!-- #{inquiryFileId}, #{inquiryId} -->
-    <select id="selectInquiryFile" parameterType="Long" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
-    
+    <!-- 특정 첨부파일 조회 #{inquiryFileId}, #{inquiryId} -->
+    <select id="selectInquiryFile" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
+		SELECT f.INQUIRY_FILE_ID as inquiryFileId, f.INQUIRY_ID as inquiryId,
+	    f.ORIGINAL_FILE_NAME as originalFileName, f.FILE_PATH as filePath  
+	    FROM INQUIRY_FILE f 
+    	WHERE INQUIRY_ID = #{inquiryId} AND INQUIRY_FILE_ID = #{inquiryFileId}
     </select>
 
-
+	<!-- 문의에 연결된 첨부파일 DB 정보 전체 삭제 -->
     <delete id="deleteInquiryFilesByInquiryId" parameterType="Long">
-    
+    	DELETE FROM INQUIRY_FILE
+    	WHERE INQUIRY_ID = #{inquiryId}
     </delete>
 
-    <!-- #{inquiryFileId}, #{inquiryId} -->
+    <!--특정 첨부파일 DB 정보 삭제 #{inquiryFileId}, #{inquiryId} -->
     <delete id="deleteInquiryFile">
-    
+   		DELETE FROM INQUIRY_FILE
+    	WHERE INQUIRY_ID = #{inquiryId} AND INQUIRY_FILE_ID = #{inquiryFileId}
     </delete>
+    
+    <select id="selectInquiryByStatus" resultType="int">
+    	select count(*) from INQUIRY
+    	WHERE INQUIRY_ID = #{inquiryId} and MEMBER_ID = #{memberId} and status = 0 
+    </select>
     
 </mapper>
