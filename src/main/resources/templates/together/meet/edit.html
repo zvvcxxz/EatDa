@@ -1,121 +1,122 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/layout}">
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 <head>
 <title>같이 먹어요 글 수정 · 잇다</title>
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/together-edit.css}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" th:href="@{/dist/css/together-meet-editorial.css}">
 </th:block>
 </head>
 <body>
-	<main layout:fragment="content" class="together-edit">
-		<!-- 상세보기로 이동 -->
-		<nav class="te-nav" th:if="${meet != null}">
-			<a class="te-back"
-				th:href="@{/together/meet/detail/{id}(id=${meet.meet_id})}"> <i
-				class="fa-solid fa-arrow-left" aria-hidden="true"></i> 상세보기로 돌아가기
-			</a> <span class="te-nav-label">TOGETHER · 같이 먹어요</span>
-		</nav>
-		<section class="te-card" th:if="${meet != null}">
-			<header class="te-header">
-				<span class="te-badge"><i class="fa-solid fa-utensils"
-					aria-hidden="true"></i> 같이 먹어요</span>
-				<h1>모임 글 수정</h1>
-				<p>함께할 이웃에게 전할 모임 정보를 수정해주세요.</p>
-			</header>
-			<!-- 수정 실패 안내 -->
-			<p class="te-alert" role="alert" th:if="${applyMessage != null}"
-				th:text="${applyMessage}"></p>
-			<!-- 글 수정 - 기존 값 불러오기 -->
-			<form method="post" data-meet-edit
-				th:action="@{/together/meet/{id}/edit(id=${meet.meet_id})}">
-				<!-- 제목 / 내용 -->
-				<section class="te-section" aria-labelledby="te-basic-title">
-					<h2 id="te-basic-title">
-						<span>01</span> 모임 소개
-					</h2>
-					<label class="te-field" for="te-title">제목 <em>*</em></label> <input
-						id="te-title" type="text" name="title" maxlength="200" required
-						th:value="${meet.title}" placeholder="어떤 식사를 함께하고 싶으세요?">
-					<div class="te-label-row">
-						<label class="te-field" for="te-content">모임 내용 <em>*</em></label>
-						<span class="te-count" data-content-count></span>
-					</div>
-					<textarea id="te-content" name="content" rows="7" required
-						th:text="${meet.content}" placeholder="메뉴와 모임 안내를 자유롭게 적어주세요."></textarea>
-				</section>
-				<!-- 모임 장소 / 날짜 -->
-				<section class="te-section" aria-labelledby="te-plan-title">
-					<h2 id="te-plan-title">
-						<span>02</span> 장소와 일정
-					</h2>
-					<label class="te-field" for="te-location">모임 장소 <em>*</em></label>
-					<div class="te-location">
-						<i class="fa-solid fa-location-dot" aria-hidden="true"></i> <input
-							id="te-location" type="text" name="location_text" maxlength="300"
-							required th:value="${meet.location_text}"
-							placeholder="예: 강남역 11번 출구 근처">
-					</div>
-					<!-- datetime-local에 맞게 날짜 공백을 T로 변경 -->
-					<div class="te-grid">
-						<div>
-							<label class="te-field" for="te-meet-at">모임 일시 <em>*</em></label>
-							<input id="te-meet-at" type="datetime-local" name="meet_at"
-								required
-								th:value="${meet.meet_at == null ? '' : #strings.replace(meet.meet_at, ' ', 'T')}">
-						</div>
-						<div>
-							<label class="te-field" for="te-deadline">신청 마감 <small>선택</small></label>
-							<input id="te-deadline" type="datetime-local"
-								name="application_deadline"
-								th:value="${meet.application_deadline == null ? '' : #strings.replace(meet.application_deadline, ' ', 'T')}">
-							<p class="te-help">모임 일시보다 늦게 설정할 수 없어요.</p>
-						</div>
-					</div>
-				</section>
-				<!-- 최대 인원 - 방장 포함 -->
-				<section class="te-section" aria-labelledby="te-people-title">
-					<h2 id="te-people-title">
-						<span>03</span> 참여 인원
-					</h2>
-					<div class="te-people-box">
-						<div>
-							<label class="te-field" for="te-max">최대 참여 인원 <em>*</em></label>
-							<p class="te-help">방장을 포함한 전체 인원이에요.</p>
-						</div>
-						<div class="te-number">
-							<input id="te-max" type="number" name="max_participants" min="1"
-								max="99999" step="1" th:value="${meet.max_participants}"
-								required aria-describedby="te-people-note"> <span>명</span>
-						</div>
-					</div>
-					<p id="te-people-note" class="te-help">이미 참여 중인 인원보다 적게 줄일 수
-						없어요.</p>
-				</section>
-				<!-- 수정 저장 / 취소 -->
-				<footer class="te-footer">
-					<p>
-						<em>*</em> 필수 입력 항목
-					</p>
-					<div class="te-actions">
-						<a class="te-button te-cancel"
-							th:href="@{/together/meet/detail/{id}(id=${meet.meet_id})}">취소</a>
-						<button class="te-button te-save" type="submit">
-							<i class="fa-solid fa-check" aria-hidden="true"></i> 수정 완료
-						</button>
-					</div>
-				</footer>
-			</form>
-		</section>
-		<!-- 게시글이 없는 경우 -->
-		<section class="te-card" th:if="${meet == null}">
-			<h1>게시글을 찾을 수 없습니다.</h1>
-			<a th:href="@{/together/meet}">목록으로 돌아가기</a>
-		</section>
-	</main>
-	<th:block layout:fragment="script">
-		<script defer th:src="@{/dist/js/together-edit.js}"></script>
-	</th:block>
+    <main layout:fragment="content" class="together-edit me-page">
+        <!-- 상세보기로 이동 -->
+        <nav class="te-nav" th:if="${meet != null}">
+            <a class="te-back"
+                th:href="@{/together/meet/detail/{id}(id=${meet.meet_id})}">  상세보기로 돌아가기
+            </a> <span class="te-nav-label">TOGETHER · 같이 먹어요</span>
+        </nav>
+        <section class="te-card" th:if="${meet != null}">
+            <header class="te-header">
+                <span class="te-badge"> 같이 먹어요</span>
+                <h1>모임 글 수정</h1>
+                <p>함께할 이웃에게 전할 모임 정보를 수정해주세요.</p>
+            </header>
+            <!-- 수정 실패 안내 -->
+            <p class="te-alert" role="alert" th:if="${applyMessage != null}"
+                th:text="${applyMessage}"></p>
+            <!-- 글 수정 - 기존 값 불러오기 -->
+            <form method="post" data-meet-edit
+                th:action="@{/together/meet/{id}/edit(id=${meet.meet_id})}">
+                <!-- 제목 / 내용 -->
+                <section class="te-section" aria-labelledby="te-basic-title">
+                    <h2 id="te-basic-title">
+                        <span>01</span> 모임 소개
+                    </h2>
+                    <label class="te-field" for="te-title">제목 <em>*</em></label> <input
+                        id="te-title" type="text" name="title" maxlength="200" required
+                        th:value="${meet.title}" placeholder="어떤 식사를 함께하고 싶으세요?">
+                    <div class="te-label-row">
+                        <label class="te-field" for="te-content">모임 내용 <em>*</em></label>
+                        <span class="te-count" data-content-count></span>
+                    </div>
+                    <textarea id="te-content" name="content" rows="7" required
+                        th:text="${meet.content}" placeholder="메뉴와 모임 안내를 자유롭게 적어주세요."></textarea>
+                </section>
+                <!-- 모임 장소 / 날짜 -->
+                <section class="te-section" aria-labelledby="te-plan-title">
+                    <h2 id="te-plan-title">
+                        <span>02</span> 장소와 일정
+                    </h2>
+                    <label class="te-field" for="te-location">모임 장소 <em>*</em></label>
+                    <div class="te-location">
+                         <input
+                            id="te-location" type="text" name="location_text" maxlength="300"
+                            required th:value="${meet.location_text}"
+                            placeholder="예: 강남역 11번 출구 근처">
+                    </div>
+                    <!-- datetime-local에 맞게 날짜 공백을 T로 변경 -->
+                    <div class="te-grid">
+                        <div>
+                            <label class="te-field" for="te-meet-at">모임 일시 <em>*</em></label>
+                            <input id="te-meet-at" type="datetime-local" name="meet_at"
+                                required
+                                th:value="${meet.meet_at == null ? '' : #strings.replace(meet.meet_at, ' ', 'T')}">
+                        </div>
+                        <div>
+                            <label class="te-field" for="te-deadline">신청 마감 <small>선택</small></label>
+                            <input id="te-deadline" type="datetime-local"
+                                name="application_deadline"
+                                th:value="${meet.application_deadline == null ? '' : #strings.replace(meet.application_deadline, ' ', 'T')}">
+                            <p class="te-help">모임 일시보다 늦게 설정할 수 없어요.</p>
+                        </div>
+                    </div>
+                </section>
+                <!-- 최대 인원 - 방장 포함 -->
+                <section class="te-section" aria-labelledby="te-people-title">
+                    <h2 id="te-people-title">
+                        <span>03</span> 참여 인원
+                    </h2>
+                    <div class="te-people-box">
+                        <div>
+                            <label class="te-field" for="te-max">최대 참여 인원 <em>*</em></label>
+                            <p class="te-help">방장을 포함한 전체 인원이에요.</p>
+                        </div>
+                        <div class="te-number">
+                            <input id="te-max" type="number" name="max_participants" min="1"
+                                max="99999" step="1" th:value="${meet.max_participants}"
+                                required aria-describedby="te-people-note"> <span>명</span>
+                        </div>
+                    </div>
+                    <p id="te-people-note" class="te-help">이미 참여 중인 인원보다 적게 줄일 수
+                        없어요.</p>
+                </section>
+                <!-- 수정 저장 / 취소 -->
+                <footer class="te-footer">
+                    <p>
+                        <em>*</em> 필수 입력 항목
+                    </p>
+                    <div class="te-actions">
+                        <a class="te-button te-cancel"
+                            th:href="@{/together/meet/detail/{id}(id=${meet.meet_id})}">취소</a>
+                        <button class="te-button te-save" type="submit">
+                             수정 완료
+                        </button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+        <!-- 게시글이 없는 경우 -->
+        <section class="te-card" th:if="${meet == null}">
+            <h1>게시글을 찾을 수 없습니다.</h1>
+            <a th:href="@{/together/meet}">목록으로 돌아가기</a>
+        </section>
+    </main>
+    <th:block layout:fragment="script">
+        <script defer th:src="@{/dist/js/together-edit.js}"></script>
+    </th:block>
 </body>
 </html>
