@@ -168,6 +168,14 @@ public class MyKitchenController {
         
         return "mykitchen/myinquiries";
     }
+    //vue 용 연결
+    @GetMapping("/inquiries-vue")
+    public String inquiryvue(Model model) {
+        model.addAttribute("tab", "inquiries");
+        model.addAttribute("pageTitle", "신고 / 문의");
+        return "mykitchen/myinquiryvue";
+    }
+
     
 
     // 9. 나의 활동

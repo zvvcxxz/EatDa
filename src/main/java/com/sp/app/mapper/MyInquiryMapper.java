@@ -21,19 +21,23 @@ public interface MyInquiryMapper {
     // 내 문의 상세
     MyInquiryDto selectMyInquiryDetail(
         @Param("inquiryId") Long inquiryId, @Param("memberId") Long memberId);
+    
+    // 추가 문의 목록
+    List<MyInquiryDto> selectFollowUpInquiries(
+    		@Param("parentInquiryId") Long parentInquiryId,
+    		@Param("memberId") Long memberId);
+    
+    //추가문의 상세 (부모id 검사)
+    MyInquiryDto selectFollowUpDetail(@Param("inquiryId") Long inquiryId,
+    		@Param("followUpId") Long followUpId, @Param("memberId") Long memberId);
 
     int insertMyInquiry(MyInquiryDto dto);// 문의 등록   
     int updateMyInquiry(MyInquiryDto dto);// 문의 수정
     int deleteMyInquiry(@Param("inquiryId") Long inquiryId, 
     		@Param("memberId") Long memberId);// 문의 삭제
 
-    // 추가 문의 목록
-    List<MyInquiryDto> selectFollowUpInquiries(
-        @Param("parentInquiryId") Long parentInquiryId,
-        @Param("memberId") Long memberId);
-
-    // 첨부파일 등록
-    int insertInquiryFile(InquiryFileDto dto);
+    
+    int insertInquiryFile(InquiryFileDto dto);// 첨부파일 등록
 
     // 문의의 첨부파일 목록
     List<InquiryFileDto> selectInquiryFiles(@Param("inquiryId") Long inquiryId);
@@ -52,5 +56,6 @@ public interface MyInquiryMapper {
     
     //수정, 삭제 가능한 문의인지(status = 0) 인지 확인용
     int selectInquiryByStatus(@Param("inquiryId") Long inquiryId, @Param("memberId") Long memberId);
+    
     
 }

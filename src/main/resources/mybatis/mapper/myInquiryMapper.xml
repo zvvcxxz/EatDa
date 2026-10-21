@@ -148,4 +148,15 @@
     	WHERE INQUIRY_ID = #{inquiryId} and MEMBER_ID = #{memberId} and status = 0 
     </select>
     
+    <select id="selectFollowUpDetail" resultType="com.sp.app.domain.dto.MyInquiryDto">
+	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId,
+	        i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title,
+	        i.CONTENT AS content, i.STATUS AS status,
+	        i.ANSWER_CONTENT AS answerContent, i.CREATED_AT AS createdAt,
+	        i.PARENT_INQUIRY_ID AS parentInquiryId
+	    FROM INQUIRY i
+	    WHERE i.INQUIRY_ID = #{followUpId}
+	      AND i.PARENT_INQUIRY_ID = #{inquiryId} AND i.MEMBER_ID = #{memberId}
+	</select>
+    
 </mapper>
