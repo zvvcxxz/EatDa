@@ -1,0 +1,65 @@
+.site-header .brand:hover img { transform: none; }
+.site-header .header-inner > .header-account { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 1px solid #f2d4bd; border-radius: 50%; color: #744732; background: transparent; box-shadow: none; transition: background-color .24s ease, border-color .24s ease, color .24s ease, box-shadow .24s ease; }
+.site-header .header-inner > .header-account:hover { transform: none; background: #fff0e3; color: #d14d2c; border-color: #efb38d; box-shadow: 0 2px 8px #a0562110; }
+.site-header .header-account:focus-visible { outline: 2px solid #d14d2c; outline-offset: 4px; }
+@media(prefers-reduced-motion:reduce) { .site-header .header-inner > .header-account { transition: none; } }
+.home-main .filters button { transition: background-color .24s ease, color .24s ease, box-shadow .24s ease; }
+.home-main .basket-heading > button { transition: color .22s ease; }
+.home-main .basket-panel .tag { transition: background-color .24s ease, color .24s ease, border-color .24s ease, transform .24s ease; }
+.home-main .basket-summary .button { transition: background-color .24s ease, color .24s ease, box-shadow .24s ease, transform .24s ease; }
+.home-main .recipe-body h3 { transition: color .24s ease; }
+.home-main .recipe-overlay .button { transition: background-color .24s ease, color .24s ease, box-shadow .24s ease, transform .24s ease; }
+.home-main .home-bottom .actions .button { transition: background-color .26s ease, color .26s ease, border-color .26s ease, box-shadow .26s ease; }
+.site-header .brand img { transition: box-shadow .25s ease; }
+.site-header .nav > a, .site-header .nav summary { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; line-height: 1.5; position: relative; transition: color .22s ease; }
+.site-header .nav summary::-webkit-details-marker { display: none; }
+.site-header .nav summary::after { content: ''; display: block; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); color: #92969a; transition: transform .24s ease, color .24s ease; }
+.site-header .nav details[open] > summary::after { transform: translateY(1px) rotate(225deg); color: var(--orange); }
+.site-header .nav > a::before, .site-header .nav summary::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform .24s ease; }
+.site-header .nav > a:hover::before, .site-header .nav > a:focus-visible::before, .site-header .nav details[open] summary::before { transform: scaleX(1); }
+.site-header .nav .dropdown { top: 100%; padding-top: 10px; border-radius: 12px; animation: eatda-menu-in .2s ease-out; transform-origin: top center; }
+.site-header .nav .dropdown a { transition: background .18s ease, color .18s ease, padding-left .18s ease; }
+.site-header .nav .dropdown a:hover, .site-header .nav .dropdown a:focus-visible { padding-left: 16px; }
+@keyframes eatda-menu-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.home-main .search-trigger { transition: border-color .28s ease, box-shadow .28s ease; }
+.home-main .search-trigger:hover, .home-main .search-trigger:focus-visible { border-color: #ffb34b; box-shadow: 0 5px 18px #7a310b18; }
+.home-main .search-trigger .search-icon, .home-main .search-trigger:hover .search-icon { transform: none; transition: background .28s ease, color .28s ease; }
+.home-main .search-trigger:hover .search-icon { background: #ffe4c6; }
+.home-main .search-trigger b { transition: box-shadow .28s ease, filter .28s ease; }
+.home-main .search-trigger:hover b { transform: none; filter: brightness(1.045); box-shadow: 0 5px 14px #9b351c26; }
+.home-main .home-bottom .panel { position: relative; transition: border-color .3s ease, box-shadow .3s ease; }
+.home-main .home-bottom .panel:hover, .home-main .home-bottom .panel:focus-within { border-color: #f4bc94; box-shadow: 0 8px 24px #8b4c1910; }
+.home-main .home-bottom .actions .button { position: relative; overflow: hidden; isolation: isolate; transition: color .26s ease, border-color .26s ease, box-shadow .26s ease; }
+.home-main .home-bottom .actions .button::after { content: ''; position: absolute; inset: 0; background: #fff2; transform: translateX(-105%) skewX(-14deg); transition: transform .45s ease; pointer-events: none; z-index: -1; }
+.home-main .home-bottom .actions .button:hover::after, .home-main .home-bottom .actions .button:focus-visible::after { transform: translateX(0) skewX(0); }
+.home-main .home-bottom .actions .button.secondary::after { background: #ffedd5; }
+.home-main .home-bottom .actions .button:hover { transform: none; border-color: #efaa7b; box-shadow: 0 3px 10px #91471512; }
+.site-footer.eatda-footer { background: #2c251f; padding: 54px 0 22px; color: #f8eee2; }
+.eatda-footer .ef-top { display: grid; grid-template-columns: 1.4fr .85fr .85fr 1.1fr; gap: 40px; padding-bottom: 42px; }
+.eatda-footer .ef-github { display: flex; gap: 14px; margin-top: 24px; }
+.eatda-footer .ef-github button { display: inline-flex; align-items: center; gap: 4px; padding: 0; min-height: 32px; background: transparent; color: #bcafa2; cursor: default; opacity: 1; }
+.eatda-footer .ef-github svg { width: 21px; height: 21px; }
+.eatda-footer .ef-github span { font-size: 9px; align-self: flex-end; line-height: 1.8; }
+.eatda-footer .ef-github-note { font-size: 10px; color: #9d8d7f; margin-top: 5px; }
+.eatda-footer .ef-project > p { font-size: 12px; color: #c5b8ab; line-height: 1.8; margin: 0 0 10px; }
+.eatda-footer .ef-repository { display: inline-block; font-size: 12px; color: #f3dfcd; margin-top: 18px; padding-bottom: 4px; border-bottom: 1px solid #76604f; transition: color .22s ease, border-color .22s ease; }
+.eatda-footer .ef-repository:hover { color: #ffb28c; border-color: #ffb28c; }
+.eatda-footer .ef-symbols { position: absolute; overflow: hidden; }
+.eatda-footer .ef-brand { display: inline-flex; align-items: baseline; gap: 12px; font-size: 32px; font-weight: 900; letter-spacing: -.06em; }
+.eatda-footer .ef-brand span { font-size: 12px; font-family: 'Outfit',sans-serif; letter-spacing: .12em; color: #ff9877; }
+.eatda-footer .ef-tagline { margin: 14px 0 10px; font-size: 15px; font-weight: 600; }
+.eatda-footer .ef-description { color: #b8aca1; font-size: 12px; line-height: 1.9; }
+.eatda-footer h2 { font-size: 12px; color: #ddc5b0; font-weight: 500; margin: 6px 0 22px; }
+.eatda-footer .ef-links { display: flex; flex-direction: column; align-items: flex-start; }
+.eatda-footer .ef-links a { display: flex; justify-content: space-between; gap: 36px; width: 160px; padding: 7px 0; font-size: 13px; transition: color .22s ease; }
+.eatda-footer .ef-links a span { color: #a28c7b; transition: color .22s ease, transform .22s ease; }
+.eatda-footer .ef-links a:hover, .eatda-footer .ef-links a:focus-visible { color: #ffb28c; }
+.eatda-footer .ef-links a:hover span { color: #ffb28c; transform: translate(2px,-2px); }
+.eatda-footer dl { margin: 0; font-size: 12px; }
+.eatda-footer dl div { display: grid; grid-template-columns: 76px 1fr; gap: 12px; margin-bottom: 10px; }
+.eatda-footer dt { color: #a99c90; }
+.eatda-footer dd { margin: 0; color: #e9ddd1; }
+.eatda-footer .ef-bottom { border-top: 1px solid #534438; padding-top: 20px; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; color: #ad9f92; font-size: 11px; }
+@media(max-width:900px) { .eatda-footer .ef-top { grid-template-columns: 1fr 1fr; gap: 32px; } .eatda-footer .ef-intro { grid-column: 1/-1; } }
+@media(max-width:550px) { .eatda-footer .ef-top { grid-template-columns: 1fr; } .eatda-footer .ef-intro { grid-column: auto; } .eatda-footer .ef-bottom { flex-direction: column; } }
+@media(prefers-reduced-motion:reduce) { .site-header .nav *, .home-main .search-trigger, .home-main .search-trigger *, .home-main .home-bottom .panel, .home-main .home-bottom .actions .button, .home-main .home-bottom .actions .button::after, .eatda-footer * { animation: none !important; transition: none !important; } }

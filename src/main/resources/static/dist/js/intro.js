@@ -1,48 +1,88 @@
-// 홈 진입 시 브랜드 문구를 보여주고 자동 종료합니다. API/로그인과 무관합니다.
-const dialog = document.getElementById("intro-dialog");
-const lines = ["냉장고를 열고,", "한 끼를 잇다."];
-const first = document.getElementById("intro-line-one");
-const second = document.getElementById("intro-line-two");
-let typing, start, hold, safety, fade;
+// 문장 단위 커튼 등장, 종료와 포커스 복귀
+const dialog = document.getElementById('intro-dialog');
+const first = document.getElementById('intro-line-one');
+const second = document.getElementById('intro-line-two');
+const skipButton = document.getElementById('intro-skip');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lines = ['냉장고를 열고,', '한 끼를 잇다.'];
 let closed = false;
-function skip() {
-  if (closed) return;
-  closed = true;
-  clearInterval(typing);
-  clearTimeout(start);
-  clearTimeout(hold);
-  clearTimeout(safety);
-  document.removeEventListener("keydown", skip);
-  dialog.classList.add("intro-leaving");
-  fade = setTimeout(() => dialog.close(), 350);
+let reveal;
+let hold;
+let safety;
+let fade;
+let previousOverflow;
+let previousFocus;
+
+function cleanup() {
+    clearTimeout(reveal);
+    clearTimeout(hold);
+    clearTimeout(safety);
+    clearTimeout(fade);
+    document.removeEventListener('keydown', onKey);
+    document.documentElement.style.overflow = previousOverflow;
 }
-if (dialog && first && second) {
-  dialog.showModal();
-  document.getElementById("intro-skip").onclick = skip;
-  document.addEventListener("keydown", skip);
-  dialog.addEventListener("cancel", (event) => { event.preventDefault(); skip(); });
-  dialog.addEventListener("close", () => {
+
+function finish() {
+    if (dialog.open) dialog.close();
+    cleanup();
+    const target = previousFocus instanceof HTMLElement && previousFocus !== document.body
+        ? previousFocus : document.getElementById('open-search');
+    target?.focus({ preventScroll: true });
+}
+
+function skip() {
+    if (closed) return;
     closed = true;
-    clearInterval(typing);
-    [start, hold, safety, fade].forEach(clearTimeout);
-    document.removeEventListener("keydown", skip);
-  });
-  // 요청한 브랜드 타이핑은 OS의 동작 줄이기 설정에서도 생략하지 않습니다.
-  // 글자 자체만 추가하며 이동/확대 효과는 사용하지 않습니다.
-  first.textContent = "";
-  second.textContent = "";
-  start = setTimeout(() => {
-    let index = 0;
-    typing = setInterval(() => {
-      index++;
-      first.textContent = lines[0].slice(0, index);
-      second.textContent = lines[1].slice(0, Math.max(0, index - lines[0].length));
-      if (index >= lines[0].length + lines[1].length) {
-        clearInterval(typing);
-        hold = setTimeout(skip, 1000);
-      }
-    }, 150);
-  }, 400);
-  // 애니메이션 처리 실패로 홈이 계속 가려지는 상황을 방지합니다.
-  safety = setTimeout(skip, 8000);
+    clearTimeout(reveal);
+    clearTimeout(hold);
+    clearTimeout(safety);
+    document.removeEventListener('keydown', onKey);
+    dialog.classList.add('intro-leaving');
+    // transitionend가 발생하지 않아도 반드시 닫기
+    fade = setTimeout(finish, reduced ? 0 : 380);
+}
+
+function onKey(event) {
+    // Tab은 포커스 이동, 한글 조합과 보조 키는 건너뛰기로 처리하지 않기
+    if (event.key === 'Tab' || event.isComposing || event.ctrlKey || event.metaKey
+        || event.altKey || ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) return;
+    event.preventDefault();
+    skip();
+}
+
+if (dialog && first && second && skipButton) {
+    previousFocus = document.activeElement;
+    previousOverflow = document.documentElement.style.overflow;
+    try {
+        dialog.showModal();
+        document.documentElement.style.overflow = 'hidden';
+        skipButton.addEventListener('click', skip);
+        document.addEventListener('keydown', onKey);
+        dialog.addEventListener('cancel', event => { event.preventDefault(); skip(); });
+        dialog.addEventListener('transitionend', event => {
+            if (closed && event.target === dialog && event.propertyName === 'opacity') finish();
+        });
+        dialog.addEventListener('close', () => { closed = true; cleanup(); });
+        first.textContent = lines[0];
+        second.textContent = lines[1];
+        dialog.classList.add('intro-curtain');
+        // 폰트 준비를 잠깐 기다리되 로딩 실패로 인트로를 막지 않기
+        const ready = document.fonts?.ready || Promise.resolve();
+        let started = false;
+        function begin() {
+            if (closed || started) return;
+            started = true;
+            clearTimeout(reveal);
+            dialog.classList.add('intro-curtain-playing');
+            // 0.8초 등장 → 0.15초 간격 → 0.8초 등장 → 0.8초 유지
+            hold = setTimeout(skip, reduced ? 800 : 2550);
+        }
+        ready.then(begin, begin);
+        reveal = setTimeout(begin, 500);
+        safety = setTimeout(skip, 6500);
+    } catch (error) {
+        if (dialog.open) dialog.close();
+        cleanup();
+        console.warn('인트로를 생략하고 홈을 표시합니다.', error);
+    }
 }

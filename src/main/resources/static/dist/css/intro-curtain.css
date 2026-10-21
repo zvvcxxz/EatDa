@@ -1,0 +1,19 @@
+.intro-dialog { transition: opacity .3s ease; }
+.intro-dialog .intro-lines { min-height: 2.6em; overflow: visible; }
+.intro-curtain .intro-lines > span {
+    opacity: 0;
+    clip-path: inset(0 100% 0 -12%);
+    transform: translateX(-18px);
+}
+.intro-curtain-playing .intro-lines > span {
+    animation: intro-curtain-reveal .8s cubic-bezier(.22,.61,.36,1) both;
+}
+.intro-curtain-playing #intro-line-two { animation-delay: .95s; }
+@keyframes intro-curtain-reveal {
+    from { opacity: 0; clip-path: inset(0 100% 0 -12%); transform: translateX(-18px); }
+    to { opacity: 1; clip-path: inset(0 -12% 0 -12%); transform: translateX(0); }
+}
+@media(prefers-reduced-motion:reduce) {
+    .intro-dialog { transition: none; }
+    .intro-curtain .intro-lines > span { opacity: 1; clip-path: none; transform: none; animation: none; }
+}
