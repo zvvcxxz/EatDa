@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sp.app.mapper.CommunityQuestionMapper">
+
+    <!-- 질문 등록 -->
+    <insert id="insertQuestion" parameterType="com.sp.app.domain.dto.CommunityQuestionDto">
+        INSERT INTO COMMUNITY_POST(POST_ID, AUTHOR_ID, POST_TYPE, TITLE, CONTENT,
+            STATUS, VIEW_COUNT, CREATED_AT)
+        VALUES (SEQ_COMMUNITY_POST.NEXTVAL, #{authorId}, 1, #{title},
+            #{content, jdbcType=CLOB}, 0, 0, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 검색 조건 -->
+    <sql id="where-list">
+        <choose>
+            <when test="schType == 'all'">
+                <![CDATA[
+                    (
+                        INSTR(P.TITLE, #{kwd}) > 0
+                        OR DBMS_LOB.INSTR(REGEXP_REPLACE(P.CONTENT, '<[^>]+>', ''), #{kwd}) > 0
+                    )
+                ]]>
+            </when>
+            <when test="schType == 'content'">
+                <![CDATA[
+                    DBMS_LOB.INSTR(REGEXP_REPLACE(P.CONTENT, '<[^>]+>', ''), #{kwd}) > 0
+                ]]>
+            </when>
+            <otherwise>
+                INSTR(P.TITLE, #{kwd}) &gt; 0
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!-- 공개된 질문 개수 -->
+    <select id="dataCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_TYPE = 1 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+    </select>
+    
+    <!-- 질문 목록: 본문 앞부분과 공개 댓글·답글 수 조회 -->
+	<select id="listQuestion" parameterType="map" resultType="com.sp.app.domain.dto.CommunityQuestionDto">
+	    SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
+	        P.TITLE AS title, DBMS_LOB.SUBSTR(P.CONTENT, 120, 1) AS content, P.VIEW_COUNT AS viewCount,
+	        TO_CHAR(P.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt,
+	        NVL(C.commentCount, 0) AS commentCount
+	    FROM COMMUNITY_POST P
+	    LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
+	    <!-- 숨김·삭제된 부모 댓글의 답글은 개수에서 제외 -->
+	    LEFT OUTER JOIN (
+	        SELECT R.POST_ID, COUNT(*) AS commentCount
+	        FROM POST_COMMENT R
+	        LEFT OUTER JOIN POST_COMMENT A
+	            ON R.PARENT_COMMENT_ID = A.COMMENT_ID AND R.POST_ID = A.POST_ID
+	        WHERE R.STATUS = 0
+	            AND (R.PARENT_COMMENT_ID IS NULL OR A.STATUS = 0)
+	        GROUP BY R.POST_ID
+	    ) C ON P.POST_ID = C.POST_ID
+	    <where>
+	        <if test="kwd != null and kwd != ''">
+	            <include refid="where-list"/>
+	        </if>
+	        AND P.POST_TYPE = 1 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+	    </where>
+	    ORDER BY P.POST_ID DESC
+	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+    <!-- 질문 상세 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityQuestionDto">
+        SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
+            P.TITLE AS title, P.CONTENT AS content, P.VIEW_COUNT AS viewCount,
+            TO_CHAR(P.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt
+        FROM COMMUNITY_POST P
+        LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
+        WHERE P.POST_ID = #{postId}
+            AND P.POST_TYPE = 1 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+    </select>
+    
+    <!-- 조회수 증가 -->
+    <update id="updateHitCount" parameterType="Long">
+        UPDATE COMMUNITY_POST SET VIEW_COUNT = VIEW_COUNT + 1
+        WHERE POST_ID = #{postId}
+            AND POST_TYPE = 1 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 본인 글만 수정 -->
+    <update id="updateQuestion" parameterType="com.sp.app.domain.dto.CommunityQuestionDto">
+        UPDATE COMMUNITY_POST
+        SET TITLE = #{title}, CONTENT = #{content, jdbcType=CLOB}, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId} AND AUTHOR_ID = #{authorId}
+            AND POST_TYPE = 1 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+    
+    <!-- 본인 글을 삭제 상태로 변경 -->
+    <update id="deleteQuestion" parameterType="map">
+        UPDATE COMMUNITY_POST
+        SET STATUS = 2, DELETED_AT = SYSTIMESTAMP, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId} AND AUTHOR_ID = #{authorId}
+            AND POST_TYPE = 1 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+
+    <!-- 숨김은 삭제일시를 변경하지 않음 -->
+    <update id="hideQuestion" parameterType="Long">
+        UPDATE COMMUNITY_POST SET STATUS = 1, UPDATED_AT = SYSTIMESTAMP
+        WHERE POST_ID = #{postId}
+            AND POST_TYPE = 1 AND STATUS = 0 AND DELETED_AT IS NULL
+    </update>
+    
+    <!-- 이전글 -->
+    <select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityQuestionDto">
+        SELECT P.POST_ID AS postId, P.TITLE AS title
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_ID &gt; #{postId}
+            AND P.POST_TYPE = 1 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+        ORDER BY P.POST_ID ASC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+    
+    <!-- 다음글 -->
+    <select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityQuestionDto">
+        SELECT P.POST_ID AS postId, P.TITLE AS title
+        FROM COMMUNITY_POST P
+        <where>
+            <if test="kwd != null and kwd != ''">
+                <include refid="where-list"/>
+            </if>
+            AND P.POST_ID &lt; #{postId}
+            AND P.POST_TYPE = 1 AND P.STATUS = 0 AND P.DELETED_AT IS NULL
+        </where>
+        ORDER BY P.POST_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+</mapper>

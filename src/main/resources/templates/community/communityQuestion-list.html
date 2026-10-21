@@ -1,23 +1,276 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>요리 질문 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>요리 질문 · 잇다</title>
+</head>
+
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        .community-design .question-row {
+            display:grid;
+            grid-template-columns:minmax(0,1fr) auto;
+            gap:16px;
+            align-items:center;
+            padding:18px 0;
+            border-bottom:1px solid var(--ds-line);
+        }
+
+        .community-design .question-row:last-child {
+            border-bottom:0;
+        }
+
+        .community-design .question-main {
+            min-width:0;
+        }
+
+        .community-design .question-main > a {
+            display:block;
+        }
+
+        .community-design .question-title {
+            font-size:16px;
+            font-weight:700;
+            color:var(--ds-ink);
+            margin:8px 0;
+            overflow-wrap:anywhere;
+        }
+
+        /* 질문 목록의 본문은 한 줄, 넘치면 … 표시 */
+		.community-design .question-summary {
+		    font-size: 13px;
+		    color: var(--ds-muted);
+		    line-height: 1.6;
+		    display: block;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+
+        .community-design .question-meta {
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:10px;
+            font-size:12px;
+            color:var(--ds-muted);
+        }
+
+        .community-design .question-count {
+            text-align:center;
+            font-size:12px;
+            color:var(--ds-muted);
+            white-space:nowrap;
+        }
+
+        .community-design .question-count strong {
+            display:block;
+            margin-bottom:4px;
+            font-size:22px;
+            color:var(--ds-orange);
+        }
+    </style>
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="question-list" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading"><div><p class="ds-eyebrow">ASK THE KITCHEN</p><h2>요리 질문</h2><p>작은 궁금증도 함께 나누면 쉬워져요.</p></div><a class="ds-button primary" data-link="question-write">질문하기 ＋</a></div><div class="ds-toolbar"><select id="questionSearchType" aria-label="검색 항목"><option value="all">제목 + 내용</option><option value="title">제목</option></select><label class="ds-search"><span>⌕</span><input id="questionSearch" placeholder="재료나 조리방법을 검색해 보세요." aria-label="질문 검색"></label></div><section class="ds-paper ds-question-list" id="questionList"></section></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+
+                <h1 class="hero-title">
+                    한 끼를 나누고, 맛있는 일상을 잇다.
+                </h1>
+
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">
+                        💬 자유 이야기
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">
+                        🍳 모두의 레시피
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">
+                        📸 따라 만든 요리
+                    </a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/questions}">
+                        🙋 요리 질문
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow">ASK THE KITCHEN</p>
+                    <h2>요리 질문</h2>
+                    <p>작은 궁금증도 함께 나누면 쉬워져요.</p>
+                </div>
+
+                <a class="ds-button primary"
+                   th:href="@{/community/questions/write}">
+                    질문하기 ＋
+                </a>
+            </div>
+
+            <!-- 검색하면 첫 페이지부터 조회 -->
+            <form class="ds-toolbar"
+                  method="get"
+                  th:action="@{/community/questions}">
+
+                <select name="schType" aria-label="검색 항목">
+                    <option value="all"
+                            th:selected="${schType == 'all'}">
+                        제목 + 내용
+                    </option>
+                    <option value="title"
+                            th:selected="${schType == 'title'}">
+                        제목
+                    </option>
+                    <option value="content"
+                            th:selected="${schType == 'content'}">
+                        내용
+                    </option>
+                </select>
+
+                <label class="ds-search">
+                    <span aria-hidden="true">⌕</span>
+
+                    <input name="kwd"
+                           th:value="${kwd}"
+                           placeholder="재료나 조리방법을 검색해 보세요."
+                           aria-label="질문 검색">
+                </label>
+
+                <button type="submit" class="ds-button light">
+                    검색
+                </button>
+
+                <span class="ds-count"
+                      th:text="|총 ${dataCount}개의 질문|">
+                    총 0개의 질문
+                </span>
+            </form>
+
+            <!-- questions는 컨트롤러에서 받은 질문 목록 -->
+            <section class="ds-paper ds-question-list">
+                <article class="question-row"
+                         th:each="question : ${questions}">
+
+                    <div class="question-main">
+                        <a th:href="@{/community/questions/{id}(
+                                     id=${question.postId},
+                                     page=${page},
+                                     schType=${schType},
+                                     kwd=${kwd})}">
+
+                            <span class="ds-pill">요리 질문</span>
+
+                            <h3 class="question-title"
+                                th:text="${question.title}">
+                                질문 제목
+                            </h3>
+
+                            <p class="question-summary"
+                               th:text="${question.content}">
+                                질문 내용 미리보기
+                            </p>
+                        </a>
+
+                        <div class="question-meta">
+                            <span th:text="${question.authorName}">
+                                작성자
+                            </span>
+
+                            <span th:text="${question.createdAt}">
+                                작성일
+                            </span>
+
+                            <span th:text="|조회 ${question.viewCount}|">
+                                조회 0
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="question-count">
+                        <strong th:text="${question.commentCount}">0</strong>
+                        <span>답변·답글</span>
+                    </div>
+                </article>
+
+                <div class="ds-empty"
+                     th:if="${#lists.isEmpty(questions)}">
+                    등록된 질문이 없거나 검색 결과가 없습니다.
+                </div>
+            </section>
+
+            <!-- 페이지 이동 시 검색 조건 유지 -->
+            <nav class="pagination"
+                 aria-label="질문 페이지"
+                 th:if="${dataCount > 0 and totalPage > 1}">
+
+                <a th:if="${page > 1}"
+                   th:href="@{/community/questions(
+                            page=${page - 1},
+                            schType=${schType},
+                            kwd=${kwd})}">
+                    이전
+                </a>
+
+                <a th:each="num : ${#numbers.sequence(pageStart, pageEnd)}"
+                   th:href="@{/community/questions(
+                            page=${num},
+                            schType=${schType},
+                            kwd=${kwd})}"
+                   th:classappend="${num == page} ? 'current' : ''"
+                   th:text="${num}">
+                    1
+                </a>
+
+                <a th:if="${page < totalPage}"
+                   th:href="@{/community/questions(
+                            page=${page + 1},
+                            schType=${schType},
+                            kwd=${kwd})}">
+                    다음
+                </a>
+            </nav>
+        </section>
+    </div>
 </div>
-<th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
-</th:block>
-</body></html>
+
+</body>
+</html>

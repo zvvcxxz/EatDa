@@ -125,7 +125,7 @@
             AND POST_TYPE = 0 AND STATUS = 0 AND DELETED_AT IS NULL
     </update>
 
-    <!-- 현재보다 번호가 큰 글 중 가장 가까운 글 -->
+    <!-- 이전글 -->
     <select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
         SELECT P.POST_ID AS postId, P.TITLE AS title
         FROM COMMUNITY_POST P
@@ -140,7 +140,7 @@
         FETCH FIRST 1 ROWS ONLY
     </select>
 
-    <!-- 현재보다 번호가 작은 글 중 가장 가까운 글 -->
+    <!-- 다음글 -->
     <select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityPostDto">
         SELECT P.POST_ID AS postId, P.TITLE AS title
         FROM COMMUNITY_POST P

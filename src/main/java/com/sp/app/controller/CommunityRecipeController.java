@@ -180,7 +180,7 @@ public class CommunityRecipeController {
         model.addAttribute("kwd", kwd);
         model.addAttribute("categoryId", categoryId);
 
-        return "community/communityRecipe-detail";
+        return "community/communityRecipe-article";
     }
 
     // 등록 화면

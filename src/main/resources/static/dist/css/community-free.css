@@ -591,3 +591,54 @@ body.eatda-layout>.community-orange {flex:1}
 /* 커뮤니티 왼쪽 메뉴 스크롤 고정 */
 @media(min-width:801px){.community-orange .sidebar {position:sticky;top:90px;align-self:start}}
 @media(max-width:800px){.community-orange .sidebar {position:static}}
+
+/* 작성자와 댓글 수가 카드 안에 들어오도록 조정 */
+.community-orange .post-card {
+    box-sizing: border-box;
+    height: 250px;
+    padding: 18px;
+    gap: 10px;
+}
+
+.community-orange .post-card > div:first-child {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.community-orange .card-category {
+    margin-bottom: 8px;
+}
+
+.community-orange .card-title {
+    font-size: 16px;
+    line-height: 22px;
+    max-height: 44px;
+    margin: 0 0 6px;
+    -webkit-line-clamp: 2;
+}
+
+.community-orange .card-content-preview {
+    font-size: 14px;
+    line-height: 20px;
+    max-height: 40px;
+    margin: 0 0 8px;
+    -webkit-line-clamp: 2;
+}
+
+.community-orange .card-date {
+    font-size: 12px;
+    line-height: 18px;
+    margin: 0;
+}
+
+.community-orange .card-meta {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.community-orange .meta-stats {
+    flex-shrink: 0;
+    gap: 8px;
+}

@@ -1,23 +1,158 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>질문 작성 · 잇다</title></head><body>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title th:text="${mode == 'update'}
+                    ? '질문 수정 · 잇다' : '질문 작성 · 잇다'">
+        질문 작성 · 잇다
+    </title>
+</head>
+
+<body>
+
 <th:block layout:fragment="css">
-    <!-- 자유 이야기의 공통 분위기 + 새 게시판 전용 스타일 -->
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 </th:block>
-<div layout:fragment="content" class="community-orange community-design" data-view="question-write" th:attr="data-id=${previewId}">
-<section class="hero-banner"><div class="hero-card"><div><span class="hero-tag">✨ 함께하는 주방</span><h1 class="hero-title">한 끼를 나누고, 맛있는 일상을 잇다.</h1><p class="hero-sub">직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.</p></div></div></section><div class="main-wrapper"><aside class="sidebar"><h2 class="sidebar-title">COMMUNITY</h2><ul class="sidebar-menu">
-<li class="sidebar-item" th:classappend="${activeMenu == 'free'} ? 'active' : ''"><a th:href="@{/community/free}" href="/community/free">💬 자유 이야기</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'recipes'} ? 'active' : ''"><a th:href="@{/community/recipes}" href="/community/recipes">🍳 모두의 레시피</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'cooking'} ? 'active' : ''"><a th:href="@{/community/cooking}" href="/community/cooking">📸 따라 만든 요리</a></li>
-<li class="sidebar-item" th:classappend="${activeMenu == 'questions'} ? 'active' : ''"><a th:href="@{/community/questions}" href="/community/questions">🙋 요리 질문</a></li>
-</ul><div class="sidebar-footer-text">각자의 한 끼가 모여<br>우리의 따뜻한 주방이 됩니다.</div></aside><section class="content-area">
-<div class="ds-heading"><div><p class="ds-eyebrow">NEW QUESTION</p><h2>무엇이 궁금한가요?</h2></div></div><form class="ds-paper ds-form" id="questionForm"><div class="ds-field"><label for="questionTitle">질문 제목 <b>*</b></label><input id="questionTitle" name="title" maxlength="200" required placeholder="예: 파스타 면수를 얼마나 넣어야 하나요?"></div><div class="ds-field"><label for="questionContent">질문 내용 <b>*</b></label><textarea id="questionContent" name="content" rows="8" required placeholder="사용한 재료와 조리 상황을 자세히 적어주세요."></textarea></div><div class="ds-tip">💡 어떤 요리를 만들고 있었는지 알려주면 더 정확한 답변을 받을 수 있어요.</div><div class="ds-bottom-actions"><a class="ds-button light" data-link="questions">취소</a><button class="ds-button primary" type="submit" id="questionSubmit">질문 등록</button></div></form></section></div>
-<div id="designToast" class="ds-toast" role="status" hidden></div>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+
+                <h1 class="hero-title">
+                    한 끼를 나누고, 맛있는 일상을 잇다.
+                </h1>
+
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">
+                        💬 자유 이야기
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">
+                        🍳 모두의 레시피
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">
+                        📸 따라 만든 요리
+                    </a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/questions}">
+                        🙋 요리 질문
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow"
+                       th:text="${mode == 'update'}
+                                ? 'EDIT QUESTION' : 'NEW QUESTION'">
+                        NEW QUESTION
+                    </p>
+
+                    <h2 th:text="${mode == 'update'}
+                                 ? '질문 수정' : '무엇이 궁금한가요?'">
+                        무엇이 궁금한가요?
+                    </h2>
+                </div>
+            </div>
+
+            <p class="ds-help"
+               style="color:#b42318; margin-bottom:16px;"
+               th:if="${error != null}"
+               th:text="${error}"
+               role="alert"></p>
+
+            <!-- mode에 따라 등록 또는 수정 주소로 전송 -->
+            <form id="questionForm"
+                  class="ds-paper ds-form"
+                  th:object="${question}"
+                  th:action="${mode == 'update'}
+                             ? @{/community/questions/{id}/update(
+                                 id=${question.postId})}
+                             : @{/community/questions/write}"
+                  method="post">
+
+                <div class="ds-field">
+                    <label for="questionTitle">
+                        질문 제목 <b>*</b>
+                    </label>
+
+                    <input type="text"
+                           id="questionTitle"
+                           th:field="*{title}"
+                           maxlength="200"
+                           required
+                           placeholder="예: 파스타 면수를 얼마나 넣어야 하나요?">
+                </div>
+
+                <div class="ds-field">
+                    <label for="questionContent">
+                        질문 내용 <b>*</b>
+                    </label>
+
+                    <textarea id="questionContent"
+                              th:field="*{content}"
+                              rows="8"
+                              required
+                              placeholder="사용한 재료와 조리 상황을 자세히 적어주세요."></textarea>
+                </div>
+
+                <div class="ds-tip">
+                    💡 어떤 요리를 만들고 있었는지 알려주면
+                    더 정확한 답변을 받을 수 있어요.
+                </div>
+
+                <div class="ds-bottom-actions">
+                    <a class="ds-button light"
+                       th:href="${mode == 'update'}
+                                ? @{/community/questions/{id}(
+                                    id=${question.postId})}
+                                : @{/community/questions}">
+                        취소
+                    </a>
+
+                    <button type="submit"
+                            id="questionSubmit"
+                            class="ds-button primary"
+                            th:text="${mode == 'update'}
+                                     ? '수정 완료' : '질문 등록'">
+                        질문 등록
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
 </div>
-<th:block layout:fragment="script">
-    <script th:src="@{/dist/js/community-design-data.js}"></script>
-    <script th:src="@{/dist/js/community-design.js}"></script>
-</th:block>
-</body></html>
+
+</body>
+</html>

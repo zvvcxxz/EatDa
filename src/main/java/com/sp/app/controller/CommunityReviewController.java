@@ -144,7 +144,7 @@ public class CommunityReviewController {
         model.addAttribute("pageTitle", dto.getTitle());
         model.addAttribute("activeMenu", "cooking");
 
-        return "community/communityReview-detail";
+        return "community/communityReview-article";
     }
 
     // 등록 화면

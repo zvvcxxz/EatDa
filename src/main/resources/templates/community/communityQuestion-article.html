@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>질문 상세 · 잇다</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <style>
+        .community-design .ds-question-title {
+            overflow-wrap:anywhere;
+        }
+
+        .community-design .question-neighbors {
+            margin-top:24px;
+            border-top:1px solid var(--ds-line);
+            border-bottom:1px solid var(--ds-line);
+        }
+
+        .community-design .question-neighbor-row {
+            display:grid;
+            grid-template-columns:90px minmax(0,1fr);
+            gap:12px;
+            padding:12px 0;
+            font-size:13px;
+        }
+
+        .community-design .question-neighbor-row
+        + .question-neighbor-row {
+            border-top:1px solid var(--ds-line);
+        }
+
+        .community-design .question-neighbor-row > span {
+            color:var(--ds-muted);
+        }
+
+        .community-design .question-neighbor-row a {
+            color:var(--ds-ink);
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+
+        .community-design .question-actions {
+            flex-wrap:wrap;
+        }
+
+        .community-design .question-actions form {
+            margin:0;
+        }
+    </style>
+</th:block>
+
+<div layout:fragment="content"
+     class="community-orange community-design">
+
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">✨ 함께하는 주방</span>
+
+                <h1 class="hero-title">
+                    한 끼를 나누고, 맛있는 일상을 잇다.
+                </h1>
+
+                <p class="hero-sub">
+                    직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">COMMUNITY</h2>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a th:href="@{/community/free}">
+                        💬 자유 이야기
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/recipes}">
+                        🍳 모두의 레시피
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a th:href="@{/community/cooking}">
+                        📸 따라 만든 요리
+                    </a>
+                </li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/questions}">
+                        🙋 요리 질문
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer-text">
+                각자의 한 끼가 모여<br>
+                우리의 따뜻한 주방이 됩니다.
+            </div>
+        </aside>
+
+        <section class="content-area">
+            <div class="ds-heading compact">
+                <div>
+                    <p class="ds-eyebrow">요리 질문 / 상세</p>
+                    <h2>함께 답을 찾아요.</h2>
+                </div>
+
+                <a class="ds-button light"
+                   th:href="@{/community/questions(
+                            page=${page},
+                            schType=${schType},
+                            kwd=${kwd})}">
+                    ← 목록으로
+                </a>
+            </div>
+
+            <article class="ds-paper">
+                <!-- question은 컨트롤러에서 받은 질문 한 개 -->
+                <div id="questionDetail">
+                    <span class="ds-pill">요리 질문</span>
+
+                    <h2 class="ds-question-title"
+                        th:text="${question.title}">
+                        질문 제목
+                    </h2>
+
+                    <p class="ds-author-line">
+                        <span th:text="${question.authorName}">
+                            작성자
+                        </span>
+
+                        <span aria-hidden="true"> · </span>
+
+                        <span th:text="${question.createdAt}">
+                            작성일
+                        </span>
+
+                        <span aria-hidden="true"> · </span>
+
+                        <span th:text="|조회 ${question.viewCount}|">
+                            조회 0
+                        </span>
+                    </p>
+
+                    <!-- 입력 내용을 문자로 출력 -->
+                    <p class="ds-question-text"
+                       th:text="${question.content}">
+                        질문 내용
+                    </p>
+                </div>
+
+                <!-- 검색 조건에 맞는 이전글·다음글 -->
+                <nav class="question-neighbors"
+                     aria-label="이전글과 다음글">
+
+                    <div class="question-neighbor-row">
+                        <span>↑ 이전글</span>
+
+                        <a th:if="${prevQuestion != null}"
+                           th:href="@{/community/questions/{id}(
+                                    id=${prevQuestion.postId},
+                                    page=${page},
+                                    schType=${schType},
+                                    kwd=${kwd})}"
+                           th:text="${prevQuestion.title}">
+                            이전 질문 제목
+                        </a>
+
+                        <span th:if="${prevQuestion == null}">
+                            이전글이 없습니다.
+                        </span>
+                    </div>
+
+                    <div class="question-neighbor-row">
+                        <span>↓ 다음글</span>
+
+                        <a th:if="${nextQuestion != null}"
+                           th:href="@{/community/questions/{id}(
+                                    id=${nextQuestion.postId},
+                                    page=${page},
+                                    schType=${schType},
+                                    kwd=${kwd})}"
+                           th:text="${nextQuestion.title}">
+                            다음 질문 제목
+                        </a>
+
+                        <span th:if="${nextQuestion == null}">
+                            다음글이 없습니다.
+                        </span>
+                    </div>
+                </nav>
+
+                <div class="ds-bottom-actions question-actions">
+                    <a class="ds-button light"
+                       th:href="@{/community/questions(
+                                page=${page},
+                                schType=${schType},
+                                kwd=${kwd})}">
+                        목록
+                    </a>
+
+                    <!-- 본인 질문만 수정·삭제 -->
+                    <a class="ds-button light"
+                       th:if="${owner}"
+                       th:href="@{/community/questions/{id}/update(
+                                id=${question.postId})}">
+                        수정
+                    </a>
+
+                    <form th:if="${owner}"
+                          th:action="@{/community/questions/{id}/delete(
+                                      id=${question.postId})}"
+                          method="post"
+                          onsubmit="return confirm('이 질문을 삭제할까요?');">
+
+                        <button type="submit" class="ds-button light">
+                            삭제
+                        </button>
+                    </form>
+
+                    <!-- 관리자만 숨김 -->
+                    <form th:if="${admin}"
+                          th:action="@{/community/questions/{id}/hide(
+                                      id=${question.postId})}"
+                          method="post"
+                          onsubmit="return confirm('이 질문을 숨길까요? 숨기면 일반 목록에서 제외됩니다.');">
+
+                        <button type="submit" class="ds-button light">
+                            관리자 숨김
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 답변 기능은 다음 단계에서 연결 -->
+                <div class="ds-section-title">
+                    <h3>답변</h3>
+                </div>
+
+                <div id="answerList"></div>
+
+                <form class="ds-answer-form"
+                      id="answerForm"
+                      onsubmit="return false;">
+
+                    <label for="answerContent">답변 작성</label>
+
+                    <textarea id="answerContent"
+                              rows="3"
+                              placeholder="현재 답변 등록은 사용할 수 없습니다."
+                              disabled></textarea>
+
+                    <div class="ds-bottom-actions">
+                        <button class="ds-button primary"
+                                type="submit"
+                                disabled>
+                            답변 등록
+                        </button>
+                    </div>
+                </form>
+            </article>
+        </section>
+    </div>
+</div>
+
+</body>
+</html>
