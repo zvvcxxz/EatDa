@@ -1,0 +1,29 @@
+.home-main .home-bottom > .mf-fridge { --mf-edge:#969d9f; padding:0; border:1px solid var(--mf-edge); border-radius:12px 12px 8px 8px; background:linear-gradient(90deg,#aab1b3 0%,#edf0ef 3%,#c5cbcd 7%,#dce0df 50%,#b1b8bb 96%,#8b9497 100%); box-shadow:inset 1px 0 0 #fff, inset -3px 0 3px #56606466, 3px 9px 17px #29333324; overflow:visible; min-width:0; align-self:start; position:relative; margin-bottom:12px; }
+.home-main .mf-freezer { position:relative; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:25px 22px 26px 45px; border-bottom:5px solid #505b5f; border-radius:12px 12px 0 0; background:repeating-linear-gradient(0deg,#ffffff08 0px,#ffffff08 1px,#59636605 1px,#59636605 3px),linear-gradient(105deg,#b8c0c3,#edf0ef 38%,#c0c7ca 80%,#a8b0b4); box-shadow:inset 0 2px 2px #fff,0 2px 0 #e9eded; }
+.home-main .mf-freezer::before, .home-main .mf-door::before { content:''; position:absolute; left:16px; width:9px; border:1px solid #7b878d; background:linear-gradient(90deg,#6f7d83,#f5f8f7 40%,#d0d7d9 65%,#8c999f); border-radius:4px; box-shadow:3px 2px 3px #3540455c,inset 0 1px 0 #fff; }
+.home-main .mf-freezer::before { height:32px; top:50%; transform:translateY(-50%); }
+.home-main .mf-label { display:block; color:#556367; font-size:10px; font-weight:700; margin-bottom:7px; letter-spacing:.06em; }
+.home-main .home-bottom .mf-fridge h2 { font-size:17px; line-height:1.5; letter-spacing:-.04em; margin:0; }
+.home-main .home-bottom .mf-fridge h2::before { display:none; }
+.home-main .mf-brand { font-size:9px; letter-spacing:.1em; font-weight:700; color:#5f6f75; writing-mode:vertical-rl; text-shadow:0 1px 0 #fff; }
+.home-main .mf-door { position:relative; padding:22px 18px 18px 42px; border-top:1px solid #faffff; }
+.home-main .mf-door::before { height:72px; top:40px; }
+.home-main .mf-window { position:relative; padding:19px 14px 12px; background:linear-gradient(90deg,#d6e1e4,#f3f8f8 13%,#edf3f4 86%,#c5d2d7); border:7px solid #57666e; outline:1px solid #8b999f; border-radius:8px; box-shadow:0 1px 1px #fff,inset 0 8px 12px #3e505830,inset 4px 0 5px #526b7018; }
+.home-main .mf-window::before { content:''; position:absolute; left:19%; right:19%; top:5px; height:3px; background:#f5ffff; border-radius:3px; box-shadow:0 2px 9px 2px #f5ffff; pointer-events:none; }
+.home-main .mf-caption { color:#697b83; font-size:10px; margin-bottom:8px; }
+.home-main .mf-fridge #fridge-items { min-height:110px; }
+.home-main .mf-fridge #fridge-items .empty { display:grid; place-items:center; min-height:100px; margin:0; padding:16px 8px; background:transparent; border:0; border-radius:0; color:#7a8273; font-size:12px; line-height:1.7; }
+.home-main .mf-fridge #fridge-items .list-row { border-bottom:3px solid #c0caba; box-shadow:0 1px 0 #fff; padding:12px 0; font-size:12px; gap:8px; }
+.home-main .mf-fridge #fridge-items .list-row > span { overflow-wrap:anywhere; }
+.home-main .mf-shelf { height:6px; border-top:1px solid #fbffff; border-bottom:2px solid #8ca7ae; background:#c9e4e7; box-shadow:0 4px 4px #48646b30; margin:12px -5px 18px; }
+.home-main .mf-drawer { height:46px; border:1px solid #a7c1c7; border-top:3px solid #efffff; border-radius:2px 2px 7px 7px; background:linear-gradient(110deg,#ffffffa6,#c8dfe54d 45%,#faffff99); box-shadow:inset 1px 0 0 #fff,0 3px 4px #657c8020; position:relative; }
+.home-main .mf-drawer span { position:absolute; width:46px; height:5px; border-radius:3px; background:#9eb9c0; box-shadow:0 1px 0 #fff,inset 0 1px 1px #6c8890; top:8px; left:50%; transform:translateX(-50%); }
+.home-main .mf-fridge .mf-actions { margin:16px 0 0; }
+.home-main .mf-fridge .mf-actions .button { width:100%; display:flex; align-items:center; justify-content:space-between; padding:11px 14px; font-size:12px; border-radius:9px; }
+.home-main .mf-actions .button span { transition:transform .24s ease; }
+.home-main .mf-actions .button:hover span { transform:translateX(4px); }
+.home-main .mf-plinth { height:18px; border-top:1px solid #79888e; border-radius:0 0 7px 7px; position:relative; background:repeating-linear-gradient(90deg,#3a464a 0,#3a464a 2px,#647277 2px,#647277 5px); box-shadow:inset 0 4px 0 #acb6ba; margin:0 8px 5px; }
+.home-main .mf-plinth::before,.home-main .mf-plinth::after { content:''; width:26px; height:10px; background:#465258; position:absolute; bottom:-14px; border-radius:0 0 4px 4px; }
+.home-main .mf-plinth::before { left:24px; } .home-main .mf-plinth::after { right:24px; }
+@media(max-width:600px) { .home-main .home-bottom .mf-fridge h2 { font-size:16px; } }
+@media(prefers-reduced-motion:reduce) { .home-main .mf-actions .button span { transition:none; } }

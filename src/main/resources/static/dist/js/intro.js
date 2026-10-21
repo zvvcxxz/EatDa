@@ -5,6 +5,24 @@ const second = document.getElementById('intro-line-two');
 const skipButton = document.getElementById('intro-skip');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lines = ['냉장고를 열고,', '한 끼를 잇다.'];
+const introSessionKey = 'eatda.intro.seen';
+
+// 같은 탭의 새로고침과 홈 재방문에서는 인트로 생략
+function hasSeenIntro() {
+    try {
+        return sessionStorage.getItem(introSessionKey) === '1';
+    } catch {
+        return false;
+    }
+}
+
+function markIntroSeen() {
+    try {
+        sessionStorage.setItem(introSessionKey, '1');
+    } catch {
+        // 저장소를 사용할 수 없어도 홈 진입은 막지 않기
+    }
+}
 let closed = false;
 let reveal;
 let hold;
@@ -32,6 +50,7 @@ function finish() {
 
 function skip() {
     if (closed) return;
+    markIntroSeen();
     closed = true;
     clearTimeout(reveal);
     clearTimeout(hold);
@@ -50,11 +69,13 @@ function onKey(event) {
     skip();
 }
 
-if (dialog && first && second && skipButton) {
+if (dialog && first && second && skipButton && !hasSeenIntro()) {
     previousFocus = document.activeElement;
     previousOverflow = document.documentElement.style.overflow;
     try {
         dialog.showModal();
+        // 등장 도중 새로고침해도 다시 재생되지 않도록 즉시 기록
+        markIntroSeen();
         document.documentElement.style.overflow = 'hidden';
         skipButton.addEventListener('click', skip);
         document.addEventListener('keydown', onKey);

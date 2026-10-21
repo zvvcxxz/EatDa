@@ -196,13 +196,3 @@ preview(
     e(item.expiresOn || "") +
     "</span></div>",
 );
-preview(
-  "communityHighlights",
-  "community-highlights",
-  (item) =>
-    '<div class="list-row"><span>' +
-    e(item.title) +
-    "</span><span>" +
-    e(item.authorName || "") +
-    "</span></div>",
-);

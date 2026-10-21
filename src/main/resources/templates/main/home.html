@@ -3,6 +3,8 @@
 <head><title>홈 · 잇다</title>
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/intro-curtain.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/home-community.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/home-mini-fridge.css}">
 </th:block>
 </head>
 <body><th:block layout:fragment="content">
@@ -57,29 +59,34 @@
         <div id="home-recipes" class="recipe-grid"></div>
       </section>
       <section class="home-bottom">
-        <article class="panel">
-          <h2>냉장고 신선도 매니저</h2>
-          <div id="fridge-items"></div>
-          <div class="actions">
-            <a class="button" href="/my/fridge" th:href="@{/my/fridge}">냉장고 관리</a>
+        <article class="panel mf-fridge" aria-labelledby="mf-title">
+          <div class="mf-freezer">
+            <div><span class="mf-label">나의 주방</span><h2 id="mf-title">냉장고 신선도 매니저</h2></div>
+            <span class="mf-brand" aria-hidden="true">EAT-DA</span>
           </div>
+          <div class="mf-door">
+            <div class="mf-window">
+              <p class="mf-caption">냉장고 속 재료</p>
+              <div id="fridge-items" aria-live="polite"></div>
+              <div class="mf-shelf" aria-hidden="true"></div>
+              <div class="mf-drawer" aria-hidden="true"><span></span></div>
+            </div>
+            <div class="actions mf-actions">
+              <a class="button" href="/my/fridge" th:href="@{/my/fridge}">냉장고 관리 <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+          <div class="mf-plinth" aria-hidden="true"></div>
         </article>
-        <article class="panel">
-          <h2>함께하는 주방 (커뮤니티 소식)</h2>
-          <div id="community-highlights"></div>
-          <div class="actions">
-            <a
-              class="button secondary"
-              href="../community/share.html"
-              th:href="@{/community/share}"
-              >재료 나눔</a
-            ><a
-              class="button secondary"
-              href="../community/meet.html"
-              th:href="@{/community/meet}"
-              >같이 먹어요</a
-            >
+        <article class="panel hc-panel" data-home-community
+          th:data-api="@{/home/community-preview}"
+          th:data-meet-base="@{/together/meet/}" th:data-share-base="@{/together/share/}">
+          <div class="hc-heading">
+            <div><p class="hc-eyebrow">함께하는 주방</p><h2 id="hc-title">같이 먹어요</h2></div>
+            <button type="button" class="hc-switch" aria-controls="community-highlights">재료 나눔 보기 <span aria-hidden="true">⇄</span></button>
           </div>
+          <p class="hc-status" role="status" aria-live="polite"></p>
+          <div id="community-highlights" class="hc-list" aria-labelledby="hc-title"></div>
+          <div class="hc-bottom"><span>최신 등록순 · 최대 4개</span><a class="hc-all" th:href="@{/together/meet}">전체 글 보기 <span aria-hidden="true">→</span></a></div>
         </article>
       </section>
     </main>
@@ -181,4 +188,4 @@
       type="module"
       src="../../static/dist/js/home.js"
       th:src="@{/dist/js/home.js}"
-    ></script></th:block></body></html>
+    ></script><script defer th:src="@{/dist/js/home-community.js}"></script></th:block></body></html>
