@@ -36,12 +36,12 @@
 		
 	<!-- 내 문의 목록: 검색 + 유형 필터 + 페이징 -->
 	<select id="selectMyInquiryList" parameterType="Map" resultType="com.sp.app.domain.dto.MyInquiryDto">
-	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId,
+	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId, i.CONTENT as content,
 	        i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title, i.STATUS AS status,
 	        i.CREATED_AT AS createdAt, i.PARENT_INQUIRY_ID AS parentInquiryId
 	    FROM INQUIRY i
 		<where>
-			i.MEMBER_ID = #{memberId}
+			i.MEMBER_ID = #{memberId} AND i.PARENT_INQUIRY_ID IS NULL
 			<include refid="where-list"/>	
 		</where>
 		order by i.CREATED_AT desc, i.INQUIRY_ID desc
@@ -53,7 +53,7 @@
 	<select id="countMyInquiryList" parameterType="map" resultType="long">
     select count(*) from INQUIRY i
 	    <where>
-	    	i.MEMBER_ID = #{memberId}
+	    	i.MEMBER_ID = #{memberId} AND i.PARENT_INQUIRY_ID IS NULL
 	    	<include refid="where-list"/>
 	    </where>    
     </select>
@@ -105,6 +105,7 @@
     	i.PARENT_INQUIRY_ID AS parentInquiryId, i.CREATED_AT as createdAt
     	from inquiry i
     	where PARENT_INQUIRY_ID = #{parentInquiryId} and MEMBER_ID = #{memberId}
+    	ORDER BY i.CREATED_AT ASC, i.INQUIRY_ID ASC
     </select>
 
 	<!-- 첨부파일 등록 -->

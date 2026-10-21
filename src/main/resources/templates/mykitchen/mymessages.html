@@ -11,8 +11,8 @@
     <section class="panel">
         <div class="section-heading">
             <div class="tab-links">
-                <a th:href="@{/kitchen(tab='messages', box='received')}" th:classappend="${box == 'received'} ? 'active'">받은 쪽지</a>
-                <a th:href="@{/kitchen(tab='messages', box='sent')}" th:classappend="${box == 'sent'} ? 'active'">보낸 쪽지</a>
+                <a th:href="@{/mymessages(tab='messages', box='received')}" th:classappend="${box == 'received'} ? 'active'">받은 쪽지</a>
+                <a th:href="@{/mymessages(tab='messages', box='sent')}" th:classappend="${box == 'sent'} ? 'active'">보낸 쪽지</a>
             </div>
             <button type="button" class="btn btn-primary" id="composeMessageButton">쪽지 보내기</button>
         </div>
@@ -27,16 +27,33 @@
                     <span>
                         <strong th:text="${message.counterpartNickname}">상대방</strong>
                         <span class="badge badge-success" th:if="${!message.read}">읽지 않음</span>
+                        <span class="badge badge-secondary" th:if="${message.read}">읽음</span>
                     </span>
                     <strong th:text="${message.title}">제목</strong>
                     <span class="muted" th:text="${message.preview}">내용 일부</span>
                     <small th:text="${message.createdAtText}">2026-01-01</small>
                 </button>
-                <button type="button" class="btn btn-danger-light btn-small" data-action="delete-message" th:attr="data-id=${message.id}">삭제</button>
+
+                <!-- 보낸 쪽지함 & 안 읽은 상태: 발송취소 버튼 노출 -->
+                <button type="button" 
+                        class="btn btn-warning-light btn-small" 
+                        data-action="cancel-message" 
+                        th:attr="data-id=${message.id}"
+                        th:if="${box == 'sent' and !message.read}">발송취소</button>
+
+                <!-- 기타 경우 (받은 쪽지함 또는 이미 읽은 보낸 쪽지): 일반 삭제 버튼 노출 -->
+                <button type="button" 
+                        class="btn btn-danger-light btn-small" 
+                        data-action="delete-message" 
+                        th:attr="data-id=${message.id}"
+                        th:unless="${box == 'sent' and !message.read}">삭제</button>
             </article>
         </div>
     </section>
 </th:block>
 
+ <th:block layout:fragment="script">
+ <script th:src="@{/js/mykitchen/mymessages.js}"></script>
+ </th:block>
 </body>
 </html>
