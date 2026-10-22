@@ -55,7 +55,7 @@ public class MyInquiryApiController {
 			Map<String, Object> map = new HashMap<>();
 			
 			//kwd = myUtil.decodeUrl(kwd);
-			int size = 7;
+			int size = 5;
 			
 			map.put("memberId", memberId);
 			map.put("inquiryType", inquiryType);

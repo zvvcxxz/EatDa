@@ -128,56 +128,59 @@
                     <button class="btn btn-primary btn-small" v-if="inquiry.status === 1" @click="$emit('open-follow-up', inquiry)">추가 문의하기</button>
                 </div>
 
-                <!-- 하위 자식 추가 문의 목록 -->
-                <div class="child-inquiry-section" v-if="followUps.length > 0">
-                    <div class="child-inquiry-title">↳ 추가 문의 내역 ({{ followUps.length }})</div>
-                    <inquiry-child-item 
-                        v-for="child in followUps" 
-                        :key="child.inquiryId" 
-                        :parent-id="inquiry.inquiryId"
-                        :child-info="child"
-                        @refresh-all="$emit('refresh')">
-                    </inquiry-child-item>
-                </div>
+				<!-- 하위 자식 추가 문의 목록 영역 -->
+				<div class="child-inquiry-section" v-if="followUps.length > 0">
+				    <div class="child-inquiry-title">↳ 추가 문의 내역 ({{ followUps.length }})</div>
+				    <inquiry-child-item 
+				        v-for="child in followUps" 
+				        :key="child.inquiryId" 
+				        :parent-id="inquiry.inquiryId"
+				        :child-info="child"
+				        @refresh-all="$emit('refresh')"
+				        @open-child-edit="(childData) => $emit('open-edit', childData)">
+				    </inquiry-child-item>
+				</div>
             </div>
         </details>
     </template>
 
     <!-- [자식 2] 하위 자식 추가 문의 아코디언 Template -->
-    <template id="inquiry-child-item-template">
-        <details class="child-inquiry-item" :open="isOpen" @toggle="onToggle">
-            <summary>
-                <strong>{{ childInfo.title }}</strong>
-                <span class="muted" style="margin-left: 10px; font-size: 12px;">{{ formatDate(childInfo.createdAt) }}</span>
-                <span class="badge" :class="childInfo.status === 1 ? 'badge-success' : 'badge-warning'" style="margin-left: auto;">
-                    {{ childInfo.status === 1 ? '답변완료' : '문의중' }}
-                </span>
-            </summary>
-            <div class="inquiry-body" v-if="loaded">
-                <div class="inquiry-detail-content preserve-lines" v-html="childDetail.content"></div>
-                
-                <!-- 자식 문의 첨부파일 -->
-                <div class="file-attach-list" v-if="childDetail.files && childDetail.files.length > 0">
-                    <strong>📁 첨부파일</strong>
-                    <ul>
-                        <li v-for="file in childDetail.files" :key="file.inquiryFileId">
-                            <a :href="'/api/inquiries/' + parentId + '/files/' + file.inquiryFileId">{{ file.originalFileName }}</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- 자식 문의 답변 -->
-                <div class="admin-answer" v-if="childDetail.status === 1">
-                    <h3>관리자 답변</h3>
-                    <p class="preserve-lines">{{ childDetail.answerContent }}</p>
-                </div>
-
-                <div class="card-actions" v-if="childInfo.status === 0" style="margin-top: 10px;">
-                    <button class="btn btn-danger-light btn-small" @click="deleteChild">추가문의 삭제</button>
-                </div>
-            </div>
-        </details>
-    </template>
+	<template id="inquiry-child-item-template">
+	    <details class="child-inquiry-item" :open="isOpen" @toggle="onToggle">
+	        <summary>
+	            <strong>{{ childInfo.title }}</strong>
+	            <span class="muted" style="margin-left: 10px; font-size: 12px;">{{ formatDate(childInfo.createdAt) }}</span>
+	            <span class="badge" :class="childInfo.status === 1 ? 'badge-success' : 'badge-warning'" style="margin-left: auto;">
+	                {{ childInfo.status === 1 ? '답변완료' : '문의중' }}
+	            </span>
+	        </summary>
+	        <div class="inquiry-body" v-if="loaded">
+	            <div class="inquiry-detail-content preserve-lines" v-html="childDetail.content"></div>
+	            
+	            <!-- 자식 문의 첨부파일 -->
+	            <div class="file-attach-list" v-if="childDetail.files && childDetail.files.length > 0">
+	                <strong>📁 첨부파일</strong>
+	                <ul>
+	                    <li v-for="file in childDetail.files" :key="file.inquiryFileId">
+	                        <a :href="'/api/inquiries/' + parentId + '/files/' + file.inquiryFileId">{{ file.originalFileName }}</a>
+	                    </li>
+	                </ul>
+	            </div>
+	
+	            <!-- 자식 문의 답변 -->
+	            <div class="admin-answer" v-if="childDetail.status === 1">
+	                <h3>관리자 답변</h3>
+	                <p class="preserve-lines">{{ childDetail.answerContent }}</p>
+	            </div>
+	
+	            <!-- 버튼 영역: 수정 및 삭제 버튼 -->
+	            <div class="card-actions" v-if="childInfo.status === 0" style="margin-top: 10px;">
+	                <button class="btn btn-light btn-small" @click="$emit('open-child-edit', childDetail)">수정</button>
+	                <button class="btn btn-danger-light btn-small" @click="deleteChild">추가문의 삭제</button>
+	            </div>
+	        </div>
+	    </details>
+	</template>
 
     <!-- [자식 3] Quill 에디터 통합 모달 Form Template -->
     <template id="inquiry-form-template">

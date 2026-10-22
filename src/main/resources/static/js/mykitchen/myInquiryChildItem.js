@@ -4,7 +4,7 @@ const InquiryChildItem = {
         parentId: { type: Number, required: true },
         childInfo: { type: Object, required: true }
     },
-    emits: ['refresh-all'],
+    emits: ['refresh-all', 'open-child-edit'],
     data() {
         return {
             isOpen: false,
@@ -12,7 +12,6 @@ const InquiryChildItem = {
             childDetail: {}
         };
     },
-	
     watch: {
         childInfo: {
             deep: true,

@@ -1,7 +1,7 @@
 const InquiryForm = {
     template: '#inquiry-form-template',
     props: {
-        mode: { type: String, default: 'create' },
+        mode: { type: String, default: 'create' }, // 'create', 'edit', 'followUp'
         targetData: { type: Object, default: null }
     },
     emits: ['close', 'saved'],
@@ -28,11 +28,11 @@ const InquiryForm = {
     mounted() {
         this.initQuill();
         if (this.mode === 'edit' && this.targetData) {
-            this.form.inquiryType = this.targetData.inquiryType;
+            this.form.inquiryType = this.targetData.inquiryType ?? 0;
             this.form.title = this.targetData.title;
             this.form.content = this.targetData.content;
             this.existingFiles = [...(this.targetData.files || [])];
-            this.quill.root.innerHTML = this.form.content;
+            this.quill.root.innerHTML = this.form.content || '';
         }
     },
     methods: {
@@ -60,7 +60,6 @@ const InquiryForm = {
                 this.form.content = this.quill.root.innerHTML;
             });
         },
-        // Quill 에디터 이미지 업로드 처리 (서버 controller: /api/editor/upload)
         quillImageHandler() {
             const input = document.createElement('input');
             input.setAttribute('type', 'file');
@@ -87,7 +86,6 @@ const InquiryForm = {
         handleFileSelect(e) {
             this.newFiles = Array.from(e.target.files);
         },
-        // 수정 모드 시 개별 파일 삭제 API
         async deleteExistingFile(fileId) {
             if (!confirm('이 파일을 삭제하시겠습니까?')) return;
             try {
@@ -117,15 +115,15 @@ const InquiryForm = {
                     await axios.post('/api/inquiries', formData);
                 } 
                 else if (this.mode === 'edit') {
-                    // 본문 수정
                     const formData = new FormData();
-                    formData.append('inquiryType', this.form.inquiryType);
+                    if (this.form.inquiryType !== null && this.form.inquiryType !== undefined) {
+                        formData.append('inquiryType', this.form.inquiryType);
+                    }
                     formData.append('title', this.form.title);
                     formData.append('content', this.form.content);
 
                     await axios.post(`/api/inquiries/${this.targetData.inquiryId}`, formData);
 
-                    // 새 파일 개별 추가 업로드
                     for (const file of this.newFiles) {
                         const fileForm = new FormData();
                         fileForm.append('file', file);
