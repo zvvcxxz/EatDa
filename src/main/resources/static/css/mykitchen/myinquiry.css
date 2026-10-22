@@ -151,3 +151,31 @@
     border-top-right-radius: 10px;
     background: #fcf8f0;
 }
+
+/* ==========================================================================
+   열려있는(open) 아코디언 헤더 및 제목 강조 스타일
+   ========================================================================== */
+
+/* 1. 최상위 부모 문의가 열렸을 때 */
+.inquiry-item[open] summary {
+    background-color: var(--primary-light); /* 은은한 배경색 강조 */
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s ease;
+}
+
+.inquiry-item[open] summary strong {
+    color: var(--primary-dark); /* 제목 색상 진하게 */
+    font-weight: 800;           /* 폰트 두껍게 */
+}
+
+/* 2. 자식 추가 문의가 열렸을 때 */
+.child-inquiry-item[open] summary {
+    background-color: #f5eedf;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s ease;
+}
+
+.child-inquiry-item[open] summary strong {
+    color: var(--primary-dark);
+    font-weight: 800;
+}

@@ -43,7 +43,6 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 		try {
 			list = mapper.selectMyInquiryList(map);
 			for(MyInquiryDto dto : list) {
-				dto.setTitle(myUtil.htmlSymbols(dto.getTitle()));
 				dto.setContent(myUtil.sanitize(dto.getContent()));
 			}
 		} catch (Exception e) {

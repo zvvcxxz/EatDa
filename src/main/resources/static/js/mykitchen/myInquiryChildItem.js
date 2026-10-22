@@ -12,6 +12,19 @@ const InquiryChildItem = {
             childDetail: {}
         };
     },
+	
+    watch: {
+        childInfo: {
+            deep: true,
+            handler() {
+                if (this.isOpen) {
+                    this.loadChildDetail();
+                } else {
+                    this.loaded = false;
+                }
+            }
+        }
+    },
     methods: {
         async onToggle(e) {
             this.isOpen = e.target.open;

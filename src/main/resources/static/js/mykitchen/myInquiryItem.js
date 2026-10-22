@@ -12,6 +12,21 @@ const InquiryItem = {
             followUps: []
         };
     },
+	
+    watch: {
+        inquiry: {
+            deep: true,
+            handler() {
+                // 수정 등으로 부모 목록이 갱신되었을 때, 아코디언이 열려있다면 상세 내용/추가문의 즉시 재로드
+                if (this.isOpen) {
+                    this.loadDetail();
+                    this.loadFollowUps();
+                } else {
+                    this.loaded = false; // 닫혀있다면 다음 토글 때 새로 불러오도록 플래그 리셋
+                }
+            }
+        }
+    },
     methods: {
         async onToggle(e) {
             this.isOpen = e.target.open;
