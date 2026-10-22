@@ -45,7 +45,7 @@ public class AdminNoticeController {
         Map<String, Object> map = new HashMap<>();
         map.put("offset", offset);
         map.put("size", size);
-        map.put("schType", schType); // 💡 Map에 담아서 DB로 전달
+        map.put("schType", schType);
         map.put("kwd", kwd);
 
         List<AdminNoticeDto> topList = service.listNoticeTop();

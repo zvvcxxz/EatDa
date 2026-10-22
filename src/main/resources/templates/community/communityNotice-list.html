@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>공지사항 · 잇다</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+</th:block>
+
+<div layout:fragment="content" class="community-orange community-design">
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">📢 잇다 소식</span>
+                <h1 class="hero-title">새로운 소식과 안내를 전해드려요.</h1>
+                <p class="hero-sub">이벤트, 업데이트 등 잇다의 중요한 소식을 확인해 보세요.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">CUSTOMER CENTER</h2>
+            <ul class="sidebar-menu">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/notice/list}">📢 공지사항</a>
+                </li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+            <div class="sidebar-footer-text">
+                언제나 여러분의<br>
+                목소리에 귀 기울이겠습니다.
+            </div>
+        </aside>
+
+        <div class="content-area">
+            <div class="ds-heading">
+                <div>
+                    <p class="ds-eyebrow">NOTICE</p>
+                    <h2>공지사항</h2>
+                    <p>서비스 이용에 관한 중요한 안내 사항입니다.</p>
+                </div>
+            </div>
+
+            <form class="ds-toolbar" method="get" th:action="@{/community/notice/list}">
+                <select name="schType" aria-label="검색 항목">
+                    <option value="all" th:selected="${schType == 'all'}">제목 + 내용</option>
+                    <option value="title" th:selected="${schType == 'title'}">제목</option>
+                    <option value="content" th:selected="${schType == 'content'}">내용</option>
+                </select>
+
+                <label class="ds-search">
+                    <input name="kwd" th:value="${kwd}" placeholder="검색어 입력" aria-label="검색어">
+                </label>
+
+                <button type="submit" class="ds-button light">검색</button>
+
+                <span class="ds-count" th:text="|총 ${dataCount}건의 공지|">총 0건의 공지</span>
+            </form>
+
+            <section style="background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 0 20px;">
+                <div class="ds-question-row" th:each="dto : ${list}">
+                    <div style="flex: 1;">
+                        <span th:if="${dto.pinnedYn == 'Y'}" class="card-category" style="margin-bottom: 6px;">중요 공지</span>
+                        <h3 style="margin-bottom: 8px;">
+                            <a th:text="${dto.title}" 
+                               th:href="@{/community/notice/article(noticeId=${dto.noticeId}, page=${page}, schType=${schType}, kwd=${kwd})}"
+                               style="color: var(--text-main); font-weight: 700;">공지사항 제목</a>
+                        </h3>
+                        <div class="ds-question-meta">
+                            <span th:text="${dto.createdAt}">등록일</span>
+                            <span style="margin: 0 6px;">|</span>
+                            <span th:text="|조회 ${dto.hitCount}|">조회수</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="empty-state" th:if="${#lists.isEmpty(list)}" style="border: none;">
+                    등록된 공지사항이 없습니다.
+                </p>
+            </section>
+
+            <nav class="pagination" aria-label="페이지 이동" th:if="${dataCount > 0}">
+                <div class="page-navigation" th:utext="${paging}"></div>
+            </nav>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

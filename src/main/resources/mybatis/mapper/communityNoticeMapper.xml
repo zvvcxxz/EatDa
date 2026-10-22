@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityNoticeMapper">
+	<sql id="where-list">
+		<if test="kwd != null and kwd != ''">
+			<choose>
+				<when test="schType == 'all'">
+					AND (INSTR(n.TITLE, #{kwd}) &gt;  OR INSTR(n.CONTENT, #{kwd}) &gt; 0)
+				</when>
+				<when test="schType == 'all'">
+					AND INSTR(n.TITLE, #{kwd}) &gt; 0
+				</when>
+				<when test="schType == 'content'">
+					AND INSTR(n.CONTENT, #{kwd} &gt; 0)
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<select id="dataCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM NOTICE n
+		WHERE n.STATUS = 1
+		<include refid="where-list"/>
+	</select>
+	
+	<select id="listNotice" parameterType="map" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT n.NOTICE_ID AS noticeId, m.NAME AS adminName, n.TITLE AS title,
+			   n.PINNED_YN AS pinnedYn, n.HIT_COUNT AS hitCount,
+			   TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt
+		FROM NOTICE n
+		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		WHERE n.STATUS = 1
+		<include refid="where-list"/>
+		ORDER BY n.PINNED_YN DESC, n.NOTICE_ID DESC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY	   
+	</select>
+	
+	<update id="updateHitCount" parameterType="long">
+		UPDATE NOTICE SET HIT_COUNT = HIT_COUNT + 1 WHERE NOTICE_ID = #{noticeId}
+	</update>
+	
+	<select id="findById" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT n.NOTICE_ID AS noticeId, m.NAME AS adminName, n.TITLE AS title,
+			   n.CONTENT AS content, n.PINNED_YN AS pinnedYn, n.HIT_COUNT AS hitCount,
+			   TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt
+		FROM NOTICE n
+		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		WHERE n.NOTICE_ID = #{noticeId} AND n.STATUS = 1
+	</select>
+	
+	<select id="findByPrev" parameterType="map" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT NOTICE_ID AS noticeId, TITLE AS title FROM NOTICE n
+		WHERE n.STATUS = 1 AND n.NOTICE_ID &gt; #{noticeId}
+		<include refid="where-list"/>
+		ORDER BY n.NOTICE_ID ASC
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="findByNext" parameterType="map" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT NOTICE_ID AS noticeId, TITLE AS title FROM NOTICE n
+		WHERE n.STATUS = 1 AND n.NOTICE_ID &lt; #{noticeId}
+		<include refid="where-list"/>
+		ORDER BY n.NOTICE_ID DESC
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="listNoticeFile" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT NOTICE_FILE_ID AS noticeFileId, ORIGINAL_FILE_NAME AS originalFileName, FILE_PATH AS filePath
+		FROM NOTICE_FILE WHERE NOTICE_ID = #{noticeId}
+	</select>
+	
+	<select id="findByFileId" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
+		SELECT NOTICE_FILE_ID AS noticeFileId, ORIGINAL_FILE_NAME AS originalFIleName, FILE_PATH AS filePath
+		FROM NOTICE_FILE WHERE NOTICE_FILE_ID = #{fileId}
+	</select>
+</mapper>

@@ -17,7 +17,7 @@
     </div></details>
     
     <details><summary>함께하는 주방</summary><div class="dropdown">
-        <a href="/community/notice" th:href="@{/community/notice}" >공지사항</a>
+        <a href="/community/notice/list" th:href="@{/community/notice/list}" >공지사항</a>
         <a href="/community/free" th:href="@{/community/free}" >자유 이야기</a>
         <a href="/community/recipes" th:href="@{/community/recipes}" >모두의 레시피</a>
         <a href="/community/cooking" th:href="@{/community/cooking}" >따라 만든 요리</a>
@@ -36,7 +36,6 @@
         <a href="/my/messages" th:href="@{/my/messages}" >쪽지</a>
     </div></details>
     
-    <a href="/missions" th:href="@{/missions}" >미션/포인트</a>
     <a href="/shop" th:href="@{/shop}" >장보기</a>
     <a href="/admin" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">관리자</a>
   </nav>

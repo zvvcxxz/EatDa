@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <title>공지사항 상세 · 잇다</title>
+</head>
+
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+</th:block>
+
+<div layout:fragment="content" class="community-orange community-design">
+    <section class="hero-banner">
+        <div class="hero-card">
+            <div>
+                <span class="hero-tag">📢 잇다 소식</span>
+                <h1 class="hero-title">새로운 소식과 안내를 전해드려요.</h1>
+                <p class="hero-sub">이벤트, 업데이트 등 잇다의 중요한 소식을 확인해 보세요.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">CUSTOMER CENTER</h2>
+            <ul class="sidebar-menu">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li class="sidebar-item active">
+                    <a th:href="@{/community/notice/list}">📢 공지사항</a>
+                </li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+            <div class="sidebar-footer-text">
+                언제나 여러분의<br>
+                목소리에 귀 기울이겠습니다.
+            </div>
+        </aside>
+
+        <div class="content-area">
+            <div class="ds-heading compact">
+                <div>
+                    <p class="ds-eyebrow">NOTICE / 상세보기</p>
+                    <h2>공지사항</h2>
+                </div>
+                <a class="ds-button light" th:href="@{/notice/list(page=${page}, schType=${schType}, kwd=${kwd})}">← 목록으로</a>
+            </div>
+
+            <article class="detail-container">
+                <div class="detail-header">
+                    <span th:if="${dto.pinnedYn == 'Y'}" class="card-category" style="margin-bottom: 10px;">중요 공지</span>
+                    <h1 class="detail-title" th:text="${dto.title}">공지사항 제목</h1>
+            
+                    <div class="detail-info">
+                        <span class="writer-name">관리자</span>
+                        · <span th:text="${dto.createdAt}">작성일</span>
+                        · <span th:text="|조회 ${dto.hitCount}|">조회 0</span>
+                    </div>
+                </div>
+            
+                <div class="detail-body" th:text="${dto.content}">
+                    공지사항 내용
+                </div>
+                
+                <div th:if="${not #lists.isEmpty(listFile)}" style="margin-top: 40px; padding: 20px; background: #FFFBF8; border-radius: var(--radius-md); border: 1px dashed var(--primary-orange);">
+                    <h3 style="font-size: 14px; font-weight: 700; color: var(--primary-orange); margin-bottom: 10px;">
+                        <i class="bi bi-paperclip"></i> 첨부파일
+                    </h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                        <li th:each="file : ${listFile}">
+                            <a th:href="@{/notice/download(fileId=${file.noticeFileId})}" style="color: var(--text-main); font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+                                📄 <span th:text="${file.originalFileName}">파일이름.jpg</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+
+            <div class="post-nav" style="margin-top: 24px;">
+                <div th:if="${prevDto != null}">
+                    <strong class="post-nav-label">이전글</strong>
+                    <a class="post-nav-title" th:href="@{/notice/article(noticeId=${prevDto.noticeId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${prevDto.title}"></a>
+                </div>
+                <div th:if="${prevDto == null}">
+                    <strong class="post-nav-label">이전글</strong>
+                    <span class="post-nav-title" style="color: var(--text-muted);">이전 공지사항이 없습니다.</span>
+                </div>
+        
+                <div th:if="${nextDto != null}" style="border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px;">
+                    <strong class="post-nav-label">다음글</strong>
+                    <a class="post-nav-title" th:href="@{/notice/article(noticeId=${nextDto.noticeId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${nextDto.title}"></a>
+                </div>
+                <div th:if="${nextDto == null}" style="border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px;">
+                    <strong class="post-nav-label">다음글</strong>
+                    <span class="post-nav-title" style="color: var(--text-muted);">다음 공지사항이 없습니다.</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

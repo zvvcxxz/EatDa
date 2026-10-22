@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div onclick="location.href='/admin/ingredient/list'" class="cursor-pointer">
+				<p class="eyebrow">INGREDIENT MANAGEMENT</p>
+				<h2>재료 관리</h2>
+				<p class="subtitle">레시피에 사용되는 식재료와 양념의 기준 데이터를 관리합니다.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>재료 목록</h2></div>
+				<button type="button" class="custom-btn primary" onclick="openIngredientDialog('write')">+ 재료 등록</button>
+			</div>
+            
+            <div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th style="width: 80px;">번호</th>
+                            <th style="width: 120px;">분류</th>
+                            <th>재료명</th>
+                            <th style="width: 120px;">기본 단위</th>
+                            <th style="width: 100px;">상태</th>
+                            <th style="width: 100px;">관리</th>
+						</tr>
+					</thead>
+					<tbody id="ingredient-rows">
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="6" class="empty">등록된 재료가 없습니다.</td>
+                        </tr>
+						<tr th:each="dto, stat : ${list}">
+						    <td th:text="${dataCount - (page-1) * size - stat.index}">1</td>
+							<td>
+							    <span class="custom-badge" 
+							          th:classappend="${dto.ingredientType == '조미료' or dto.ingredientType == '유지류' ? 'orange' : 'blue'}"
+							          th:text="${dto.ingredientType}">분류명</span>
+							</td>
+						    <td class="cell-title tag-name-text" th:text="${dto.ingredientName}">김치</td>
+                            <td class="muted" th:text="${dto.defaultUnit}">g</td>
+						    <td>
+						        <span class="custom-badge green" th:if="${dto.activeYn == 'Y'}">사용중</span>
+						        <span class="custom-badge red" th:if="${dto.activeYn == 'N'}">미사용</span>
+						    </td>
+							<td>
+							    <div class="table-action-btns">
+							        <button type="button" class="custom-btn secondary small" 
+                                            th:data-id="${dto.ingredientId}"
+                                            th:data-name="${dto.ingredientName}"
+                                            th:data-type="${dto.ingredientType}"
+                                            th:data-unit="${dto.defaultUnit}"
+                                            th:data-active="${dto.activeYn}"
+                                            onclick="openIngredientDialog('update', this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-type'), this.getAttribute('data-unit'), this.getAttribute('data-active'))">
+                                        수정
+                                    </button>
+							    </div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+            
+            <div class="page-navigation page-navigation-wrap"></div>
+
+            <div class="search-section">
+                <form name="searchForm" class="form-search">
+                    <select name="schType" class="select-ui">
+                        <option value="ingredientName" th:selected="${schType=='ingredientName'}">재료명</option>
+                        <option value="ingredientType" th:selected="${schType=='ingredientType'}">분류 (FOOD/SEASONING)</option>
+                    </select>
+                    <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
+                    <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/ingredient/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                </form>
+            </div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="aside-container">
+	<dialog id="ingredient-dialog">
+		<div class="dialog-head">
+			<h2 id="dialog-title">재료 등록</h2><button type="button" class="close-btn" data-close>×</button>
+		</div>
+		<div class="dialog-body">
+			<form id="ingredient-form" class="form-grid" method="post" th:action="@{/admin/ingredient/write}">
+                <input type="hidden" name="ingredientId" id="form-ingredientId" value="0">
+                <input type="hidden" name="page" th:value="${page}">
+				<label class="field">
+				    <span>분류 (Type)</span>
+				    <select name="ingredientType" id="form-ingredientType" class="select-ui" required>
+				        <option value="육류">육류</option>
+				        <option value="해산물">해산물</option>
+				        <option value="난류">난류</option>
+				        <option value="유제품">유제품</option>
+				        <option value="곡물·면류">곡물·면류</option>
+				        <option value="채소">채소</option>
+				        <option value="과일">과일</option>
+				        <option value="버섯">버섯</option>
+				        <option value="콩·견과류">콩·견과류</option>
+				        <option value="가공식품">가공식품</option>
+				        <option value="유지류">유지류</option>
+				        <option value="조미료">조미료</option>
+				        <option value="물·육수">물·육수</option>
+				    </select>
+				</label>
+				<label class="field">
+                    <span>재료명</span>
+                    <input type="text" name="ingredientName" id="form-ingredientName" required placeholder="예: 김치, 소금, 돼지고기">
+                </label>
+                
+                <label class="field">
+                    <span>기본 단위</span>
+                    <input type="text" name="defaultUnit" id="form-defaultUnit" required placeholder="예: g, 개, 큰술, 모">
+                </label>
+                
+                <label class="field wrap-active-yn" id="wrap-activeYn" style="display:none;">
+                    <span>사용 여부 (상태)</span>
+                    <select name="activeYn" id="form-activeYn" class="select-ui">
+                        <option value="Y">사용중 (Y)</option>
+                        <option value="N">미사용 (N - 숨김처리)</option>
+                    </select>
+                </label>
+                
+				<button type="submit" class="custom-btn primary full mt-2" id="dialog-submit-btn">재료 등록</button>
+			</form>
+		</div>
+	</dialog>
+	<div class="toast-popup" id="toast" role="status" aria-live="polite" hidden></div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript" th:src="@{/dist/posts/renderPaging.js}"></script>
+    <script type="text/javascript">
+        window.ingredientData = {
+            page: '[[${page}]]',
+            size: '[[${size}]]',
+            dataCount: '[[${dataCount}]]',
+            schType: '[[${schType}]]',
+            kwd: '[[${kwd}]]'
+        };
+    </script>
+    <script type="text/javascript" th:src="@{/dist/js/admin-ingredient.js}"></script>
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>

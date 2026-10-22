@@ -3,74 +3,65 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{admin/layout/layout3}">
 
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+
 <th:block layout:fragment="content">
-    
-    <div class="body-container">
-        <div class="body-title">
-            <h3><i class="bi bi-book"></i> 레시피 상세 보기</h3>
-        </div>
-        
-        <div class="body-main pt-3">
-            <table class="table table-bordered align-middle">
-                <tbody>
-                    <tr>
-                        <th class="table-light text-center" style="width: 15%;">레시피 번호</th>
-                        <td style="width: 35%;" th:text="${dto.recipeId}"></td>
-                        <th class="table-light text-center" style="width: 15%;">출처</th>
-                        <td style="width: 35%;">
-                            <span class="badge" 
-                                  th:classappend="${dto.sourceType == 'API' ? 'bg-primary' : 'bg-secondary'}"
-                                  th:text="${dto.sourceType == 'API' ? '공식' : '유저'}">출처</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="table-light text-center">작성자</th>
-                        <td th:text="${dto.userName != null ? dto.userName : dto.loginId}"></td>
-                        <th class="table-light text-center">등록일</th>
-                        <td th:text="${dto.createdAt}"></td>
-                    </tr>
-                    <tr>
-                        <th class="table-light text-center">조리 시간</th>
-                        <td th:text="${dto.cookMinutes != null ? dto.cookMinutes + '분' : '-'}"></td>
-                        <th class="table-light text-center">난이도 / 인원</th>
-                        <td th:text="${(dto.difficulty != null ? dto.difficulty : '-') + ' / ' + (dto.servings != null ? dto.servings + '인분' : '-')}"></td>
-                    </tr>
-                    <tr>
-                        <th class="table-light text-center">현재 상태</th>
-                        <td colspan="3">
-                            <span th:if="${dto.status == 1}" class="text-success fw-bold">정상 (표시 중)</span>
-                            <span th:if="${dto.status == 0}" class="text-danger fw-bold">숨김 처리됨</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="table-light text-center">요약 정보</th>
-                        <td colspan="3" th:text="${dto.summary != null ? dto.summary : '-'}"></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="d-flex justify-content-between mt-4">
-                <form th:action="@{/admin/recipe/updateStatus}" method="post">
-                    <input type="hidden" name="recipeId" th:value="${dto.recipeId}">
-                    <input type="hidden" name="page" th:value="${page}">
-                    <input type="hidden" name="schType" th:value="${schType}">
-                    <input type="hidden" name="kwd" th:value="${kwd}">
-                    <input type="hidden" name="sourceType" th:value="${sourceType}">
-                    
-                    <input type="hidden" name="status" th:value="${dto.status == 1 ? 0 : 1}">
-                    
-                    <button type="submit" class="btn" 
-                            th:classappend="${dto.status == 1 ? 'btn-danger' : 'btn-success'}"
-                            th:text="${dto.status == 1 ? '이 레시피 숨김 처리' : '숨김 해제 및 표시'}"
-                            onclick="return confirm('이 레시피의 상태를 변경하시겠습니까?');">
-                    </button>
-                </form>
-
-                <button type="button" class="btn btn-outline-secondary" 
-                        th:onclick="|location.href='@{/admin/recipe/list(page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}'|">목록</button>
+    <div class="admin-wrap">
+s        <section class="page-heading">
+            <div>
+                <p class="eyebrow">NOTICE DETAILS</p>
+                <h2>공지사항 상세</h2>
+                <p class="subtitle">등록된 공지사항의 상세 내용을 확인합니다.</p>
             </div>
-        </div>
-    </div>
+        </section>
 
+        <section class="panel">
+            <div class="panel-head article-head-info" style="display: flex;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span th:if="${dto.pinnedYn == 'Y'}" class="custom-badge red">공지</span>
+                    <span th:if="${dto.status == 0}" class="custom-badge gray">숨김</span>
+                    <h3 class="article-title" th:text="${dto.title}">공지사항 제목</h3>
+                </div>
+                
+                <div class="article-meta" style="margin-top: 10px;">
+                    <strong th:text="${dto.adminName}">관리자명</strong>
+                    <span class="divider">|</span>
+                    <span th:text="${dto.createdAt}">등록일</span>
+                    <span class="divider">|</span>
+                    <span>조회 <span th:text="${dto.hitCount}">0</span></span>
+                </div>
+            </div>
+            
+            <div class="panel-body">
+                <div class="article-content" th:text="${dto.content}">
+                    공지사항 내용
+                </div>
+
+                <div class="article-attachments" th:if="${not #lists.isEmpty(listFile)}">
+                    <h3><i class="bi bi-paperclip"></i> 첨부파일</h3>
+                    <div class="tag-list">
+                        <span class="tag-item" th:each="file : ${listFile}">
+                            <i class="bi bi-file-earmark-text" style="color: var(--orange);"></i>
+                            <span th:text="${file.originalFileName}">첨부파일.jpg</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="article-footer">
+                    <div>
+                        <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/update(noticeId=${dto.noticeId})}'|">수정</button>
+                        <button type="button" class="custom-btn danger" th:onclick="|if(confirm('이 공지사항을 삭제하시겠습니까?')) location.href='@{/admin/notice/delete(noticeId=${dto.noticeId})}'|">삭제</button>
+                    </div>
+                    <button type="button" class="custom-btn primary" th:onclick="|location.href='@{/admin/notice/list}'|">목록으로</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
 </th:block>
 </html>

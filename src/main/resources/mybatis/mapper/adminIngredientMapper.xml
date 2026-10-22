@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.admin.mapper.AdminIngredientMapper">
+	
+	<sql id="where-list">
+		<if test="kwd != null and kwd != ''">
+            <choose>
+                <when test="schType == 'ingredientName'">
+                    AND INSTR(INGREDIENT_NAME, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'ingredientType'">
+                    AND INSTR(UPPER(INGREDIENT_TYPE), UPPER(#{kwd})) &gt; 0
+                </when>
+            </choose>
+        </if>
+	</sql>
+	
+	<insert id="insertIngredient" parameterType="com.sp.app.admin.domain.dto.AdminIngredientDto">
+		INSERT INTO INGREDIENT (
+			INGREDIENT_ID, INGREDIENT_NAME, INGREDIENT_TYPE, DEFAULT_UNIT, ACTIVE_YN, CREATED_AT, UPDATED_AT	
+		) VALUES (
+			SEQ_INGREDIENT.NEXTVAL, #{ingredientName}, #{ingredientType}, #{defaultUnit}, NVL(#{activeYn, jdbcType=VARCHAR}, 'Y'), SYSTIMESTAMP, SYSTIMESTAMP
+		)
+	</insert>
+	
+	<update id="updateIngredient" parameterType="com.sp.app.admin.domain.dto.AdminIngredientDto">
+		UPDATE INGREDIENT SET
+			INGREDIENT_NAME = #{ingredientName},
+			INGREDIENT_TYPE = #{ingredientType},
+			DEFAULT_UNIT = #{defaultUnit},
+			ACTIVE_YN = NVL(#{activeYn, jdbcType=VARCHAR}, 'Y'),
+			UPDATED_AT = SYSTIMESTAMP
+		WHERE INGREDIENT_ID = #{ingredientId}
+	</update>
+	
+	<select id="dataCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM INGREDIENT
+		<where>
+			<include refid="where-list"/>
+		</where>
+	</select>
+	
+	<select id="listIngredient" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminIngredientDto">
+        SELECT INGREDIENT_ID AS ingredientId,
+               INGREDIENT_NAME AS ingredientName,
+               INGREDIENT_TYPE AS ingredientType,
+               DEFAULT_UNIT AS defaultUnit,
+               ACTIVE_YN AS activeYn,
+               TO_CHAR(CREATED_AT, 'YYYY-MM-DD') AS createdAt
+        FROM INGREDIENT
+        <where>
+            <include refid="where-list"/>
+        </where>
+        ORDER BY INGREDIENT_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+	
+	<select id="findById" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminIngredientDto">
+		SELECT INGREDIENT_ID AS ingredientId, INGREDIENT_NAME AS ingredientName,
+				INGREDIENT_TYPE AS ingredientType, DEFAULT_UNIT AS defaultUnit, ACTIVE_YN AS activeYn
+		FROM INGREDIENT WHERE INGREDIENT_NAME = #{ingredientName}
+	</select>
+</mapper>
