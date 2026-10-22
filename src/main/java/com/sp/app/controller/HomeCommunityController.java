@@ -1,13 +1,22 @@
 package com.sp.app.controller;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.sp.app.domain.dto.MyFridgeDto;
+import com.sp.app.domain.dto.SessionInfo;
+import com.sp.app.security.LoginMemberUtil;
+import com.sp.app.service.MyFridgeService;
 import com.sp.app.service.TogetherMeetService;
 import com.sp.app.service.TogetherShareService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 public class HomeCommunityController {
     private final TogetherMeetService meetService;
     private final TogetherShareService shareService;
+    private final MyFridgeService fridgeService;
 
     public record PreviewItem(Long id, String title, String location, String date) {}
+
 
     // 메인에서 보여줄 최신 게시글 네 개
     @GetMapping("/home/community-preview")
@@ -40,4 +51,24 @@ public class HomeCommunityController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "게시글을 불러오지 못했습니다.");
         }
     }
+
+
+    @GetMapping("/home/items")
+    public ResponseEntity<?> getFridgeItems() {
+        SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+        if(info != null && info.getMember_id() != null) {
+            List<MyFridgeDto.ItemResponse> items = fridgeService.getMemberFridgeItems(info.getMember_id());
+            return ResponseEntity.ok(Map.of(
+                    "state","login",
+                    "list",items
+                    ));
+        }
+
+
+        return ResponseEntity.ok(Map.of(
+                "state","logout"));
+    }
+
+
 }

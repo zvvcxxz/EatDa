@@ -1,4 +1,11 @@
 .site-header .brand:hover img { transform: none; }
+.site-header .header-logout-form { display:flex; align-items:center; flex-shrink:0; margin:0; }
+.site-header .header-logout-form .header-logout { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0; border:1px solid #f2d4bd; border-radius:50%; color:#744732; background:transparent; box-shadow:none; transition:background-color .24s ease, border-color .24s ease, color .24s ease, box-shadow .24s ease; }
+.site-header .header-logout-form .header-logout:hover { transform:none; background:#fff0e3; color:#d14d2c; border-color:#efb38d; box-shadow:0 2px 8px #a0562110; }
+.site-header .header-logout-arrow { transition:transform .24s ease; }
+.site-header .header-logout:hover .header-logout-arrow { transform:translateX(2px); }
+.site-header .header-logout:focus-visible { outline:2px solid #d14d2c; outline-offset:4px; }
+@media(prefers-reduced-motion:reduce) { .site-header .header-logout-form .header-logout, .site-header .header-logout-arrow { transition:none; } }
 .site-header .header-inner > .header-account { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 1px solid #f2d4bd; border-radius: 50%; color: #744732; background: transparent; box-shadow: none; transition: background-color .24s ease, border-color .24s ease, color .24s ease, box-shadow .24s ease; }
 .site-header .header-inner > .header-account:hover { transform: none; background: #fff0e3; color: #d14d2c; border-color: #efb38d; box-shadow: 0 2px 8px #a0562110; }
 .site-header .header-account:focus-visible { outline: 2px solid #d14d2c; outline-offset: 4px; }

@@ -5,7 +5,7 @@
   <a class="brand" href="/" th:href="@{/}"><img th:src="@{/dist/images/itda-logo.png}" alt="잇다 로고"><span><strong>잇다</strong><b>EAT-DA</b><small>맛을 잇고, 사람을 잇다</small></span></a>
   <nav class="nav" aria-label="주 메뉴">
     <a href="/" th:href="@{/}" >홈</a>
-    
+
     <details><summary>레시피 찾기</summary><div class="dropdown">
         <a href="/" th:href="@{/}" data-recipe-category="">전체 레시피</a>
         <a href="/?category=자취" th:href="@{/?category=자취}" data-recipe-category="자취">자취 요리</a>
@@ -15,7 +15,7 @@
         <a href="/?category=태그" th:href="@{/?category=태그}" data-recipe-category="태그">태그별 레시피</a>
         <a href="/?category=인기" th:href="@{/?category=인기}" data-recipe-category="인기">인기 레시피</a>
     </div></details>
-    
+
     <details><summary>함께하는 주방</summary><div class="dropdown">
         <a href="/community/notice/list" th:href="@{/community/notice/list}" >공지사항</a>
         <a href="/community/free" th:href="@{/community/free}" >자유 이야기</a>
@@ -25,7 +25,7 @@
         <a href="/community/share" th:href="@{/community/share}" >재료 나눔</a>
         <a href="/community/meet" th:href="@{/community/meet}" >같이 먹어요</a>
     </div></details>
-    
+
     <details><summary>나의 주방</summary><div class="dropdown">
         <a href="/my/fridge" th:href="@{/my/fridge}" >내 냉장고</a>
         <a href="/my/recipes" th:href="@{/my/recipes}" >내가 쓴 레시피</a>
@@ -35,11 +35,11 @@
         <a href="/member/pwd" th:href="@{/member/pwd}" >회원정보</a>
         <a href="/my/messages" th:href="@{/my/messages}" >쪽지</a>
     </div></details>
-    
+
     <a href="/shop" th:href="@{/shop}" >장보기</a>
     <a href="/admin" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">관리자</a>
   </nav>
-  
+
   <button type="button" class="button header-account" data-open-login sec:authorize="isAnonymous()"
     aria-label="로그인 또는 회원가입" title="로그인 / 회원가입">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -47,9 +47,16 @@
       <path d="M5 21v-2a7 7 0 0 1 14 0v2"></path>
     </svg>
   </button>
-  <form th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()"><button class="button secondary" type="submit">로그아웃</button></form>
+  <form class="header-logout-form" th:action="@{/member/logout}" method="post" sec:authorize="isAuthenticated()">
+    <button class="button header-logout" type="submit" aria-label="로그아웃" title="로그아웃">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"></path>
+        <g class="header-logout-arrow"><path d="M9 12h11M16 8l4 4-4 4"></path></g>
+      </svg>
+    </button>
+  </form>
  </div>
- 
+
  <details class="wrap mobile-menu"><summary>메뉴</summary>
     <nav class="mobile-links">
         <a href="/" th:href="@{/}" >전체 레시피</a>
