@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.sp.app.common.MyUtil;
 import com.sp.app.domain.dto.MyInquiryDto;
 import com.sp.app.domain.dto.MyInquiryDto.InquiryFileDto;
 import com.sp.app.domain.dto.SessionInfo;
@@ -33,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MyInquiryApiController {
 	
 	private final MyInquiryService service;
-	private final MyUtil myUtil;
+	//private final MyUtil myUtil;
 	
 	private Long getMemberId() {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -55,7 +54,7 @@ public class MyInquiryApiController {
 			Long memberId = getMemberId();
 			Map<String, Object> map = new HashMap<>();
 			
-			kwd = myUtil.decodeUrl(kwd);
+			//kwd = myUtil.decodeUrl(kwd);
 			int size = 7;
 			
 			map.put("memberId", memberId);
@@ -65,6 +64,7 @@ public class MyInquiryApiController {
 
 			long totalCount = service.countMyInquiryList(map);
 			long totalPage = (totalCount+size-1)/size;
+			page = Math.max(page, 1);
 			page = (int)Math.min(page, totalPage);
 			if(totalCount <=0) page=1;
 			
@@ -76,7 +76,7 @@ public class MyInquiryApiController {
 			map.put("size", size);
 			map.put("totalCount", totalCount);
 			map.put("totalPage", totalPage);
-			
+			map.put("offset", offset);
 			
 			List<MyInquiryDto> list = service.selectMyInquiryList(map);
 			map.put("list", list);
@@ -141,6 +141,7 @@ public class MyInquiryApiController {
     	try {
     		Long memberId = getMemberId();
 			dto.setMemberId(memberId);
+			dto.setParentInquiryId(null);
     		return ResponseEntity.ok(service.insertMyInquiry(dto));
 		} catch (Exception e) {
 			log.info("create : ", e);
@@ -183,13 +184,10 @@ public class MyInquiryApiController {
     @PostMapping("/{inquiryId}/follow-ups")
     public ResponseEntity<?> createFollowUp(@PathVariable Long inquiryId,
     		@ModelAttribute MyInquiryDto dto) {
-        // 본인 원문 + status 1 검증
     	try {
     		Long memberId = getMemberId();
-    		service.selectInquiryByStatus(inquiryId, memberId);
-    		dto.setMemberId(memberId);
-    		dto.setParentInquiryId(inquiryId);
-    		return ResponseEntity.ok(service.insertMyInquiry(dto));
+    		
+    		return ResponseEntity.ok(service.insertFollowUp(inquiryId, memberId, dto));
 		} catch (Exception e) {
 			log.info("createFollowUp : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -205,7 +203,7 @@ public class MyInquiryApiController {
 			service.selectMyInquiryDetail(inquiryId, memberId);
 			InquiryFileDto dto = new InquiryFileDto();
 			dto.setInquiryId(inquiryId);
-    		return ResponseEntity.ok(service.insertInquiryFile(mf, dto));
+    		return ResponseEntity.ok(service.insertInquiryFile(mf, dto, memberId));
 		} catch (Exception e) {
 			log.info("fileUpload : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -247,7 +245,7 @@ public class MyInquiryApiController {
     	try {
     		Long memberId = getMemberId();
 			service.selectMyInquiryDetail(inquiryId, memberId);
-    		return ResponseEntity.ok(service.deleteInquiryFile(fileId, inquiryId));
+    		return ResponseEntity.ok(service.deleteInquiryFile(fileId, inquiryId, memberId));
 		} catch (Exception e) {
 			log.info("fileDelete : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -261,7 +259,7 @@ public class MyInquiryApiController {
     	try {
     		Long memberId = getMemberId();
 			service.selectMyInquiryDetail(inquiryId, memberId);
-    		return ResponseEntity.ok(service.deleteInquiryFilesByInquiryId(inquiryId));
+    		return ResponseEntity.ok(service.deleteInquiryFilesByInquiryId(inquiryId, memberId));
 		} catch (Exception e) {
 			log.info("fileDelete : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

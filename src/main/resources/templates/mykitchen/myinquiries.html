@@ -3,40 +3,260 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{mykitchen/mykitchenLayout}">
 <head>
-    <title>신고 / 문의 - 나의 주방</title>
+    <title>1:1 문의 게시판 - 나의 주방</title>
+    <!-- Quill Text Editor CDN -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    
+    <!-- Vue 3 & Axios CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <link rel="stylesheet" th:href="@{/css/mykitchen/myinquiry.css}">
 </head>
 <body>
 
 <th:block layout:fragment="kitchenContent">
-    <section class="panel">
+    <section class="panel" id="app" v-cloak>
         <div class="section-heading">
-            <h2>내 신고 / 문의 내역</h2>
-            <a class="btn btn-primary" th:href="@{/inquiries/new}">문의 작성</a>
+            <div>
+                <div class="eyebrow">SUPPORT</div>
+                <h2>내 신고 / 문의 내역</h2>
+            </div>
+            <button class="btn btn-primary" @click="openCreateModal">1:1 문의 작성</button>
         </div>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(inquiries)}">
-            <h3>등록한 신고나 문의가 없어요</h3>
+        <!-- 탭 및 검색 영역 -->
+        <div class="inquiry-filter-bar">
+            <div class="inquiry-tabs">
+                <button class="inquiry-tab-btn" :class="{ active: selectedType === null }" @click="changeType(null)">전체</button>
+                <button class="inquiry-tab-btn" :class="{ active: selectedType === 0 }" @click="changeType(0)">서비스</button>
+                <button class="inquiry-tab-btn" :class="{ active: selectedType === 1 }" @click="changeType(1)">레시피</button>
+                <button class="inquiry-tab-btn" :class="{ active: selectedType === 2 }" @click="changeType(2)">커뮤니티</button>
+                <button class="inquiry-tab-btn" :class="{ active: selectedType === 3 }" @click="changeType(3)">기타</button>
+            </div>
+
+            <div class="inquiry-search-box">
+                <select v-model="schType">
+                    <option value="all">제목+내용</option>
+                    <option value="title">제목</option>
+                    <option value="content">내용</option>
+                    <option value="reg_date">날짜(YYYY-MM-DD)</option>
+                </select>
+                <input type="text" v-model="kwd" @keyup.enter="search" placeholder="검색어를 입력하세요">
+                <button class="btn btn-dark btn-small" @click="search">검색</button>
+            </div>
         </div>
 
-        <details class="inquiry-item" th:each="inquiry : ${inquiries}">
+        <!-- 최상위 부모 문의 목록 -->
+        <div class="empty-state" v-if="inquiries.length === 0">
+            <span>📋</span>
+            <h3>등록된 문의 내역이 없습니다.</h3>
+        </div>
+
+        <div v-else>
+            <inquiry-item 
+                v-for="item in inquiries" 
+                :key="item.inquiryId" 
+                :inquiry="item"
+                @refresh="fetchInquiries(currentPage)"
+                @open-edit="openEditModal"
+                @open-follow-up="openFollowUpModal">
+            </inquiry-item>
+        </div>
+
+        <!-- 페이징 -->
+        <inquiry-pagination 
+            v-if="totalPage > 0"
+            :current-page="currentPage" 
+            :total-page="totalPage"
+            @change-page="fetchInquiries">
+        </inquiry-pagination>
+
+        <!-- Quill 작성/수정/추가문의 통합 모달 -->
+        <inquiry-form 
+            v-if="showModal" 
+            :mode="modalMode"
+            :target-data="modalData"
+            @close="showModal = false" 
+            @saved="handleSaved">
+        </inquiry-form>
+    </section>
+
+    <!-- Vue Component Templates -->
+
+    <!-- [자식 1] 최상위 부모 문의 아코디언 Template -->
+    <template id="inquiry-item-template">
+        <details class="inquiry-item" :open="isOpen" @toggle="onToggle">
             <summary>
-                <span class="badge badge-old" th:text="${inquiry.typeLabel}">문의</span>
-                <strong th:text="${inquiry.title}">문의 제목</strong>
-                <span class="muted" th:text="${inquiry.createdDate}">2026-01-01</span>
-                <span class="badge" th:classappend="${inquiry.completed} ? 'badge-success' : 'badge-warning'" th:text="${inquiry.statusLabel}">대기</span>
+                <span class="badge badge-old">{{ getTypeName(inquiry.inquiryType) }}</span>
+                <strong>{{ inquiry.title }}</strong>
+                <span class="muted">{{ formatDate(inquiry.createdAt) }}</span>
+                <span class="badge" :class="inquiry.status === 1 ? 'badge-success' : 'badge-warning'">
+                    {{ inquiry.status === 1 ? '답변완료' : '문의중' }}
+                </span>
             </summary>
 
-            <div class="inquiry-body">
+            <div class="inquiry-body" v-if="loaded">
                 <h3>작성 내용</h3>
-                <p class="preserve-lines" th:text="${inquiry.content}">내용</p>
+                <div class="inquiry-detail-content preserve-lines" v-html="detail.content"></div>
 
-                <div class="admin-answer">
+                <!-- 첨부파일 목록 -->
+                <div class="file-attach-list" v-if="detail.files && detail.files.length > 0">
+                    <strong>📁 첨부파일 ({{ detail.files.length }}개)</strong>
+                    <ul>
+                        <li v-for="file in detail.files" :key="file.inquiryFileId" class="file-item">
+                            <a :href="'/api/inquiries/' + inquiry.inquiryId + '/files/' + file.inquiryFileId">
+                                {{ file.originalFileName }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 관리자 답변 -->
+                <div class="admin-answer" v-if="detail.status === 1">
                     <h3>관리자 답변</h3>
-                    <p class="preserve-lines" th:text="${inquiry.answer ?: '아직 등록된 답변이 없습니다.'}">관리자 답변</p>
+                    <p class="preserve-lines">{{ detail.answerContent }}</p>
+                    <small class="muted" v-if="detail.answeredAt">답변일시: {{ formatDate(detail.answeredAt) }}</small>
+                </div>
+
+                <!-- 최상위 문의 컨트롤 버튼 -->
+                <div class="card-actions" style="margin-top: 16px;">
+                    <button class="btn btn-light btn-small" v-if="inquiry.status === 0" @click="$emit('open-edit', detail)">수정</button>
+                    <button class="btn btn-danger-light btn-small" v-if="inquiry.status === 0" @click="deleteInquiry">삭제</button>
+                    <!-- 답변 완료(status 1)일 경우만 추가 문의 버튼 노출 -->
+                    <button class="btn btn-primary btn-small" v-if="inquiry.status === 1" @click="$emit('open-follow-up', inquiry)">추가 문의하기</button>
+                </div>
+
+                <!-- 하위 자식 추가 문의 목록 -->
+                <div class="child-inquiry-section" v-if="followUps.length > 0">
+                    <div class="child-inquiry-title">↳ 추가 문의 내역 ({{ followUps.length }})</div>
+                    <inquiry-child-item 
+                        v-for="child in followUps" 
+                        :key="child.inquiryId" 
+                        :parent-id="inquiry.inquiryId"
+                        :child-info="child"
+                        @refresh-all="$emit('refresh')">
+                    </inquiry-child-item>
                 </div>
             </div>
         </details>
-    </section>
+    </template>
+
+    <!-- [자식 2] 하위 자식 추가 문의 아코디언 Template -->
+    <template id="inquiry-child-item-template">
+        <details class="child-inquiry-item" :open="isOpen" @toggle="onToggle">
+            <summary>
+                <strong>{{ childInfo.title }}</strong>
+                <span class="muted" style="margin-left: 10px; font-size: 12px;">{{ formatDate(childInfo.createdAt) }}</span>
+                <span class="badge" :class="childInfo.status === 1 ? 'badge-success' : 'badge-warning'" style="margin-left: auto;">
+                    {{ childInfo.status === 1 ? '답변완료' : '문의중' }}
+                </span>
+            </summary>
+            <div class="inquiry-body" v-if="loaded">
+                <div class="inquiry-detail-content preserve-lines" v-html="childDetail.content"></div>
+                
+                <!-- 자식 문의 첨부파일 -->
+                <div class="file-attach-list" v-if="childDetail.files && childDetail.files.length > 0">
+                    <strong>📁 첨부파일</strong>
+                    <ul>
+                        <li v-for="file in childDetail.files" :key="file.inquiryFileId">
+                            <a :href="'/api/inquiries/' + parentId + '/files/' + file.inquiryFileId">{{ file.originalFileName }}</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 자식 문의 답변 -->
+                <div class="admin-answer" v-if="childDetail.status === 1">
+                    <h3>관리자 답변</h3>
+                    <p class="preserve-lines">{{ childDetail.answerContent }}</p>
+                </div>
+
+                <div class="card-actions" v-if="childInfo.status === 0" style="margin-top: 10px;">
+                    <button class="btn btn-danger-light btn-small" @click="deleteChild">추가문의 삭제</button>
+                </div>
+            </div>
+        </details>
+    </template>
+
+    <!-- [자식 3] Quill 에디터 통합 모달 Form Template -->
+    <template id="inquiry-form-template">
+        <div class="modal-backdrop" @click.self="$emit('close')">
+            <div class="modal-window">
+                <div class="dialog-header">
+                    <h2>{{ getModalTitle }}</h2>
+                    <button class="icon-button" @click="$emit('close')">✕</button>
+                </div>
+
+                <form @submit.prevent="submitForm">
+                    <!-- 신규 문의 등록 시만 카테고리 선택 -->
+                    <div class="form-group" v-if="mode === 'create'">
+                        <label>문의 유형</label>
+                        <select v-model="form.inquiryType" required>
+                            <option :value="0">서비스 문의</option>
+                            <option :value="1">레시피 문의</option>
+                            <option :value="2">커뮤니티 문의</option>
+                            <option :value="3">기타 문의</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>제목</label>
+                        <input type="text" v-model="form.title" placeholder="제목을 입력하세요." required>
+                    </div>
+
+                    <!-- Quill 에디터 영역 -->
+                    <div class="form-group">
+                        <label>내용</label>
+                        <div class="quill-editor-wrapper">
+                            <div ref="editorRef"></div>
+                        </div>
+                    </div>
+
+                    <!-- 기존 파일 목록 (수정 모드 시 개별 삭제 가능) -->
+                    <div class="form-group" v-if="mode === 'edit' && existingFiles.length > 0">
+                        <label>기존 첨부파일</label>
+                        <div class="file-attach-list">
+                            <div v-for="file in existingFiles" :key="file.inquiryFileId" class="file-item">
+                                <span>{{ file.originalFileName }}</span>
+                                <button type="button" class="btn btn-danger-light btn-small" @click="deleteExistingFile(file.inquiryFileId)">삭제</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 신규 파일 추가 -->
+                    <div class="form-group">
+                        <label>{{ mode === 'edit' ? '새 파일 추가' : '첨부파일' }}</label>
+                        <input type="file" ref="fileInput" multiple @change="handleFileSelect">
+                    </div>
+
+                    <div class="dialog-footer">
+                        <button type="button" class="btn btn-light" @click="$emit('close')">취소</button>
+                        <button type="submit" class="btn btn-primary" :disabled="submitting">
+                            {{ submitting ? '저장 중...' : '저장하기' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <!-- [자식 4] 페이징 Template -->
+    <template id="inquiry-pagination-template">
+        <div class="pagination">
+            <a href="#" v-if="currentPage > 1" @click.prevent="$emit('change-page', currentPage - 1)">‹</a>
+            <a href="#" v-for="p in pages" :key="p" :class="{ active: p === currentPage }" @click.prevent="$emit('change-page', p)">
+                {{ p }}
+            </a>
+            <a href="#" v-if="currentPage < totalPage" @click.prevent="$emit('change-page', currentPage + 1)">›</a>
+        </div>
+    </template>
+
+    <script th:src="@{/js/mykitchen/myInquiryPagination.js}"></script>
+    <script th:src="@{/js/mykitchen/myInquiryChildItem.js}"></script>
+    <script th:src="@{/js/mykitchen/myInquiryItem.js}"></script>
+    <script th:src="@{/js/mykitchen/myInquiryForm.js}"></script>
+    <script th:src="@{/js/mykitchen/myinquiryApp.js}"></script>
 </th:block>
 
 </body>

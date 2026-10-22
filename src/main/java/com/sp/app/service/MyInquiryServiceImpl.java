@@ -1,5 +1,6 @@
 package com.sp.app.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,7 +75,7 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 		try {
 			dto = mapper.selectMyInquiryDetail(inquiryId, memberId);
 			if (dto == null) {
-		        throw new IllegalArgumentException("권한이 없습니다.");
+		        throw new IllegalArgumentException("문의를 찾을 수 없습니다.");
 		    }
 			dto.setFiles(mapper.selectInquiryFiles(inquiryId)); 
 		} catch (Exception e) {
@@ -88,26 +89,38 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 	@Transactional
 	public int insertMyInquiry(MyInquiryDto dto) {
 		int result = 0;
+		List<String> uploadedPaths = new ArrayList<>();
 		try {
 			result = mapper.insertMyInquiry(dto);
-			if (result == 0) return 0;
+			if (result == 0) 
+				throw new IllegalStateException("문의글 등록에 실패하였습니다.");			
 			
-			if(!CollectionUtils.isEmpty(dto.getUploadFiles())) {
-				for(MultipartFile mf : dto.getUploadFiles()) {
-					if (mf == null || mf.isEmpty()) continue;
-					String saveFilename = Objects.requireNonNull(
-							storageService.uploadFileToServer(mf, uploadPath));
-					InquiryFileDto filedto = new InquiryFileDto();
-					filedto.setFilePath(saveFilename);
-					filedto.setOriginalFileName(mf.getOriginalFilename());
-					filedto.setInquiryId(dto.getInquiryId());
-					mapper.insertInquiryFile(filedto);					
-				}
-			}
-			
-		} catch (Exception e) {
-			log.info("insertMyInquiry : ", e);
-			throw e;
+			// 파일 저장 및 DB 등록 (예외 발생 시 디스크 cleanup 보장)
+	         if(!CollectionUtils.isEmpty(dto.getUploadFiles())) {
+	            for(MultipartFile mf : dto.getUploadFiles()) {
+	               if (mf == null || mf.isEmpty()) continue;
+	               
+	               String saveFilename = Objects.requireNonNull(
+	                     storageService.uploadFileToServer(mf, uploadPath));
+	               uploadedPaths.add(saveFilename);
+
+	               InquiryFileDto filedto = new InquiryFileDto();
+	               filedto.setFilePath(saveFilename);
+	               filedto.setOriginalFileName(mf.getOriginalFilename());
+	               filedto.setInquiryId(dto.getInquiryId());
+	               int fileResult = mapper.insertInquiryFile(filedto);  
+	               if(fileResult==0) {
+	            	   throw new IllegalStateException("파일 등록에 실패했습니다.");
+	               }
+	            }
+	         }
+	      } catch (Exception e) {
+	         // 트랜잭션 롤백 시 저장된 물리 파일 즉시 삭제
+	         for (String path : uploadedPaths) {
+	            deleteUploadFile(path);
+	         }
+	         log.info("insertMyInquiry error: ", e);
+	         throw e;
 		}
 		return result;
 	}
@@ -130,7 +143,7 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 	}
 
 	@Override// 문의 삭제 (고아 자료 방지를 위해 재귀순회)
-	@Transactional
+	@Transactional	//근데 지금은 최상위 부모만 자식가능하게 설정해서 재귀없어도 됨
 	public int deleteMyInquiry(Long inquiryId, Long memberId) {
 
 		try {
@@ -155,7 +168,7 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 	            deleteInquiryCascade(child.getInquiryId(), memberId);
 	        }
 	    }
-	    deleteInquiryFilesByInquiryId(inquiryId);
+	    deleteInquiryFilesByInquiryId(inquiryId, memberId);
 	    mapper.deleteMyInquiry(inquiryId, memberId);
 	}
 
@@ -172,16 +185,43 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 
 		return list;
 	}
+	
+	@Override //추가문의등록
+	@Transactional
+	public int insertFollowUp(Long parentInquiryId, Long memberId, MyInquiryDto dto) {
+		try {
+			MyInquiryDto parent = mapper.selectTopLevelInquiry(parentInquiryId, memberId);
+			if(parent == null) {
+				throw new IllegalArgumentException("답변이 완료된 최상위 문의에만 추가 문의를 할 수 있습니다.");
+			}
+			
+			dto.setMemberId(memberId);
+			dto.setParentInquiryId(parentInquiryId);
+			if (dto.getInquiryType() == null) {
+	             dto.setInquiryType(parent.getInquiryType());
+	         }
+			return insertMyInquiry(dto);	
+			
+		} catch (Exception e) {
+			log.info("insertFollowUp : ", e);
+			throw e;
+		}
+	}
 
 	@Override// 첨부파일 등록
 	@Transactional
-	public int insertInquiryFile(MultipartFile mf, InquiryFileDto dto) {
+	public int insertInquiryFile(MultipartFile mf, InquiryFileDto dto, Long memberId) {
 		int result = 0;
+		String saveFilename = null;
 		try {
+			if(mapper.selectInquiryByStatus(dto.getInquiryId(), memberId) ==0) {
+				throw new IllegalStateException("답변이 완료된 문의에는 파일을 추가하거나 삭제할 수 없습니다.");
+			}
+			
 			if(mf == null || mf.isEmpty()) {
 				throw new IllegalArgumentException("업로드할 파일이 없습니다.");
 			}
-			String saveFilename = Objects.requireNonNull(
+			saveFilename = Objects.requireNonNull(
 					storageService.uploadFileToServer(mf, uploadPath));
 			
 			dto.setFilePath(saveFilename);
@@ -189,7 +229,13 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 			
 			result = mapper.insertInquiryFile(dto);
 			
+			if(result == 0) {
+				throw new IllegalStateException("파일 등록에 실패했습니다.");
+			}
 		} catch (Exception e) {
+			if(saveFilename !=null) {
+				deleteUploadFile(saveFilename);
+			}
 			log.info("insertInquiryFile : ", e);
 			throw e;
 		}
@@ -227,9 +273,12 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 
 	@Override// 문의에 연결된 첨부파일 DB 정보 전체 삭제
 	@Transactional
-	public int deleteInquiryFilesByInquiryId(Long inquiryId) {
+	public int deleteInquiryFilesByInquiryId(Long inquiryId, Long memberId) {
 		int result = 0;
 		try {
+			if(mapper.selectInquiryByStatus(inquiryId, memberId) ==0) {
+				throw new IllegalStateException("답변이 완료된 문의에는 파일을 추가하거나 삭제할 수 없습니다.");
+			}
 			List<InquiryFileDto> list = mapper.selectInquiryFiles(inquiryId);
 			result = mapper.deleteInquiryFilesByInquiryId(inquiryId);
 			
@@ -245,15 +294,18 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 
 	@Override// 특정 첨부파일 DB 정보 삭제
 	@Transactional
-	public int deleteInquiryFile(Long inquiryFileId, Long inquiryId) {
+	public int deleteInquiryFile(Long inquiryFileId, Long inquiryId, Long memberId) {
 		int result = 0;
 		try {
+			if(mapper.selectInquiryByStatus(inquiryId, memberId) ==0) {
+				throw new IllegalStateException("답변이 완료된 문의에는 파일을 추가하거나 삭제할 수 없습니다.");
+			}
 			InquiryFileDto dto = mapper.selectInquiryFile(inquiryFileId, inquiryId);
 			if (dto == null) {
 			    throw new IllegalArgumentException("첨부파일을 찾을 수 없습니다.");
 			}
-			deleteUploadFile(dto.getFilePath());
 			result = mapper.deleteInquiryFile(inquiryFileId, inquiryId);
+			deleteUploadFile(dto.getFilePath());
 		} catch (Exception e) {
 			log.info("deleteInquiryFile : ", e);
 			throw e;
@@ -273,6 +325,8 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 			dto = mapper.selectFollowUpDetail(inquiryId, followUpId, memberId);
 			if (dto != null) {
 	            dto.setFiles(mapper.selectInquiryFiles(followUpId));
+	         } else {
+	        	 throw new IllegalArgumentException("추가 문의 목록을 조회할 수 없습니다.");
 	         }
 		} catch (Exception e) {
 			log.info("selectFollowUpDetail : ", e);
@@ -305,14 +359,15 @@ public class MyInquiryServiceImpl implements MyInquiryService {
 		try {
 			selectMyInquiryDetail(inquiryId, memberId);
 			result = mapper.selectInquiryByStatus(inquiryId, memberId);
-			if (result == 1) {
-				throw new IllegalStateException("관리자 답변이 완료되지 않아 추가 문의 등록이 아직 불가합니다.");
-			}
+			if (result == 0) {
+	            throw new IllegalStateException("관리자 답변이 완료되어 수정/삭제할 수 없거나 존재하지 않는 문의입니다.");
+	         }
 			return result;
 		} catch (Exception e) {
 			log.info("selectInquiryByStatus : ", e);
 			throw e;
 		}
 	}
+
 
 }

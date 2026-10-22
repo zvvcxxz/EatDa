@@ -23,12 +23,14 @@ public interface MyInquiryService {
   
     List<MyInquiryDto> selectFollowUpInquiries(Long parentInquiryId, Long memberId);
     MyInquiryDto selectFollowUpDetail(Long inquiryId, Long followUpId, Long memberId);
+    int insertFollowUp(Long parentInquiryId, Long memberId, MyInquiryDto dto);
+    
     List<InquiryFileDto> selectInquiryFiles(Long inquiryId);   
     InquiryFileDto selectInquiryFile(Long inquiryFileId, Long inquiryId);
     ResponseEntity<?> fileDownload(Long inquiryId, Long fildId);   
     
-    int insertInquiryFile(MultipartFile mf, InquiryFileDto dto);
-    int deleteInquiryFilesByInquiryId(Long inquiryId);    
-    int deleteInquiryFile(Long inquiryFileId, Long inquiryId);
+    int insertInquiryFile(MultipartFile mf, InquiryFileDto dto, Long memberId);
+    int deleteInquiryFilesByInquiryId(Long inquiryId, Long memberId);    
+    int deleteInquiryFile(Long inquiryFileId, Long inquiryId, Long memberId);
 	boolean deleteUploadFile(String filename);
 }

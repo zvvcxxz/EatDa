@@ -96,7 +96,8 @@ public class SpringSecurityConfig {
 				"/member/userIdCheck", "/member/complete", "/member/pwdFind", "/member/expired",
 				"/dist/**", "/error/**",  
 				"/guest/main", "/guest/list", "/uploads/photo/**", "/favicon.ico", 
-				"/oauth/kakao/callback" ,"/css/**", "/js/**", "/images/**",};
+				"/oauth/kakao/callback" ,"/css/**", "/js/**", "/images/**", "/home/**"
+				};
 
 		http.cors(Customizer.withDefaults()) // CORS 설정 : 기본값 사용
 			.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화

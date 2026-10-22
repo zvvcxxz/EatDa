@@ -57,5 +57,8 @@ public interface MyInquiryMapper {
     //수정, 삭제 가능한 문의인지(status = 0) 인지 확인용
     int selectInquiryByStatus(@Param("inquiryId") Long inquiryId, @Param("memberId") Long memberId);
     
+    //최상위 부모 아래에만 자식 문의글 달 수 있게 최상위문의글 여부 확인
+    MyInquiryDto selectTopLevelInquiry(@Param("inquiryId") Long inquiryId,
+            @Param("memberId") Long memberId);
     
 }

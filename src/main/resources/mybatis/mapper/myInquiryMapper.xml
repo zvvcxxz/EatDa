@@ -79,7 +79,7 @@
 		insert into Inquiry(INQUIRY_ID, MEMBER_ID, INQUIRY_TYPE, TITLE, 
 			CONTENT, STATUS, CREATED_AT, UPDATED_AT, PARENT_INQUIRY_ID)
 		values(#{inquiryId}, #{memberId},#{inquiryType},#{title},
-			#{content}, 0, SYSTIMESTAMP, SYSTIMESTAMP, #{parentInquiryId})	
+			#{content}, 0, SYSTIMESTAMP, SYSTIMESTAMP, #{parentInquiryId, jdbcType=NUMERIC})	
 	</insert>
 	
 	<!-- 문의 수정 -->
@@ -102,7 +102,8 @@
     <select id="selectFollowUpInquiries" resultType="com.sp.app.domain.dto.MyInquiryDto">
     	select i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, 
     	i.INQUIRY_TYPE as inquiryType, i.TITLE as title, i.STATUS as status, 
-    	i.PARENT_INQUIRY_ID AS parentInquiryId, i.CREATED_AT as createdAt
+    	i.PARENT_INQUIRY_ID AS parentInquiryId, i.CREATED_AT as createdAt,
+    	i.CONTENT, i.ANSWER_CONTENT, i.ANSWERED_AT
     	from inquiry i
     	where PARENT_INQUIRY_ID = #{parentInquiryId} and MEMBER_ID = #{memberId}
     	ORDER BY i.CREATED_AT ASC, i.INQUIRY_ID ASC
@@ -158,6 +159,18 @@
 	    FROM INQUIRY i
 	    WHERE i.INQUIRY_ID = #{followUpId}
 	      AND i.PARENT_INQUIRY_ID = #{inquiryId} AND i.MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectTopLevelInquiry" resultType="com.sp.app.domain.dto.MyInquiryDto">
+	    SELECT INQUIRY_ID AS inquiryId, MEMBER_ID AS memberId,
+	        INQUIRY_TYPE AS inquiryType, TITLE AS title, CONTENT AS content,
+	        STATUS AS status, PARENT_INQUIRY_ID AS parentInquiryId,
+	        ANSWER_ADMIN_ID AS answerAdminId, ANSWER_CONTENT AS answerContent,
+	        ANSWERED_AT AS answeredAt, CREATED_AT AS createdAt,  UPDATED_AT AS updatedAt
+	    FROM INQUIRY
+	    WHERE INQUIRY_ID = #{inquiryId}
+	      AND MEMBER_ID = #{memberId}
+	      AND PARENT_INQUIRY_ID IS NULL AND STATUS = 1
 	</select>
     
 </mapper>
