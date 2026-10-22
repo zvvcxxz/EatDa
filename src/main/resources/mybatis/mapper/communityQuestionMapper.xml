@@ -47,7 +47,7 @@
         </where>
     </select>
     
-    <!-- 질문 목록: 본문 앞부분과 공개 댓글·답글 수 조회 -->
+    <!-- 질문 목록: 본문 앞부분과 공개 답변 수 조회 -->
 	<select id="listQuestion" parameterType="map" resultType="com.sp.app.domain.dto.CommunityQuestionDto">
 	    SELECT P.POST_ID AS postId, P.AUTHOR_ID AS authorId, NVL(M.NAME, '회원') AS authorName,
 	        P.TITLE AS title, DBMS_LOB.SUBSTR(P.CONTENT, 120, 1) AS content, P.VIEW_COUNT AS viewCount,
@@ -55,16 +55,13 @@
 	        NVL(C.commentCount, 0) AS commentCount
 	    FROM COMMUNITY_POST P
 	    LEFT OUTER JOIN MEMBER M ON P.AUTHOR_ID = M.MEMBER_ID
-	    <!-- 숨김·삭제된 부모 댓글의 답글은 개수에서 제외 -->
-	    LEFT OUTER JOIN (
-	        SELECT R.POST_ID, COUNT(*) AS commentCount
-	        FROM POST_COMMENT R
-	        LEFT OUTER JOIN POST_COMMENT A
-	            ON R.PARENT_COMMENT_ID = A.COMMENT_ID AND R.POST_ID = A.POST_ID
-	        WHERE R.STATUS = 0
-	            AND (R.PARENT_COMMENT_ID IS NULL OR A.STATUS = 0)
-	        GROUP BY R.POST_ID
-	    ) C ON P.POST_ID = C.POST_ID
+		<!-- 공개 답변만 집계 -->
+		LEFT OUTER JOIN (
+		    SELECT POST_ID, COUNT(*) AS commentCount
+		    FROM POST_COMMENT
+		    WHERE PARENT_COMMENT_ID IS NULL AND STATUS = 0
+		    GROUP BY POST_ID
+		) C ON P.POST_ID = C.POST_ID
 	    <where>
 	        <if test="kwd != null and kwd != ''">
 	            <include refid="where-list"/>

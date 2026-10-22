@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.CommunityAnswerMapper">
+
+    <!-- 질문에 답변 등록 -->
+    <insert id="insertAnswer" parameterType="com.sp.app.domain.dto.CommunityAnswerDto">
+        INSERT INTO POST_COMMENT(COMMENT_ID, POST_ID, MEMBER_ID, CONTENT,
+        	PARENT_COMMENT_ID, STATUS, CREATED_AT, UPDATED_AT)
+        VALUES (SEQ_POST_COMMENT.NEXTVAL, #{postId}, #{memberId}, #{content}, NULL, 0, SYSTIMESTAMP, SYSTIMESTAMP)
+    </insert>
+
+    <!-- 공개 답변 개수 -->
+    <select id="answerCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM POST_COMMENT
+        WHERE POST_ID = #{postId} AND PARENT_COMMENT_ID IS NULL AND STATUS = 0
+    </select>
+
+    <!-- 공개 답변 목록 -->
+	<select id="listAnswer" parameterType="map" resultType="com.sp.app.domain.dto.CommunityAnswerDto">
+	    SELECT C.COMMENT_ID AS commentId, C.POST_ID AS postId, C.MEMBER_ID AS memberId,
+	        M.NAME AS memberName, C.CONTENT AS content, C.STATUS AS status,
+	        TO_CHAR(C.CREATED_AT, 'YYYY.MM.DD HH24:MI') AS createdAt
+	    FROM POST_COMMENT C
+	    JOIN MEMBER M ON C.MEMBER_ID = M.MEMBER_ID
+	    WHERE C.POST_ID = #{postId} AND C.PARENT_COMMENT_ID IS NULL AND C.STATUS = 0
+	    ORDER BY C.COMMENT_ID DESC
+	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+    <!-- 작성자와 답변 상태 확인 -->
+    <select id="findById" parameterType="Long" resultType="com.sp.app.domain.dto.CommunityAnswerDto">
+        SELECT COMMENT_ID AS commentId, POST_ID AS postId, MEMBER_ID AS memberId, STATUS AS status
+        FROM POST_COMMENT
+        WHERE COMMENT_ID = #{commentId} AND PARENT_COMMENT_ID IS NULL
+    </select>
+
+    <!-- 본인의 공개 답변만 수정 -->
+    <update id="updateAnswer" parameterType="com.sp.app.domain.dto.CommunityAnswerDto">
+        UPDATE POST_COMMENT SET CONTENT = #{content}, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} 
+        	AND MEMBER_ID = #{memberId} AND PARENT_COMMENT_ID IS NULL AND STATUS = 0
+    </update>
+
+    <!-- 본인의 답변을 삭제 상태로 변경 -->
+    <update id="deleteAnswer" parameterType="map">
+        UPDATE POST_COMMENT SET STATUS = 2, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} 
+        	AND MEMBER_ID = #{memberId} AND PARENT_COMMENT_ID IS NULL AND STATUS = 0
+    </update>
+
+    <!-- 관리자 권한 확인 후 숨김 처리 -->
+    <update id="hideAnswer" parameterType="map">
+        UPDATE POST_COMMENT SET STATUS = 1, UPDATED_AT = SYSTIMESTAMP
+        WHERE COMMENT_ID = #{commentId} AND POST_ID = #{postId} 
+        	AND PARENT_COMMENT_ID IS NULL AND STATUS = 0
+    </update>
+
+</mapper>

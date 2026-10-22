@@ -15,46 +15,159 @@
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 
     <style>
-        .community-design .ds-question-title {
-            overflow-wrap:anywhere;
-        }
 
-        .community-design .question-neighbors {
-            margin-top:24px;
-            border-top:1px solid var(--ds-line);
-            border-bottom:1px solid var(--ds-line);
+        /* 질문 상세 */
+        .community-design .question-article { padding: 24px; }
+        .community-design .question-article [hidden] { display: none !important; }
+        .community-design #questionDetail { padding: 0; }
+        .community-design .question-header {
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee5dd;
         }
-
-        .community-design .question-neighbor-row {
-            display:grid;
-            grid-template-columns:90px minmax(0,1fr);
-            gap:12px;
-            padding:12px 0;
-            font-size:13px;
+        .community-design #questionDetail .ds-question-title {
+            margin: 0 0 10px;
+            color: #252525;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
         }
-
-        .community-design .question-neighbor-row
-        + .question-neighbor-row {
-            border-top:1px solid var(--ds-line);
+        .community-design #questionDetail .ds-author-line {
+            margin: 0;
+            color: #7b7169;
+            font-size: 13px;
+            line-height: 1.6;
         }
-
-        .community-design .question-neighbor-row > span {
-            color:var(--ds-muted);
+        .community-design #questionDetail .ds-question-text {
+            margin: 20px 0 0;
+            padding: 0;
+            min-height: 72px;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
-
-        .community-design .question-neighbor-row a {
-            color:var(--ds-ink);
-            overflow:hidden;
-            text-overflow:ellipsis;
-            white-space:nowrap;
-        }
-
         .community-design .question-actions {
-            flex-wrap:wrap;
+            margin: 14px 0 0;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .community-design .question-actions form { margin: 0; }
+        .community-design .question-actions .ds-button,
+        .community-design .answer-buttons .ds-button {
+            min-height: 32px;
+            padding: 6px 11px;
+            border-radius: 7px;
+            box-shadow: none;
+            font-size: 12px;
         }
 
-        .community-design .question-actions form {
-            margin:0;
+        /* 답변 목록과 작성란 */
+        .community-design #communityAnswer {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee5dd;
+        }
+        .community-design #communityAnswer > .ds-section-title {
+            margin: 0 0 8px;
+            padding: 0;
+            border: 0;
+        }
+        .community-design #communityAnswer .ds-section-title h3 {
+            font-size: 19px;
+            color: #292724;
+        }
+        .community-design #answerCount { color: #ed592b; }
+        .community-design .answer-item { padding: 16px 0; }
+        .community-design .answer-item + .answer-item { border-top: 1px solid #f0eae5; }
+        .community-design .answer-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .community-design .answer-date { margin-left: 8px; color: #877c73; font-size: 12px; }
+        .community-design .answer-content {
+            margin: 9px 0 0;
+            color: #3d3833;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        .community-design .answer-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+        .community-design .answer-empty { padding: 18px 0; color: #81766c; font-size: 14px; }
+        .community-design .answer-paging { margin: 8px 0 14px; text-align: center; }
+        .community-design .answer-paging a,
+        .community-design .answer-paging span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            margin: 2px;
+            padding: 4px 8px;
+            border: 1px solid #eee5dd;
+            border-radius: 6px;
+            color: #6d6157;
+            font-size: 12px;
+        }
+        .community-design .answer-paging .active { background: #fff3eb; color: #b64d2c; font-weight: 700; }
+        .community-design #communityAnswer .ds-answer-form {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid #f1e5dc;
+            border-radius: 12px;
+            background: #fffcf9;
+        }
+        .community-design .ds-answer-form label { display: block; margin-bottom: 10px; color: #4d423a; font-size: 14px; font-weight: 700; }
+        .community-design .ds-answer-form textarea,
+        .community-design .answer-edit-content {
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            min-height: 78px;
+            padding: 10px 12px;
+            border: 1px solid #e5dcd5;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font: inherit;
+            font-size: 14px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+        .community-design .answer-edit-content { margin: 10px 0; }
+        .community-design #communityAnswer .ds-bottom-actions { margin-top: 10px; }
+        .community-design #answerSubmit { min-height: 35px; padding: 8px 14px; border-radius: 8px; box-shadow: none; }
+        .community-design .answer-message { margin-top: 8px; color: #b42318; font-size: 13px; }
+        .community-design .answer-message:empty { display: none; }
+
+        /* 이전글·다음글은 맨 아래에서 표시 */
+        .community-design .question-neighbors {
+            margin-top: 22px;
+            padding: 3px 14px;
+            border: 1px solid #eee7e1;
+            border-radius: 10px;
+            background: #fcfaf8;
+        }
+        .community-design .question-neighbor-row {
+            display: grid;
+            grid-template-columns: 65px minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            font-size: 13px;
+        }
+        .community-design .question-neighbor-row + .question-neighbor-row { border-top: 1px solid #eee7e1; }
+        .community-design .question-neighbor-row > span:first-child { color: #b15c3c; font-weight: 700; }
+        .community-design .question-neighbor-row a { color: #51463d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .community-design .question-neighbor-row > span:not(:first-child) { color: #8b8077; }
+        @media (max-width: 600px) {
+            .community-design .question-article { padding: 18px; }
+            .community-design #questionDetail .ds-question-title { font-size: 21px; }
         }
     </style>
 </th:block>
@@ -66,11 +179,9 @@
         <div class="hero-card">
             <div>
                 <span class="hero-tag">✨ 함께하는 주방</span>
-
                 <h1 class="hero-title">
                     한 끼를 나누고, 맛있는 일상을 잇다.
                 </h1>
-
                 <p class="hero-sub">
                     직접 만든 레시피부터 따라 만든 한 접시까지, 함께 나누어요.
                 </p>
@@ -84,24 +195,16 @@
 
             <ul class="sidebar-menu">
                 <li class="sidebar-item">
-                    <a th:href="@{/community/free}">
-                        💬 자유 이야기
-                    </a>
+                    <a th:href="@{/community/free}">💬 자유 이야기</a>
                 </li>
                 <li class="sidebar-item">
-                    <a th:href="@{/community/recipes}">
-                        🍳 모두의 레시피
-                    </a>
+                    <a th:href="@{/community/recipes}">🍳 모두의 레시피</a>
                 </li>
                 <li class="sidebar-item">
-                    <a th:href="@{/community/cooking}">
-                        📸 따라 만든 요리
-                    </a>
+                    <a th:href="@{/community/cooking}">📸 따라 만든 요리</a>
                 </li>
                 <li class="sidebar-item active">
-                    <a th:href="@{/community/questions}">
-                        🙋 요리 질문
-                    </a>
+                    <a th:href="@{/community/questions}">🙋 요리 질문</a>
                 </li>
             </ul>
 
@@ -114,104 +217,42 @@
         <section class="content-area">
             <div class="ds-heading compact">
                 <div>
-                    <p class="ds-eyebrow">요리 질문 / 상세</p>
-                    <h2>함께 답을 찾아요.</h2>
+                    <p class="ds-eyebrow">COOKING Q&amp;A / 상세보기</p>
+                    <h2>요리 질문</h2>
+                    <p>궁금한 요리를 묻고, 서로의 경험으로 답해요.</p>
                 </div>
 
                 <a class="ds-button light"
                    th:href="@{/community/questions(
-                            page=${page},
-                            schType=${schType},
-                            kwd=${kwd})}">
+                            page=${page}, schType=${schType}, kwd=${kwd})}">
                     ← 목록으로
                 </a>
             </div>
 
-            <article class="ds-paper">
-                <!-- question은 컨트롤러에서 받은 질문 한 개 -->
+            <article class="ds-paper question-article">
+                <!-- 컨트롤러에서 받은 질문 내용 -->
                 <div id="questionDetail">
-                    <span class="ds-pill">요리 질문</span>
+                    <div class="question-header">
 
                     <h2 class="ds-question-title"
-                        th:text="${question.title}">
-                        질문 제목
-                    </h2>
+                        th:text="${question.title}">질문 제목</h2>
 
                     <p class="ds-author-line">
-                        <span th:text="${question.authorName}">
-                            작성자
-                        </span>
-
+                        <span th:text="${question.authorName}">작성자</span>
                         <span aria-hidden="true"> · </span>
-
-                        <span th:text="${question.createdAt}">
-                            작성일
-                        </span>
-
+                        <span th:text="${question.createdAt}">작성일</span>
                         <span aria-hidden="true"> · </span>
-
-                        <span th:text="|조회 ${question.viewCount}|">
-                            조회 0
-                        </span>
+                        <span th:text="|조회 ${question.viewCount}|">조회 0</span>
                     </p>
 
-                    <!-- 입력 내용을 문자로 출력 -->
+                    </div>
+
                     <p class="ds-question-text"
-                       th:text="${question.content}">
-                        질문 내용
-                    </p>
+                       th:text="${question.content}">질문 내용</p>
                 </div>
 
-                <!-- 검색 조건에 맞는 이전글·다음글 -->
-                <nav class="question-neighbors"
-                     aria-label="이전글과 다음글">
-
-                    <div class="question-neighbor-row">
-                        <span>↑ 이전글</span>
-
-                        <a th:if="${prevQuestion != null}"
-                           th:href="@{/community/questions/{id}(
-                                    id=${prevQuestion.postId},
-                                    page=${page},
-                                    schType=${schType},
-                                    kwd=${kwd})}"
-                           th:text="${prevQuestion.title}">
-                            이전 질문 제목
-                        </a>
-
-                        <span th:if="${prevQuestion == null}">
-                            이전글이 없습니다.
-                        </span>
-                    </div>
-
-                    <div class="question-neighbor-row">
-                        <span>↓ 다음글</span>
-
-                        <a th:if="${nextQuestion != null}"
-                           th:href="@{/community/questions/{id}(
-                                    id=${nextQuestion.postId},
-                                    page=${page},
-                                    schType=${schType},
-                                    kwd=${kwd})}"
-                           th:text="${nextQuestion.title}">
-                            다음 질문 제목
-                        </a>
-
-                        <span th:if="${nextQuestion == null}">
-                            다음글이 없습니다.
-                        </span>
-                    </div>
-                </nav>
-
-                <div class="ds-bottom-actions question-actions">
-                    <a class="ds-button light"
-                       th:href="@{/community/questions(
-                                page=${page},
-                                schType=${schType},
-                                kwd=${kwd})}">
-                        목록
-                    </a>
-
+                <!-- 질문 본문 아래에 관리 버튼 표시 -->
+                <div class="ds-bottom-actions question-actions" th:if="${owner or admin}">
                     <!-- 본인 질문만 수정·삭제 -->
                     <a class="ds-button light"
                        th:if="${owner}"
@@ -225,55 +266,106 @@
                                       id=${question.postId})}"
                           method="post"
                           onsubmit="return confirm('이 질문을 삭제할까요?');">
-
                         <button type="submit" class="ds-button light">
                             삭제
                         </button>
                     </form>
 
-                    <!-- 관리자만 숨김 -->
                     <form th:if="${admin}"
                           th:action="@{/community/questions/{id}/hide(
                                       id=${question.postId})}"
                           method="post"
-                          onsubmit="return confirm('이 질문을 숨길까요? 숨기면 일반 목록에서 제외됩니다.');">
-
+                          onsubmit="return confirm('이 질문을 숨길까요?');">
                         <button type="submit" class="ds-button light">
                             관리자 숨김
                         </button>
                     </form>
                 </div>
 
-                <!-- 답변 기능은 다음 단계에서 연결 -->
-                <div class="ds-section-title">
-                    <h3>답변</h3>
-                </div>
+                <!-- JS에서 이 주소로 답변을 요청 -->
+                <section id="communityAnswer"
+                         th:attr="data-url=@{/community/questions/{id}/answers(
+                                            id=${question.postId})}">
 
-                <div id="answerList"></div>
-
-                <form class="ds-answer-form"
-                      id="answerForm"
-                      onsubmit="return false;">
-
-                    <label for="answerContent">답변 작성</label>
-
-                    <textarea id="answerContent"
-                              rows="3"
-                              placeholder="현재 답변 등록은 사용할 수 없습니다."
-                              disabled></textarea>
-
-                    <div class="ds-bottom-actions">
-                        <button class="ds-button primary"
-                                type="submit"
-                                disabled>
-                            답변 등록
-                        </button>
+                    <div class="ds-section-title">
+                        <h3>답변 <span id="answerCount">0</span>개</h3>
                     </div>
-                </form>
+
+                    <!-- 답변 목록과 페이징은 JS에서 출력 -->
+                    <div id="answerList" aria-live="polite"></div>
+                    <div id="answerPaging" class="answer-paging"></div>
+
+                    <form id="answerForm"
+                          class="ds-answer-form"
+                          th:action="@{/community/questions/{id}/answers(
+                                      id=${question.postId})}"
+                          method="post">
+
+                        <label for="answerContent">답변 남기기</label>
+
+                        <textarea id="answerContent"
+                                  name="content"
+                                  rows="3"
+                                  maxlength="2000"
+                                  placeholder="질문에 도움이 되는 답변을 작성해 주세요."
+                                  required></textarea>
+
+                        <p id="answerMessage"
+                           class="answer-message"
+                           role="status"></p>
+
+                        <div class="ds-bottom-actions">
+                            <button id="answerSubmit"
+                                    class="ds-button primary"
+                                    type="submit">
+                                답변 등록
+                            </button>
+                        </div>
+                    </form>
+                </section>
+                <!-- 검색 조건을 유지한 이전글·다음글 -->
+                <nav class="question-neighbors" aria-label="이전글과 다음글">
+                    <div class="question-neighbor-row">
+                        <span>이전글</span>
+
+                        <a th:if="${prevQuestion != null}"
+                           th:href="@{/community/questions/{id}(
+                                    id=${prevQuestion.postId},
+                                    page=${page}, schType=${schType}, kwd=${kwd})}"
+                           th:text="${prevQuestion.title}">
+                            이전 질문 제목
+                        </a>
+
+                        <span th:if="${prevQuestion == null}">
+                            이전글이 없습니다.
+                        </span>
+                    </div>
+
+                    <div class="question-neighbor-row">
+                        <span>다음글</span>
+
+                        <a th:if="${nextQuestion != null}"
+                           th:href="@{/community/questions/{id}(
+                                    id=${nextQuestion.postId},
+                                    page=${page}, schType=${schType}, kwd=${kwd})}"
+                           th:text="${nextQuestion.title}">
+                            다음 질문 제목
+                        </a>
+
+                        <span th:if="${nextQuestion == null}">
+                            다음글이 없습니다.
+                        </span>
+                    </div>
+                </nav>
+
             </article>
         </section>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/community-answer.js}"></script>
+</th:block>
 
 </body>
 </html>
