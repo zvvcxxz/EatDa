@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<head>
+    <title>AI 레시피 추천 - 나의 주방</title>
+
+</head>
+<body>
+
+<th:block layout:fragment="kitchenContent">
+    <div class="recipe-recommend-container">
+        <!-- 상단 타이틀 -->
+        <div class="section-heading mb-24">
+            <div>
+                <h2>🍳 냉장고 속 재료 맞춤 레시피</h2>
+                <p class="muted">재료를 선택하면 오늘의 한식 요리를 AI가 찾아드려요.</p>
+            </div>
+            <span class="badge badge-primary">✨ 냉장고 재료 기반 AI 맞춤 추천</span>
+        </div>
+
+        <!-- [상단 영역] 1. 선택한 재료 & 2. 재료 추가하기 (좌우 배치) -->
+        <div class="top-ingredient-grid">
+            <!-- 1. 선택한 재료 패널 -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h3><span class="step-num">1</span> 어떤 재료로 요리해볼까요? </h3>
+                    <button type="button" id="clearAllBtn" class="btn-text">전체 삭제</button>
+                </div>
+
+                <div id="selectedList" class="selected-chip-group" aria-live="polite">
+                    <span class="empty-hint" id="selectedEmpty">오른쪽에서 재료를 선택해 주세요.</span>
+                </div>
+
+                <div class="selected-summary">
+                    <span>선택한 재료</span>
+                    <strong id="selectedCountText">0개</strong>
+                </div>
+
+                <form id="recommendForm">
+                    <div id="selectedInputs"></div>
+                    <button type="submit" id="recommendBtn" class="btn btn-primary btn-full">
+                        🔎 이 재료로 레시피 추천받기
+                    </button>
+                    <p class="muted small mt-16 mb-0">선택한 재료를 기준으로 보유 재료와 부족 재료를 비교합니다.</p>
+                </form>
+            </section>
+
+            <!-- 2. 재료 추가하기 패널 -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h3><span class="step-num">2</span> 재료 추가하기</h3>
+                </div>
+
+                <!-- 재료 검색창 -->
+                <div class="search-section">
+                    <label for="ingredientSearch" class="input-label">재료 검색 (동의어 지원)</label>
+                    <div class="search-input-box">
+                        <input type="search" id="ingredientSearch" class="form-control" placeholder="예: 표고버섯, 양파, 두부" autocomplete="off">
+                        <ul id="searchResults" class="autocomplete-list" hidden></ul>
+                    </div>
+                </div>
+
+	<!-- 카테고리 타일 -->
+	<div class="category-section mt-16">
+	    <label class="input-label">카테고리별 재료 선택</label>
+	    <div class="category-tiles" id="categoryTiles">
+	        <button type="button" class="category-tile" data-category="육류">육류 🥩</button>
+	        <button type="button" class="category-tile" data-category="해산물">해산물 🐟</button>
+	        <button type="button" class="category-tile" data-category="난류">난류 🥚</button>
+	        <button type="button" class="category-tile" data-category="유제품">유제품 🥛</button>
+	        <button type="button" class="category-tile" data-category="곡물·면류">곡물·면류 🌾</button>
+	        <button type="button" class="category-tile" data-category="채소">채소 🥬</button>
+	        <button type="button" class="category-tile" data-category="과일">과일 🍎</button>
+	        <button type="button" class="category-tile" data-category="버섯">버섯 🍄</button>
+	        <button type="button" class="category-tile" data-category="콩·견과류">콩·견과류 🫘</button>
+	        <button type="button" class="category-tile" data-category="가공식품">가공식품 🥫</button>
+	        <button type="button" class="category-tile" data-category="유지류">유지류 🧈</button>
+	        <button type="button" class="category-tile" data-category="조미료">조미료 🧂</button>
+	        <button type="button" class="category-tile" data-category="물·육수">물·육수 💧</button>
+	    </div>
+	</div>
+
+                <!-- 카테고리별 재료 그리드 -->
+                <div class="ingredient-grid-wrapper mt-16">
+                    <div class="panel-header mb-16">
+                        <span class="muted small">클릭하여 담기 / 해제</span>
+                        <span class="muted small" id="ingredientResultCount">0개</span>
+                    </div>
+                    <div class="category-ingredients-grid" id="ingredientGrid"></div>
+                </div>
+            </section>
+        </div>
+
+		<!-- [하단 영역] 3. 추천 레시피 -->
+		<main class="recommend-main mt-24">
+		    <section class="panel">
+		        <div class="panel-header">
+		            <div>
+		                <h3><span class="step-num">3</span> 추천 레시피</h3>
+		                <p class="muted" id="resultsLabel">상단에서 재료를 선택하고 추천 버튼을 눌러보세요.</p>
+		            </div>
+		            <div class="result-count-badge" id="resultCountBadge">추천 결과 0개</div>
+		        </div>
+		
+		        <div class="recipe-grid" id="recipeResults">
+		            <!-- 별도 디자인의 레시피 전용 안내 카드 -->
+		            <div class="recommend-empty-card" id="recommendedEmpty">
+		                <div class="empty-icon">🍲</div>
+		                <h3>오늘은 어떤 요리를 만들어 볼까요?</h3>
+		                <p>위에서 냉장고 재료를 선택한 후 레시피 추천 버튼을 눌러주세요.</p>
+		            </div>
+		        </div>
+		    </section>
+		</main>
+    </div>
+
+    <!-- 조리 과정 상세 모달 -->
+    <div id="recipeDetailModal" class="modal-overlay" hidden>
+        <div class="modal-window modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3 id="recipeDetailModalTitle">조리 과정 상세</h3>
+                    <p class="muted" id="recipeDetailModalSubtitle">레시피 조리 순서</p>
+                </div>
+                <button type="button" class="btn-close" id="closeModalBtn">✕</button>
+            </div>
+
+            <div class="modal-body" id="recipeDetailModalBody">
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <p>조리 정보를 불러오는 중입니다...</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" id="modalCloseFooterBtn">닫기</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 1. 선택한 재료 칩 템플릿 -->
+	<template id="selectedChipTemplate">
+	    <span class="selected-chip">
+	        <span class="chip-emoji"></span>
+	        <span class="chip-name"></span>
+	        <button type="button" class="remove-chip" aria-label="삭제">✕</button>
+	    </span>
+	</template>
+	
+	<!-- 2. 재료 타일 버튼 템플릿 -->
+	<template id="ingredientTileTemplate">
+	    <button type="button" class="ingredient-tile-btn">
+	        <span class="tile-emoji"></span>
+	        <span class="tile-name"></span>
+	    </button>
+	</template>
+	
+	<!-- 3. 추천 레시피 카드 템플릿 -->
+	<template id="recipeCardTemplate">
+	    <article class="recipe-card">
+	        <div class="recipe-image">
+	            <img src="" alt="" loading="lazy">
+	        </div>
+	        <div class="recipe-body">
+	            <div class="panel-header mb-16">
+	                <h3 class="recipe-title"></h3>
+	                <span class="badge badge-primary recipe-match"></span>
+	            </div>
+	            <p class="muted small mb-16 recipe-sub-info"></p>
+	
+	            <div class="match-rate-bar">
+	                <div class="match-rate-fill"></div>
+	            </div>
+	
+	            <div class="ingredient-info-box match-box" hidden>
+	                <strong>✓ 보유 재료:</strong> <span class="have-text"></span>
+	            </div>
+	            <div class="ingredient-info-box missing-box" hidden>
+	                <strong>＋ 부족 재료:</strong> <span class="missing-text"></span>
+	            </div>
+	
+	            <div class="card-actions mt-16">
+	                <button type="button" class="btn btn-light btn-small btn-full view-detail-btn">조리 방법 보기</button>
+	            </div>
+	        </div>
+	    </article>
+	</template>
+	
+	<!-- 4. 조리 순서 STEP 템플릿 -->
+	<template id="manualStepTemplate">
+	    <div class="manual-step-item">
+	        <img src="" alt="" class="step-img" hidden>
+	        <div class="step-desc">
+	            <strong class="step-title"></strong>
+	            <p class="preserve-lines mb-0 step-text"></p>
+	        </div>
+	    </div>
+	</template>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/js/mykitchen/myrecipeai.js}" type="text/javascript"></script>
+</th:block>
+</body>
+</html>

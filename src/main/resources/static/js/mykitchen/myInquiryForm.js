@@ -1,7 +1,7 @@
 const InquiryForm = {
     template: '#inquiry-form-template',
     props: {
-        mode: { type: String, default: 'create' }, // 'create', 'edit', 'followUp'
+        mode: { type: String, default: 'create' },
         targetData: { type: Object, default: null }
     },
     emits: ['close', 'saved'],
@@ -37,6 +37,11 @@ const InquiryForm = {
     },
     methods: {
         initQuill() {
+            // ★ Quill Image Resize 모듈 등록
+            if (window.ImageResize) {
+                Quill.register('modules/imageResize', window.ImageResize.default || window.ImageResize);
+            }
+
             this.quill = new Quill(this.$refs.editorRef, {
                 theme: 'snow',
                 placeholder: '문의하실 내용을 입력하세요.',
@@ -52,6 +57,10 @@ const InquiryForm = {
                         handlers: {
                             image: this.quillImageHandler
                         }
+                    },
+                    // ★ 이미지 리사이즈 옵션 활성화
+                    imageResize: {
+                        displaySize: true
                     }
                 }
             });

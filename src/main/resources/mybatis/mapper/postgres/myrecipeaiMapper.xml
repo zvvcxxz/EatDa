@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.postgres.mapper.MyRecipeAiMapper">
+	<select id="findById" parameterType="String" resultType="com.sp.app.domain.dto.MyRecipeAiDto">
+    	SELECT
+			rcp_seq, rcp_nm, rcp_way2, rcp_pat2,
+			info_wgt, info_eng, info_car, info_pro, info_fat, info_na,
+			hash_tag, att_file_no_main, att_file_no_mk,
+			rcp_parts_dtls,
+
+			manual01, manual_img01, manual02, manual_img02,
+			manual03, manual_img03, manual04, manual_img04,
+			manual05, manual_img05, manual06, manual_img06,
+			manual07, manual_img07, manual08, manual_img08,
+			manual09, manual_img09, manual10, manual_img10,
+			manual11, manual_img11, manual12, manual_img12,
+			manual13, manual_img13, manual14, manual_img14,
+			manual15, manual_img15, manual16, manual_img16,
+			manual17, manual_img17, manual18, manual_img18,
+			manual19, manual_img19, manual20, manual_img20,
+			rcp_na_tip
+			
+			FROM recipe
+			WHERE rcp_seq = #{rcp_seq}
+	</select>
+	
+	<!-- LIMIT : PostgreSQL 에서 SELECT 조회 결과의 최대 행(row) 개수를 제한하는 구문 -->
+	<!--  pgvector 확장 기능을 이용해 임베딩 벡터와 유사한 레시피를 검색 -->
+	<select id="findBySimilarRecipes" resultType="map">
+		SELECT id, rcp_seq, rcp_nm, rcp_way2, rcp_pat2, att_file_no_main, rcp_parts_dtls,
+			info_wgt, info_eng, info_car, info_pro, info_fat, info_na,
+			(embedding &lt;=> CAST(#{embedding} AS vector)) AS distance, 
+			( 1 - (embedding &lt;=> CAST(#{embedding} AS vector)) ) AS similarity 
+		FROM recipe
+		ORDER BY embedding &lt;=> CAST(#{embedding} AS vector) 
+		LIMIT #{limit}
+	</select>
+	
+</mapper>

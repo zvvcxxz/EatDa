@@ -1,0 +1,207 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   My Messages Page Scoped Styles (mymessages.css)
+   ========================================================================== */
+
+.mymessages-panel {
+    padding: 24px;
+}
+
+.mb-24 {
+    margin-bottom: 24px;
+}
+
+/* 1. 좌/우 2컬럼 레이아웃 */
+.message-columns-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.message-box-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #faf8f5;
+    border: 1px solid var(--border, #f0e8dc);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 380px; /* 쪽지가 없어도 높이감 유지 */
+}
+
+.message-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border, #f0e8dc);
+}
+
+.message-box-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text, #2b261f);
+}
+
+/* 2. 데이터 없을 때 표시되는 빈 상태 영역 */
+.message-box-col .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed var(--border, #f0e8dc);
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+.message-box-col .empty-state .empty-icon {
+    font-size: 32px;
+    margin: 0 0 8px 0;
+}
+
+.message-box-col .empty-state .muted {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted, #857868);
+}
+
+/* 3. 개별 쪽지 카드 아이템 */
+.mymessages-panel .message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mymessages-panel .message-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid var(--border, #f0e8dc);
+    border-radius: 14px;
+    transition: all 0.2s ease;
+}
+
+.mymessages-panel .message-item:hover {
+    border-color: #e3bd72;
+    box-shadow: 0 4px 14px rgba(160, 120, 50, 0.08);
+    transform: translateY(-1px);
+}
+
+.mymessages-panel .message-item.unread-item {
+    background: #fdfaf3;
+    border-left: 4px solid var(--primary, #d99e32);
+}
+
+.mymessages-panel .message-open {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    gap: 6px;
+}
+
+.mymessages-panel .message-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.mymessages-panel .message-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mymessages-panel .message-author strong {
+    font-size: 14px;
+    color: var(--text, #2b261f);
+}
+
+.mymessages-panel .message-date {
+    font-size: 11px;
+    color: var(--muted, #857868);
+    white-space: nowrap;
+}
+
+.mymessages-panel .message-body-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+}
+
+.mymessages-panel .message-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text, #2b261f);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mymessages-panel .message-preview-text {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--muted, #857868);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mymessages-panel .message-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* 4. 버튼 스타일 */
+.btn-warning-light {
+    color: #a86b19;
+    background: #fef0d8;
+    border: 1px solid #fce1b2;
+}
+
+.btn-warning-light:hover:not(:disabled) {
+    background: #fde2b3;
+    color: #8c550f;
+}
+
+.dialog-header .btn-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--muted, #857868);
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    border-radius: 6px;
+}
+
+.dialog-header .btn-close:hover {
+    background: #f8f3ea;
+    color: var(--text, #2b261f);
+}
+
+/* 5. 모바일 반응형 (화면이 좁아지면 1컬럼으로 자동 전환) */
+@media (max-width: 900px) {
+    .message-columns-grid {
+        grid-template-columns: 1fr;
+    }
+}

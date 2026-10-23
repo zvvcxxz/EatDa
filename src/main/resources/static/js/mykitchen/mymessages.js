@@ -1,19 +1,14 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const app = document.getElementById("kitchenApp");
-    if (!app) return;
-
-    const apiBase = app.dataset.apiBase || "";
-    const kitchenUrl = app.dataset.kitchenUrl || "/my";
-
     const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
     const $ = (id) => document.getElementById(id);
 
-    // 쪽지 다중 수신자 목록 ({ id, name })
     let selectedRecipients = [];
+    let currentDetailMessage = null; // 현재 상세 열람 중인 쪽지 데이터
+    let isReplying = false; // 답장 전환 중 페이지 새로고침 방지 플래그
     let toastTimer;
 
     function toast(message) {
@@ -42,11 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
             headers.set(csrfHeader, csrfToken);
         }
 
-        const targetUrl = (options.isRoot || path.startsWith("/community") || path.startsWith("/my") || path.startsWith("/messages") || path.startsWith("http"))
-            ? path
-            : `${apiBase}${path}`;
-
-        const response = await fetch(targetUrl, {
+        const response = await fetch(path, {
             ...options,
             method,
             headers,
@@ -87,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 수신자 태그 UI 랜더링
     function renderRecipientTags() {
         const container = $("recipientTagList");
         if (!container) return;
@@ -114,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 회원 검색 자동완성
     function createAutocomplete({ input, container, getPath }) {
         if (!input || !container) return { clear: () => {} };
 
@@ -234,61 +223,106 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 쪽지 상세 열람 및 삭제 액션
+    // 쪽지 상세 열람 및 액션 처리
     async function handleAction(button) {
         const action = button.dataset.action;
         const id = encodeURIComponent(button.dataset.id || "");
 
-		switch (action) {
-		    case "open-message": {
-		        const data = await request(`/messages/${id}`);
-		        await request(`/messages/${id}/read`, { method: "PATCH" });
+        switch (action) {
+            case "open-message": {
+                const boxType = button.dataset.box || "received";
+                const data = await request(`/messages/${id}`);
+                await request(`/messages/${id}/read`, { method: "PATCH" });
 
-		        if ($("detailMessageTitle")) $("detailMessageTitle").textContent = data.title;
-		        if ($("detailMessageMeta")) {
-		            $("detailMessageMeta").textContent = `${data.senderNickname} → ${data.recipientNickname} · ${data.createdAtText}`;
-		        }
-		        if ($("detailMessageContent")) $("detailMessageContent").textContent = data.content;
+                currentDetailMessage = data;
 
-		        $("messageDetailDialog")?.showModal();
-		        break;
-		    }
+                if ($("detailMessageTitle")) $("detailMessageTitle").textContent = data.title;
+                if ($("detailMessageMeta")) {
+                    $("detailMessageMeta").textContent = `${data.senderNickname} → ${data.recipientNickname} · ${data.createdAtText}`;
+                }
+                if ($("detailMessageContent")) $("detailMessageContent").textContent = data.content;
 
-		    case "delete-message":
-		        if (!confirm("내 쪽지함에서 이 쪽지를 삭제할까요?")) return;
-		        await request(`/messages/${id}`, { method: "DELETE" });
-		        location.reload();
-		        break;
+                // 받은 쪽지인 경우에만 '답장하기' 버튼 노출
+                const replyBtn = $("replyMessageButton");
+                if (replyBtn) {
+                    replyBtn.style.display = (boxType === "received") ? "inline-block" : "none";
+                }
 
-		    // 발송 취소 액션 추가
-		    case "cancel-message":
-		        if (!confirm("쪽지 발송을 취소하시겠습니까?\n상대방 쪽지함에서도 쪽지가 완전 삭제됩니다.")) return;
-		        await request(`/messages/${id}/cancel`, { method: "DELETE" });
-		        location.reload();
-		        break;
-		}
+                $("messageDetailDialog")?.showModal();
+                break;
+            }
+
+            case "delete-message":
+                if (!confirm("내 쪽지함에서 이 쪽지를 삭제할까요?")) return;
+                await request(`/messages/${id}`, { method: "DELETE" });
+                location.reload();
+                break;
+
+            case "cancel-message":
+                if (!confirm("쪽지 발송을 취소하시겠습니까?\n상대방 쪽지함에서도 쪽지가 완전 삭제됩니다.")) return;
+                await request(`/messages/${id}/cancel`, { method: "DELETE" });
+                location.reload();
+                break;
+        }
     }
 
-	document.addEventListener("click", async (event) => {
-	    const button = event.target.closest("button[data-action]");
-	    if (!button || button.disabled) return;
+    // 답장하기 버튼 클릭 이벤트 처리
+    $("replyMessageButton")?.addEventListener("click", () => {
+        if (!currentDetailMessage) return;
 
-	    if (!["open-message", "delete-message", "cancel-message"].includes(button.dataset.action)) return;
+        isReplying = true; // 답장 전환 모드 설정 (새로고침 방지)
 
-	    button.disabled = true;
+        // 상세 모달 닫기
+        closeDialog($("messageDetailDialog"));
 
-	    try {
-	        await handleAction(button);
-	    } catch (error) {
-	        toast(error.message);
-	    } finally {
-	        button.disabled = false;
-	    }
-	});
+        // 작성 폼 리셋 및 자동 수신자 지정 (보낸 사람 ID 및 닉네임)
+        const form = $("messageForm");
+        if (form) form.reset();
+        recipientAutocomplete.clear();
 
+        selectedRecipients = [{
+            id: currentDetailMessage.senderId,
+            name: currentDetailMessage.senderNickname
+        }];
+        renderRecipientTags();
+
+        // 제목 자동 세팅 ("RE: 기존제목")
+        const titleInput = $("messageTitle");
+        if (titleInput) {
+            const origTitle = currentDetailMessage.title || "";
+            titleInput.value = origTitle.startsWith("RE: ") ? origTitle : `RE: ${origTitle}`;
+        }
+
+        if ($("messageError")) $("messageError").textContent = "";
+
+        // 작성 모달 오픈 및 내용 입력창 포커스
+        $("composeDialog")?.showModal();
+        $("messageContent")?.focus();
+    });
+
+    document.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button || button.disabled) return;
+
+        if (!["open-message", "delete-message", "cancel-message"].includes(button.dataset.action)) return;
+
+        button.disabled = true;
+
+        try {
+            await handleAction(button);
+        } catch (error) {
+            toast(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    // 상세 모달을 닫았을 때 읽음 상태(Badge) 반영을 위한 새로고침
     $("messageDetailDialog")?.addEventListener("close", () => {
-        const url = new URL(kitchenUrl, location.origin);
-        url.search = location.search;
-        location.assign(url.href);
+        if (isReplying) {
+            isReplying = false; // 답장 버튼을 누른 경우는 새로고침 취소
+            return;
+        }
+        location.reload();
     });
 });

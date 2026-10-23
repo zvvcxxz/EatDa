@@ -6,11 +6,7 @@
     <th:block layout:fragment="css">
         <link rel="stylesheet" th:href="@{/css/mykitchen/mykitchen.css}">
     </th:block>
-    <!-- Spring Security CSRF Token -->
-    <th:block th:if="${_csrf != null}">
-        <meta name="_csrf" th:content="${_csrf.token}">
-        <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    </th:block>
+
     <script defer th:src="@{/js/mykitchen/mykitchen.js}"></script>
 </head>
 <body>
@@ -47,13 +43,13 @@
                th:classappend="${tab == 'favorites'} ? 'active'">
                 <span aria-hidden="true">❤️</span> 찜한 레시피
             </a>
-            <a th:href="@{/my/notifications}"
+            <!-- <a th:href="@{/my/notifications}"
                th:classappend="${tab == 'notifications'} ? 'active'">
                 <span aria-hidden="true">🔔</span> 내 알림
                 <span class="nav-count"
                       th:if="${unreadNotificationCount > 0}"
                       th:text="${unreadNotificationCount}">3</span>
-            </a>
+            </a> -->
             <a th:href="@{/my/preferences}"
                th:classappend="${tab == 'tags'} ? 'active'">
                 <span aria-hidden="true">🏷️</span> 관심 태그
@@ -74,9 +70,9 @@
             	th:classappend="${tab == 'memberinfo'} ? 'active'">
             	<span aria-hidden="true">👤</span> 나의 정보
             </a>
-            <a th:href="@{/my/activity}"
-               th:classappend="${tab == 'activity'} ? 'active'">
-                <span aria-hidden="true">📊</span> 나의 활동
+            <a th:href="@{/my/recipeai}"
+               th:classappend="${tab == 'recipeai'} ? 'active'">
+                <span aria-hidden="true">📊</span> 냉장고를 부탁해
             </a>
         </nav>
 

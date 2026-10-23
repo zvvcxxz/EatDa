@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sp.app.domain.dto.MyMessagesDto;
 import com.sp.app.domain.dto.MyPreferencesDto;
 import com.sp.app.domain.dto.MyRecipeDto;
 import com.sp.app.domain.dto.SessionInfo;
 import com.sp.app.security.LoginMemberUtil;
+import com.sp.app.service.MyMessagesService;
 import com.sp.app.service.MyPreferencesService;
 import com.sp.app.service.MyRecipeService;
 
@@ -30,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MyKitchenController {
 	private final MyRecipeService myRecipeService;
     private final MyPreferencesService myPreferencesService;
+    private final MyMessagesService myMessagesService;
 	
 	private Long getLoginMemberId() { //데이터 주인 확인용
         SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -106,13 +109,13 @@ public class MyKitchenController {
     	return "mykitchen/myrecipes";
     }
 
-    // 4. 알림
-    @GetMapping("/notifications")
+    // 4. 레시피 추천
+    @GetMapping("/myRecipeAi")
     public String notifications(Model model) {
-        model.addAttribute("tab", "notifications");
-        model.addAttribute("pageTitle", "내 알림");
+        model.addAttribute("tab", "myRecipeAi");
+        model.addAttribute("pageTitle", "냉장고를 털어봐");
         
-        return "mykitchen/mynotifications";
+        return "mykitchen/myRecipeAi";
     }
 
     // 5. 관심사 설정 (페이지 조회)
@@ -143,11 +146,22 @@ public class MyKitchenController {
 
     // 6. 쪽지
     @GetMapping("/messages")
-    public String messages(Model model) {
-        model.addAttribute("tab", "messages");
-        model.addAttribute("pageTitle", "쪽지함");
+    public String kitchenPage(
+            @RequestParam(name = "tab", defaultValue = "messages") String tab,
+            @RequestParam(name = "box", defaultValue = "received") String box,
+            Model model) {
 
-        return "mykitchen/mymessages";
+        Long currentUserId = getLoginMemberId();
+
+        List<MyMessagesDto.Response> sentMessages = myMessagesService.getSentMessages(currentUserId);
+        List<MyMessagesDto.Response> receivedMessages = myMessagesService.getReceivedMessages(currentUserId);
+
+        model.addAttribute("sentMessages", sentMessages);
+        model.addAttribute("receivedMessages", receivedMessages);
+        model.addAttribute("box", box);
+        model.addAttribute("tab", tab);
+
+        return "mykitchen/mymessages"; 
     }
 
     // 7. 채팅
@@ -167,23 +181,14 @@ public class MyKitchenController {
         model.addAttribute("pageTitle", "신고 / 문의");
         
         return "mykitchen/myinquiries";
-    }
-    //vue 용 연결
-    @GetMapping("/inquiries-vue")
-    public String inquiryvue(Model model) {
-        model.addAttribute("tab", "inquiries");
-        model.addAttribute("pageTitle", "신고 / 문의");
-        return "mykitchen/myinquiryvue";
-    }
+    }    
 
-    
-
-    // 9. 나의 활동
-    @GetMapping("/activity")
+    // 9. ai추천
+    @GetMapping("/recipeai")
     public String activity(Model model) {
-        model.addAttribute("tab", "activity");
-        model.addAttribute("pageTitle", "나의 활동");
+        model.addAttribute("tab", "recipeai");
+        model.addAttribute("pageTitle", "냉장고를 털어봐");
         
-        return "mykitchen/myactivity";
+        return "mykitchen/myRecipeAi";
     }
 }

@@ -4,56 +4,153 @@
       layout:decorate="~{mykitchen/mykitchenLayout}">
 <head>
     <title>쪽지함 - 나의 주방</title>
+    <link rel="stylesheet" th:href="@{/css/mykitchen/mymessages.css}">
 </head>
 <body>
 
 <th:block layout:fragment="kitchenContent">
-    <section class="panel">
-        <div class="section-heading">
-            <div class="tab-links">
-                <a th:href="@{/mymessages(tab='messages', box='received')}" th:classappend="${box == 'received'} ? 'active'">받은 쪽지</a>
-                <a th:href="@{/mymessages(tab='messages', box='sent')}" th:classappend="${box == 'sent'} ? 'active'">보낸 쪽지</a>
-            </div>
+    <section class="panel mymessages-panel">
+        <div class="section-heading mb-24">
+            <h2>✉️ 쪽지함</h2>
             <button type="button" class="btn btn-primary" id="composeMessageButton">쪽지 보내기</button>
         </div>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(messages)}">
-            <h3>쪽지가 없어요</h3>
-        </div>
+        <div class="message-columns-grid">
+            
+            <!-- [왼쪽] 보낸 쪽지함 -->
+            <div class="message-box-col">
+                <div class="message-box-header">
+                    <h3>📤 보낸 쪽지함</h3>
+                </div>
 
-        <div class="message-list">
-            <article th:each="message : ${messages}" class="message-item">
-                <button type="button" class="message-open" data-action="open-message" th:attr="data-id=${message.id}">
-                    <span>
-                        <strong th:text="${message.counterpartNickname}">상대방</strong>
-                        <span class="badge badge-success" th:if="${!message.read}">읽지 않음</span>
-                        <span class="badge badge-secondary" th:if="${message.read}">읽음</span>
-                    </span>
-                    <strong th:text="${message.title}">제목</strong>
-                    <span class="muted" th:text="${message.preview}">내용 일부</span>
-                    <small th:text="${message.createdAtText}">2026-01-01</small>
-                </button>
+                <div class="empty-state" th:if="${#lists.isEmpty(sentMessages)}">
+                    <p class="empty-icon">📮</p>
+                    <p class="muted">보낸 쪽지가 없습니다.</p>
+                </div>
 
-                <!-- 보낸 쪽지함 & 안 읽은 상태: 발송취소 버튼 노출 -->
-                <button type="button" 
-                        class="btn btn-warning-light btn-small" 
-                        data-action="cancel-message" 
-                        th:attr="data-id=${message.id}"
-                        th:if="${box == 'sent' and !message.read}">발송취소</button>
+                <div class="message-list" th:unless="${#lists.isEmpty(sentMessages)}">
+                    <article th:each="message : ${sentMessages}" class="message-item" th:classappend="${!message.read} ? 'unread-item'">
+                        <button type="button" class="message-open" data-action="open-message" data-box="sent" th:attr="data-id=${message.id}">
+                            <div class="message-meta-top">
+                                <span class="message-author">
+                                    <strong th:text="${message.counterpartNickname}">받는 사람</strong>
+                                    <span class="badge badge-success" th:if="${!message.read}">읽지 않음</span>
+                                    <span class="badge badge-secondary" th:if="${message.read}">읽음</span>
+                                </span>
+                                <small class="message-date" th:text="${message.createdAtText}">2026-01-01</small>
+                            </div>
+                            <div class="message-body-preview">
+                                <strong class="message-title" th:text="${message.title}">제목</strong>
+                                <p class="message-preview-text" th:text="${message.preview}">내용 일부</p>
+                            </div>
+                        </button>
 
-                <!-- 기타 경우 (받은 쪽지함 또는 이미 읽은 보낸 쪽지): 일반 삭제 버튼 노출 -->
-                <button type="button" 
-                        class="btn btn-danger-light btn-small" 
-                        data-action="delete-message" 
-                        th:attr="data-id=${message.id}"
-                        th:unless="${box == 'sent' and !message.read}">삭제</button>
-            </article>
+                        <div class="message-actions">
+                            <button type="button" 
+                                    class="btn btn-warning-light btn-small" 
+                                    data-action="cancel-message" 
+                                    th:attr="data-id=${message.id}"
+                                    th:if="${!message.read}">발송취소</button>
+                            <button type="button" 
+                                    class="btn btn-danger-light btn-small" 
+                                    data-action="delete-message" 
+                                    th:attr="data-id=${message.id}"
+                                    th:if="${message.read}">삭제</button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- [오른쪽] 받은 쪽지함 -->
+            <div class="message-box-col">
+                <div class="message-box-header">
+                    <h3>📥 받은 쪽지함</h3>
+                </div>
+
+                <div class="empty-state" th:if="${#lists.isEmpty(receivedMessages)}">
+                    <p class="empty-icon">📬</p>
+                    <p class="muted">받은 쪽지가 없습니다.</p>
+                </div>
+
+                <div class="message-list" th:unless="${#lists.isEmpty(receivedMessages)}">
+                    <article th:each="message : ${receivedMessages}" class="message-item" th:classappend="${!message.read} ? 'unread-item'">
+                        <button type="button" class="message-open" data-action="open-message" data-box="received" th:attr="data-id=${message.id}">
+                            <div class="message-meta-top">
+                                <span class="message-author">
+                                    <strong th:text="${message.counterpartNickname}">보낸 사람</strong>
+                                    <span class="badge badge-success" th:if="${!message.read}">읽지 않음</span>
+                                    <span class="badge badge-secondary" th:if="${message.read}">읽음</span>
+                                </span>
+                                <small class="message-date" th:text="${message.createdAtText}">2026-01-01</small>
+                            </div>
+                            <div class="message-body-preview">
+                                <strong class="message-title" th:text="${message.title}">제목</strong>
+                                <p class="message-preview-text" th:text="${message.preview}">내용 일부</p>
+                            </div>
+                        </button>
+
+                        <div class="message-actions">
+                            <button type="button" 
+                                    class="btn btn-danger-light btn-small" 
+                                    data-action="delete-message" 
+                                    th:attr="data-id=${message.id}">삭제</button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
         </div>
     </section>
-</th:block>
 
- <th:block layout:fragment="script">
- <script th:src="@{/js/mykitchen/mymessages.js}"></script>
- </th:block>
+    <!-- 쪽지 작성 다이얼로그 모달 -->
+    <dialog id="composeDialog" class="app-dialog">
+        <form id="messageForm">
+            <div class="dialog-header">
+                <h2>쪽지 보내기</h2>
+                <button type="button" class="btn-close" data-close-dialog aria-label="닫기">✕</button>
+            </div>
+
+            <div class="autocomplete" style="margin-top: 12px;">
+                <label for="recipientSearch">받는 회원</label>
+                <input id="recipientSearch" type="search" autocomplete="off" placeholder="닉네임으로 검색 후 선택">
+                <div id="recipientSuggestions" class="suggestions" aria-label="회원 검색 결과" hidden></div>
+            </div>
+
+            <div id="recipientTagList" class="recipient-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;"></div>
+
+            <label for="messageTitle">제목</label>
+            <input id="messageTitle" maxlength="100" required>
+
+            <label for="messageContent" style="margin-top: 8px;">내용</label>
+            <textarea id="messageContent" rows="6" maxlength="5000" required></textarea>
+
+            <p class="form-error" id="messageError" role="alert" style="color: #d93025; font-size: 13px; margin-top: 8px;"></p>
+
+            <div class="dialog-footer" style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="btn btn-light" data-close-dialog>취소</button>
+                <button type="submit" class="btn btn-primary">보내기</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- 쪽지 상세 조회 다이얼로그 모달 -->
+    <dialog id="messageDetailDialog" class="app-dialog">
+        <div class="dialog-header">
+            <h2 id="detailMessageTitle">쪽지 제목</h2>
+            <button type="button" class="btn-close" data-close-dialog aria-label="닫기">✕</button>
+        </div>
+        <p id="detailMessageMeta" class="muted" style="margin: 8px 0; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 8px;"></p>
+        <p id="detailMessageContent" style="white-space: pre-wrap; word-break: break-all; min-height: 120px; margin-top: 12px;"></p>
+        <div class="dialog-footer" style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px;">
+            <!-- 받은 쪽지 열람 시 활성화되는 답장하기 버튼 -->
+            <button type="button" class="btn btn-primary" id="replyMessageButton" style="display: none;">답장하기</button>
+            <button type="button" class="btn btn-light" data-close-dialog>닫기</button>
+        </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script th:src="@{/js/mykitchen/mymessages.js}"></script>
+</th:block>
 </body>
 </html>

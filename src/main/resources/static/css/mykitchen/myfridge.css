@@ -622,3 +622,84 @@
 }
 
 .mt-2 { margin-top: 8px; }
+
+/* ==========================================================================
+   My Fridge Specific Styles
+   ========================================================================== */
+
+/* 레시피 추천 배너 스타일 */
+.recommend-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 32px;
+    padding: 24px 28px;
+    background: var(--primary-light, #fcf3df);
+    border: 1px solid #f3e4c3;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(217, 158, 50, 0.08);
+}
+
+.recommend-banner h3 {
+    margin-bottom: 6px;
+    color: var(--primary-dark, #b57e1b);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.recommend-banner p {
+    margin-bottom: 0;
+    color: #70582d;
+    font-size: 14px;
+}
+
+/* 더보기 버튼 컨테이너 */
+.load-more-container {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.btn-load-more {
+    width: 100%;
+    padding: 13px 20px;
+    background: #ffffff;
+    border: 1px dashed var(--primary, #d99e32);
+    border-radius: 12px;
+    color: var(--primary-dark, #b57e1b);
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-load-more:hover {
+    background: var(--primary-light, #fcf3df);
+}
+
+/* 재료 카드 내 말풍선 배지 */
+.speech-bubble {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.category-emoji {
+    margin-right: 4px;
+}
+
+.ingredient-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+/* 반응형 대응 */
+@media (max-width: 600px) {
+    .recommend-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+}

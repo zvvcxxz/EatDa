@@ -1,3 +1,8 @@
+/* ==========================================================================
+   1:1 Inquiry Board Custom Styles
+   ========================================================================== */
+
+/* 상단 탭 & 검색 툴바 */
 .inquiry-filter-bar {
     display: flex;
     flex-wrap: wrap;
@@ -15,24 +20,24 @@
 
 .inquiry-tab-btn {
     padding: 9px 18px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border, #f0e8dc);
     border-radius: 20px;
-    background: var(--surface);
-    color: var(--muted);
+    background: var(--surface, #ffffff);
+    color: var(--muted, #857868);
     font-size: 14px;
     font-weight: 600;
     transition: all 0.2s ease;
 }
 
 .inquiry-tab-btn:hover {
-    background: var(--primary-light);
-    color: var(--primary-dark);
+    background: var(--primary-light, #fcf3df);
+    color: var(--primary-dark, #b57e1b);
 }
 
 .inquiry-tab-btn.active {
-    background: var(--primary);
+    background: var(--primary, #d99e32);
     color: #ffffff;
-    border-color: var(--primary);
+    border-color: var(--primary, #d99e32);
 }
 
 .inquiry-search-box {
@@ -45,50 +50,108 @@
 .inquiry-search-box select { width: 130px; }
 .inquiry-search-box input { width: 220px; }
 
-/* 아코디언 계층 구조 */
-.inquiry-item summary {
-    user-select: none;
-    cursor: pointer;
+/* --------------------------------------------------------------------------
+   아코디언 및 본문 내부 여백 (inquiry-body padding 보완)
+   -------------------------------------------------------------------------- */
+.inquiry-item {
+    margin-bottom: 14px;
+    border: 1px solid var(--border, #f0e8dc);
+    border-radius: var(--radius, 14px);
+    overflow: hidden;
+    background: var(--surface, #ffffff);
 }
 
+.inquiry-item summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+/* 열려있는(open) 아코디언 헤더 강조 */
+.inquiry-item[open] summary {
+    background-color: var(--primary-light, #fcf3df);
+    border-bottom: 1px solid var(--border, #f0e8dc);
+}
+
+.inquiry-item[open] summary strong {
+    color: var(--primary-dark, #b57e1b);
+    font-weight: 800;
+}
+
+/* 1. inquiry-body 테두리 안쪽여백 부여 */
+.inquiry-body {
+    padding: 24px 28px; /* 테두리와 본문 내용 간격 확보 */
+    border-top: 1px solid var(--border, #f0e8dc);
+    background: #ffffff;
+}
+
+.inquiry-body h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text, #2b261f);
+}
+
+/* 문의 본문 박스 안쪽여백 */
 .inquiry-detail-content {
-    margin-bottom: 16px;
-    padding: 18px;
+    margin-bottom: 20px;
+    padding: 20px 22px;
     background: #fdfaf3;
+    border: 1px solid #f5ebd8;
     border-radius: 10px;
     font-size: 15px;
     line-height: 1.7;
+    color: #332d25;
 }
 
 .inquiry-detail-content img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
+    margin: 8px 0;
 }
 
+/* 첨부파일 및 관리자 답변 영역 */
 .file-attach-list {
     margin: 16px 0;
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: #f8f9fa;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border, #f0e8dc);
     border-radius: 10px;
 }
 
 .file-attach-list ul {
-    margin: 6px 0 0;
-    padding-left: 20px;
+    margin: 8px 0 0;
+    padding-left: 18px;
 }
 
 .file-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
-/* 자식 추가문의 계층 타임라인 영역 */
+.admin-answer {
+    margin-top: 20px;
+    padding: 20px 22px;
+    background: #fcf8f0;
+    border: 1px solid #f3e5c8;
+    border-radius: 12px;
+}
+
+.admin-answer h3 {
+    color: var(--primary-dark, #b57e1b);
+}
+
+/* 자식 추가문의 타임라인 영역 */
 .child-inquiry-section {
-    margin-top: 24px;
+    margin-top: 28px;
     padding-left: 20px;
     border-left: 3px solid #e8decb;
 }
@@ -96,24 +159,36 @@
 .child-inquiry-title {
     font-size: 15px;
     font-weight: 700;
-    color: var(--primary-dark);
-    margin-bottom: 12px;
+    color: var(--primary-dark, #b57e1b);
+    margin-bottom: 14px;
 }
 
 .child-inquiry-item {
-    margin-bottom: 10px;
-    background: #ffffff;
-    border: 1px solid var(--border);
+    margin-bottom: 12px;
+    border: 1px solid var(--border, #f0e8dc);
     border-radius: 10px;
     overflow: hidden;
+    background: #ffffff;
 }
 
 .child-inquiry-item summary {
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: #faf7f0;
 }
 
-/* 모달 및 Quill 에디터 설정 */
+.child-inquiry-item[open] summary {
+    background-color: #f5eedf;
+    border-bottom: 1px solid var(--border, #f0e8dc);
+}
+
+.child-inquiry-item[open] summary strong {
+    color: var(--primary-dark, #b57e1b);
+    font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   Quill Editor & Modal Dialog
+   -------------------------------------------------------------------------- */
 .modal-backdrop {
     position: fixed;
     top: 0; left: 0;
@@ -126,11 +201,11 @@
 }
 
 .modal-window {
-    width: min(720px, calc(100% - 32px));
+    width: min(760px, calc(100% - 32px));
     max-height: 90vh;
     padding: 28px;
     background: #ffffff;
-    border-radius: var(--radius);
+    border-radius: var(--radius, 18px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
 }
@@ -140,7 +215,7 @@
 }
 
 .ql-container {
-    min-height: 200px;
+    min-height: 220px;
     font-family: inherit;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -150,32 +225,4 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     background: #fcf8f0;
-}
-
-/* ==========================================================================
-   열려있는(open) 아코디언 헤더 및 제목 강조 스타일
-   ========================================================================== */
-
-/* 1. 최상위 부모 문의가 열렸을 때 */
-.inquiry-item[open] summary {
-    background-color: var(--primary-light); /* 은은한 배경색 강조 */
-    border-bottom: 1px solid var(--border);
-    transition: background-color 0.2s ease;
-}
-
-.inquiry-item[open] summary strong {
-    color: var(--primary-dark); /* 제목 색상 진하게 */
-    font-weight: 800;           /* 폰트 두껍게 */
-}
-
-/* 2. 자식 추가 문의가 열렸을 때 */
-.child-inquiry-item[open] summary {
-    background-color: #f5eedf;
-    border-bottom: 1px solid var(--border);
-    transition: background-color 0.2s ease;
-}
-
-.child-inquiry-item[open] summary strong {
-    color: var(--primary-dark);
-    font-weight: 800;
 }

@@ -66,7 +66,7 @@ public class MyMessagesServiceImpl implements MyMessagesService {
         List<MyMessages> messagesToSave = new ArrayList<>();
         for (Long recipientId : request.getRecipientIds()) {
             if (senderId.equals(recipientId)) {
-                continue; // 자기 자신 발송 제외 (CK_030)
+            	throw new IllegalArgumentException("자기 자신에게는 메세지를 보낼 수 없습니다.");
             }
             MyMessages message = MyMessages.builder()
                     .senderId(senderId)
@@ -203,4 +203,5 @@ public class MyMessagesServiceImpl implements MyMessagesService {
         // DB에서 데이터 자체를 완전 삭제 (상대방 쪽지함에서도 삭제됨)
         myMessagesRepository.delete(message);
     }
+    
 }

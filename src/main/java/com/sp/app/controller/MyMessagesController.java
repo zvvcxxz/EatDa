@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,28 +33,6 @@ public class MyMessagesController {
             throw new IllegalStateException("로그인이 필요한 서비스입니다.");
         }
         return info.getMember_id();
-    }
-
-    @GetMapping("/mymessages")
-    public String kitchenPage(
-            @RequestParam(name = "tab", defaultValue = "messages") String tab,
-            @RequestParam(name = "box", defaultValue = "received") String box,
-            Model model) {
-
-        Long currentUserId = getLoginMemberId();
-        List<MyMessagesDto.Response> messages;
-
-        if ("sent".equals(box)) {
-            messages = myMessagesService.getSentMessages(currentUserId);
-        } else {
-            messages = myMessagesService.getReceivedMessages(currentUserId);
-        }
-
-        model.addAttribute("messages", messages);
-        model.addAttribute("box", box);
-        model.addAttribute("tab", tab);
-
-        return "mykitchen/mymessages"; 
     }
 
     // 회원 닉네임 검색 API
@@ -97,7 +74,7 @@ public class MyMessagesController {
         return ResponseEntity.ok().build();
     }
 
-    //발송 취소 API (Hard Delete: 상대방이 안 읽었을 때 DB에서 완전 삭제)
+    // 발송 취소 API (Hard Delete: 상대방이 안 읽었을 때 DB에서 완전 삭제)
     @DeleteMapping("/messages/{id}/cancel")
     @ResponseBody
     public ResponseEntity<Void> cancelMessage(@PathVariable("id") Long id) {
