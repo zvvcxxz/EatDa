@@ -5,6 +5,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/intro-curtain.css}">
     <link rel="stylesheet" th:href="@{/dist/css/home-community.css}">
     <link rel="stylesheet" th:href="@{/dist/css/home-mini-fridge.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/home-ai-search.css}">
 </th:block>
 </head>
 <body><th:block layout:fragment="content">
@@ -28,9 +29,6 @@
           <span class="pill">✨ 재료를 이어 요리로, 요리를 이어 우리로</span>
           <h1>냉장고를 열고,<br /><span>한 끼를 잇다.</span></h1>
           <p>남은 김치 한 포기, 계란 두 개로도 근사한 순간이 완성됩니다.<br />냉장고 속 잊혀졌던 재료들을 맛있는 레시피와 따뜻한 이야기로 이어 드릴게요.</p>
-          <button id="open-search" class="search-trigger">
-            <i class="search-icon fa-solid fa-utensils" aria-hidden="true"></i><span>냉장고에 남은 재료를 검색해 보세요 (예: 계란, 대파, 스팸)</span><b>레시피 검색 →</b>
-          </button>
         </div>
         <section class="basket-panel">
           <div class="basket-heading"><h2><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> 빠른 재료 조합기</h2><button id="basket-clear">초기화</button></div>
@@ -40,6 +38,44 @@
           <button id="basket-search" class="button yellow">
             이 재료로 만들 수 있는 레시피 찾기 ✨</button></div>
         </section>
+<div class="ai-island-anchor">
+<section class="ai-island" aria-label="AI 레시피 검색">
+  <div class="ai-launcher">
+  <div id="open-search" tabindex="-1" class="ai-launcher-heading"><strong>AI 레시피 검색</strong><span>남은 재료로, 오늘의 한식 한 끼.</span></div>
+  <!-- 메인 검색 : 재료 입력 > 후보 선택 > 검색 결과창 출력 -->
+      <form id="ai-island-form" novalidate>
+        <label class="ai-field-label" for="ai-ingredient-input">어떤 재료가 남아 있나요?</label>
+        <div class="ai-input-wrap">
+          <div class="ai-ingredient-entry"><input id="ai-ingredient-input" data-home-ai-input type="text" placeholder="예: 계란, 두부, 대파" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="ai-ingredient-options" aria-autocomplete="list" aria-describedby="ai-input-help"><button type="submit" id="ai-recipe-submit">검색</button></div>
+          <div id="ai-ingredient-options" class="ai-suggestions" role="listbox" aria-label="재료 후보" hidden></div>
+        </div>
+        <p class="ai-input-help" id="ai-input-help">등록된 후보를 선택해 주세요. 같은 재료는 한 번만 추가돼요.</p>
+        <div class="ai-picked" id="ai-picked" aria-label="선택한 재료"></div>
+        <div class="ai-search-feedback"><p id="ai-island-status" role="status" aria-live="polite"></p><div class="ai-demo-actions"><button type="button" class="ai-demo-button" id="ai-demo-results">계란·두부·대파로 예시 보기</button><button type="button" class="ai-demo-button" id="ai-demo-cook">조리 모드 미리보기</button></div></div>
+      </form>
+  </div>
+  <div class="ai-results-panel" role="region" aria-label="레시피 검색 결과" tabindex="-1">
+    <div class="ai-panel-heading"><div class="ai-island-copy"><strong>AI 레시피 검색</strong><small>선택한 재료로 찾은 한식 레시피</small></div><button id="ai-island-toggle" class="ai-panel-close" type="button" aria-label="검색 결과 닫기"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="ai-island-reveal" id="ai-island-body" inert>
+    <div class="ai-island-inner">
+      <div class="ai-scope-line"><span>디자인 검토본 · 실제 API/AI 미연결</span><button type="button" id="ai-edit-ingredients">재료 다시 선택</button></div>
+      <section class="ai-results" id="ai-results" aria-labelledby="ai-results-title" hidden>
+        <div class="ai-results-head"><div><span class="ai-eyebrow">선택한 재료에서 시작하는 한 끼</span><h2 id="ai-results-title" tabindex="-1">이런 요리는 어떠세요?</h2><p id="ai-results-query"></p></div><span class="ai-example-label">모든 결과는 예시 데이터</span></div>
+        <div class="ai-results-tools">
+          <div class="ai-source-filters" role="group" aria-label="레시피 출처"><button type="button" data-source="all" aria-pressed="true">전체</button><button type="button" data-source="official" aria-pressed="false">공식 API 예시</button><button type="button" data-source="member" aria-pressed="false">공개 회원 예시</button></div>
+          <label class="ai-availability-label">재료 상태 <select id="ai-availability"><option value="all">전체</option><option value="complete">주재료 모두 있음</option><option value="missing">추가 재료 필요</option></select></label>
+        </div>
+        <div class="ai-sort-line"><span id="ai-result-total"></span><span>재료 일치순 · 동률은 이름순</span></div>
+        <p class="ai-match-note">예시에서는 주재료만 비교하며, 양념은 제외합니다. 실제 포함 범위는 팀 기준 확정 후 적용해요.</p>
+        <div class="ai-results-list" id="ai-results-list" aria-busy="false"></div>
+        <div class="ai-more-wrap"><p id="ai-result-count" aria-live="polite"></p><button type="button" id="ai-results-more" hidden>레시피 더보기</button></div>
+      </section>
+    </div>
+  </div>
+  </div>
+</section>
+</div>
+
       </section>
       <section>
         <div class="section-head">
@@ -188,4 +224,5 @@
       type="module"
       src="../../static/dist/js/home.js"
       th:src="@{/dist/js/home.js}"
-    ></script><script defer th:src="@{/dist/js/home-community.js}"></script></th:block></body></html>
+    ></script><script defer th:src="@{/dist/js/home-community.js}"></script>
+<script defer th:src="@{/dist/js/home-ai-search.js}"></script></th:block></body></html>

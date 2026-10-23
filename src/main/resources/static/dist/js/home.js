@@ -120,7 +120,7 @@ function openSearch() {
     show($("search-dialog"));
     $("ingredient-query").focus();
 }
-$("open-search").onclick = openSearch;
+// 메인 AI 검색창 열기는 home-ai-search.js에서 처리합니다.
 $("basket-search").onclick = () => {
     openSearch();
     search();
