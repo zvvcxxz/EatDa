@@ -133,6 +133,10 @@ public class SpringSecurityConfig {
 		// 인증 거부 관련 처리
 		http.exceptionHandling((exceptionConfig) -> exceptionConfig.accessDeniedPage("/error/noAuthorized"));
 
+		http.headers(headers -> headers
+			    .frameOptions(frameOptions -> frameOptions.sameOrigin())
+			);
+		
 		return http.build();
 	}
 

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘 점심 뭐 먹지?</title>
+
+    <link rel="stylesheet" th:href="@{/dist/css/lunch-chat.css}">
+    <script defer th:src="@{/dist/js/lunch-chat.js}"></script>
+</head>
+<body>
+    <main class="lunch-chat">
+        <header class="lunch-header">
+            <div>
+                <span class="lunch-label">EAT-DA LUNCH MATE</span>
+                <h1>오늘 점심 뭐 먹지?</h1>
+                <p>먹고 싶은 조건을 골라주시면 점심메이트가 추천해 드려요.</p>
+            </div>
+            <span class="lunch-header-icon" aria-hidden="true">🍽️</span>
+        </header>
+
+        <div class="lunch-layout">
+            <!-- 선택한 조건은 질문과 함께 AI에 전달 -->
+            <aside class="lunch-options">
+                <div class="lunch-section-title">
+				    <div class="lunch-options-heading">
+				        <h2>오늘의 입맛</h2>
+				        <button type="button" id="lunch-options-reset"
+				                class="lunch-options-reset">
+				            조건 초기화
+				        </button>
+				    </div>
+				    <span>취향에 맞게 골라주세요</span>
+				</div>
+
+                <div class="lunch-field">
+                    <label for="lunch-budget">예산</label>
+                    <select id="lunch-budget">
+                        <option value="0">상관없음</option>
+                        <option value="8000">8,000원 이하</option>
+                        <option value="10000">10,000원 이하</option>
+                        <option value="15000">15,000원 이하</option>
+                        <option value="20000">20,000원 이하</option>
+                    </select>
+                </div>
+
+                <div class="lunch-field">
+                    <label for="lunch-category">음식 종류</label>
+                    <select id="lunch-category">
+                        <option value="상관없음">상관없음</option>
+                        <option value="한식">한식</option>
+                        <option value="중식">중식</option>
+                        <option value="일식">일식</option>
+                        <option value="양식">양식</option>
+                        <option value="분식">분식</option>
+                    </select>
+                </div>
+
+                <div class="lunch-field">
+                    <label for="lunch-spicy">매운맛</label>
+                    <select id="lunch-spicy">
+                        <option value="상관없음">상관없음</option>
+                        <option value="안 매운 맛">안 매운 맛</option>
+                        <option value="보통">보통</option>
+                        <option value="매운 맛">매운 맛</option>
+                    </select>
+                </div>
+
+                <div class="lunch-field">
+                    <label for="lunch-exclude">못 먹거나 싫어하는 재료</label>
+                    <input type="text" id="lunch-exclude"
+                           maxlength="200"
+                           placeholder="예: 새우, 오이, 땅콩">
+                </div>
+
+                <button type="button" id="lunch-random"
+                        class="lunch-random-button">
+                    🎲 고민될 땐 점심 뽑기
+                </button>
+
+                <p class="lunch-options-note">
+                    가격과 매운맛은 매장이나 조리법에 따라 달라질 수 있어요.
+                </p>
+            </aside>
+
+            <section class="lunch-conversation" aria-labelledby="lunch-chat-title">
+                <div class="lunch-conversation-header">
+                    <div class="lunch-bot-profile">
+                        <span class="lunch-avatar" aria-hidden="true">🍳</span>
+                        <div>
+                            <h2 id="lunch-chat-title">점심메이트</h2>
+                            <span>오늘의 점심 고민을 함께해요</span>
+                        </div>
+                    </div>
+
+                    <button type="button" id="lunch-reset"
+                            class="lunch-reset-button">
+                        대화 지우기
+                    </button>
+                </div>
+
+                <!-- 질문과 AI 답변이 표시되는 영역 -->
+                <div id="lunch-messages" class="lunch-messages"
+                     role="log" aria-label="점심 추천 대화"
+                     th:attr="data-chat-url=@{/ai/aichatbot/chat}">
+                    <div class="lunch-message lunch-message-bot">
+                        <span class="lunch-message-avatar" aria-hidden="true">🍳</span>
+                        <div class="lunch-message-bubble">
+                            안녕하세요! 점심메이트예요.
+                            <br>
+                            오늘은 어떤 점심이 당기세요?
+                            조건을 고르거나 편하게 질문해 주세요.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lunch-suggestions" aria-label="추천 질문">
+                    <button type="button" data-message="든든한 점심 메뉴 추천해줘">
+                        든든한 한 끼
+                    </button>
+                    <button type="button" data-message="가볍게 먹을 점심 메뉴 추천해줘">
+                        가벼운 점심
+                    </button>
+                    <button type="button" data-message="혼자 먹기 좋은 점심 메뉴 추천해줘">
+                        혼밥 메뉴
+                    </button>
+                </div>
+
+                <form id="lunch-form" class="lunch-input-form">
+                    <label for="lunch-message" class="lunch-sr-only">
+                        점심 추천 질문
+                    </label>
+                    <input type="text" id="lunch-message"
+                           maxlength="500" autocomplete="off"
+                           placeholder="예: 오늘은 따뜻한 국물 요리가 먹고 싶어"
+                           required>
+                    <button type="submit" id="lunch-send">
+                        보내기
+                    </button>
+                </form>
+
+                <p id="lunch-status" class="lunch-status"
+                   role="status" aria-live="polite"></p>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
