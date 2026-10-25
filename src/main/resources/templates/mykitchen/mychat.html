@@ -4,7 +4,9 @@
       layout:decorate="~{mykitchen/mykitchenLayout}">
 <head>
     <title>채팅 - 나의 주방</title>
-    <!-- SockJS 및 STOMP 라이브러리 추가 -->
+    <link rel="stylesheet" th:href="@{/css/mykitchen/mychat.css}">
+
+    <!-- SockJS 및 STOMP -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
@@ -21,8 +23,8 @@
         </div>
 
         <!-- 채팅 메인 레이아웃 (좌: 방 목록, 우: 대화창) -->
-        <div class="chat-wrapper" th:attr="data-current-member-id=${currentMemberId}">
-            
+		<div class="chat-wrapper" 
+     		th:attr="data-current-member-id=${currentMemberId}, data-current-member-name=${currentMemberName}">  
             <!-- [좌측] 참여 중인 채팅방 목록 -->
             <aside class="chat-sidebar">
                 <div class="empty-state" th:if="${#lists.isEmpty(chatRooms)}">
@@ -62,8 +64,11 @@
                 </div>
 
                 <!-- 2) 채팅방이 선택되었을 때 -->
-                <div class="chat-box" th:if="${currentRoom != null}" th:attr="data-room-id=${currentRoom.roomId}">
-                    <!-- 대화창 헤더 -->
+                <!-- chat.html 내 chat-box 요소 수정 -->
+				<div class="chat-box" 
+				     th:if="${currentRoom != null}" 
+				     th:attr="data-room-id=${currentRoom.roomId}, data-target-member-id=${currentRoom.targetMemberId}">
+			     <!-- 대화창 헤더 -->
                     <div class="chat-header">
                         <div class="chat-target">
                             <span class="avatar-sm">👤</span>

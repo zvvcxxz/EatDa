@@ -1,0 +1,117 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   Chat Room & Search Modal Specific Styles
+   ========================================================================== */
+
+/* 검색 모달 스타일 보완 */
+#memberSearchModal .modal-dialog {
+    width: min(520px, 90%);
+    background: #ffffff;
+    border-radius: var(--radius, 16px);
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#memberSearchModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border, #f0e8dc);
+    padding-bottom: 12px;
+}
+
+#memberSearchModal .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text, #2b261f);
+}
+
+#memberSearchModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--muted, #857868);
+    cursor: pointer;
+    line-height: 1;
+}
+
+#memberSearchModal .search-input-box {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+#memberSearchModal .search-input-box input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #e8decb;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* 검색 결과 리스트 */
+.search-result-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid var(--border, #f0e8dc);
+    border-radius: 10px;
+    background: #fdfaf3;
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0e8dc;
+    background: #ffffff;
+    transition: background-color 0.2s ease;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: var(--primary-light, #fcf3df);
+}
+
+.search-result-item .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.search-result-item .user-info strong {
+    font-size: 15px;
+    color: var(--text, #2b261f);
+}
+
+.search-result-item .user-info .muted {
+    font-size: 12px;
+    color: var(--muted, #857868);
+}
+
+.search-result-list .empty-text {
+    padding: 24px;
+    text-align: center;
+    color: var(--muted, #857868);
+    font-size: 14px;
+}
+
+/* 안읽은 메시지 뱃지 */
+.unread-count {
+    background-color: var(--danger, #d93838);
+    color: #ffffff;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: auto;
+}

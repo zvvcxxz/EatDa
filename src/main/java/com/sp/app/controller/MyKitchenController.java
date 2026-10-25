@@ -1,5 +1,7 @@
 package com.sp.app.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sp.app.domain.dto.MemberDto;
 import com.sp.app.domain.dto.MyMessagesDto;
 import com.sp.app.domain.dto.MyPreferencesDto;
 import com.sp.app.domain.dto.MyRecipeDto;
 import com.sp.app.domain.dto.SessionInfo;
 import com.sp.app.security.LoginMemberUtil;
+import com.sp.app.service.MemberService;
 import com.sp.app.service.MyMessagesService;
 import com.sp.app.service.MyPreferencesService;
 import com.sp.app.service.MyRecipeService;
@@ -33,6 +37,7 @@ public class MyKitchenController {
 	private final MyRecipeService myRecipeService;
     private final MyPreferencesService myPreferencesService;
     private final MyMessagesService myMessagesService;
+    private final MemberService memberService;
 	
 	private Long getLoginMemberId() { //데이터 주인 확인용
         SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -164,14 +169,53 @@ public class MyKitchenController {
         return "mykitchen/mymessages"; 
     }
 
-    // 7. 채팅
+    //7.채팅
     @GetMapping("/chat")
-    public String chat(Model model) {
-    	model.addAttribute("tab", "chat");
-    	model.addAttribute("pageTitle", "채팅");
-    	
-    	return "mykitchen/mychat";
-    	
+    public String chatPage(@RequestParam(name = "roomId", required = false) Long roomId, Model model) {
+        try {
+            Long currentMemberId = getLoginMemberId();
+            MemberDto currentMember = memberService.findById(currentMemberId);
+            
+            model.addAttribute("currentMemberId", currentMemberId);
+            model.addAttribute("currentMemberName", currentMember != null ? currentMember.getName() : "나");
+
+            List<Map<String, Object>> chatRooms = new ArrayList<>();
+
+            // 1. 현재 선택된 roomId가 있으면 해당 방 정보를 목록에 추가 (DB 연동 전 임시 구성)
+            if (roomId != null) {
+                model.addAttribute("selectedRoomId", roomId);
+                
+                // 상대방 ID 계산
+                long val1 = roomId / 10000;
+                long val2 = roomId % 10000;
+                Long targetMemberId = (val1 == currentMemberId) ? val2 : val1;
+
+                MemberDto targetMember = memberService.findById(targetMemberId);
+                String targetNickname = (targetMember != null) ? targetMember.getName() : "알 수 없는 사용자";
+
+                Map<String, Object> currentRoom = new HashMap<>();
+                currentRoom.put("roomId", roomId);
+                currentRoom.put("targetMemberId", targetMemberId); // 상대방 ID 추가
+                currentRoom.put("targetNickname", targetNickname);
+                model.addAttribute("currentRoom", currentRoom);
+
+                // 좌측 목록용 데이터 객체 추가
+                Map<String, Object> roomItem = new HashMap<>();
+                roomItem.put("roomId", roomId);
+                roomItem.put("targetNickname", targetNickname);
+                roomItem.put("lastMessage", "대화를 시작하세요.");
+                roomItem.put("lastMessageTime", "방금 전");
+                roomItem.put("unreadCount", 0);
+                chatRooms.add(roomItem);
+            }
+
+            // TODO: 실제 DB 구현 시 chatService.listChatRooms(currentMemberId) 결과를 넣으시면 됩니다.
+            model.addAttribute("chatRooms", chatRooms);
+
+            return "mykitchen/mychat";
+        } catch (IllegalStateException e) {
+            return "redirect:/member/login";
+        }
     }
     
     // 8. 신고 / 문의

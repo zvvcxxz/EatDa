@@ -1,223 +1,338 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
     const chatWrapper = document.querySelector('.chat-wrapper');
+    const currentMemberId = chatWrapper ? chatWrapper.dataset.currentMemberId : null;
+    const currentMemberName = chatWrapper ? chatWrapper.dataset.currentMemberName : '익명';
+    
     const chatBox = document.querySelector('.chat-box');
+    const currentRoomId = chatBox ? chatBox.dataset.roomId : null;
+    const targetMemberId = chatBox ? chatBox.dataset.targetMemberId : null;
+
     const chatMessageArea = document.getElementById('chatMessageArea');
     const chatInput = document.getElementById('chatInput');
     const btnSend = document.getElementById('btnSend');
+    const leaveRoomBtn = document.getElementById('leaveRoomBtn'); // 나가기 버튼
 
-    //const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-    //const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const searchModal = document.getElementById('memberSearchModal');
+    const openSearchModalBtn = document.getElementById('openSearchModalBtn');
+    const closeSearchModalBtn = document.getElementById('closeSearchModalBtn');
+    const searchKeywordInput = document.getElementById('searchKeyword');
+    const btnSearchMember = document.getElementById('btnSearchMember');
+    const searchResultList = document.getElementById('searchResultList');
 
-    // 현재 사용자 ID 및 선택된 방 ID
-    const currentMemberId = chatWrapper?.dataset.currentMemberId;
-    const roomId = chatBox?.dataset.roomId;
+    // global-websocket.js 연결 완료 시 호출되는 콜백 함수
+    window.onWebSocketConnected = function(stompClient) {
+        if (!stompClient || !stompClient.connected) return;
 
-    let stompClient = null;
+        // 1. 현재 대화방 메시지 구독
+		if (currentRoomId) {
+		    stompClient.subscribe(`/topic/chat/${currentRoomId}`, (messageOutput) => {
+		        const message = JSON.parse(messageOutput.body);
 
-    //초기화 및 웹소켓 연결
-    if (chatBox && roomId) {
-        connectStomp(roomId);
+		        // 퇴장 메시지 처리
+		        if (message.type === 'LEAVE') {
+		            appendSystemNotice(message.content || `${message.senderName}님이 대화방을 나갔습니다.`);
+		            
+		            // 나간 사람이 상대방일 경우 내 입력창 비활성화
+		            if (String(message.senderId) !== String(currentMemberId)) {
+		                setChatInputEnabled(false);
+		            }
+		        } else {
+		            // 일반 대화 메시지 처리
+		            appendMessage(message);
+		            scrollToBottom();
+		        }
+		    });
+		}
+
+        // 2. 상대방 오프라인 감지 (/topic/offline)
+        stompClient.subscribe('/topic/offline', (messageOutput) => {
+            const data = JSON.parse(messageOutput.body);
+            if (targetMemberId && String(data.uid) === String(targetMemberId)) {
+                appendSystemNotice(`${data.name || '상대방'}님이 오프라인 상태가 되었습니다.`);
+                setChatInputEnabled(false);
+            }
+        });
+
+        // 3. 상대방 온라인 감지 (/topic/online)
+        stompClient.subscribe('/topic/online', (messageOutput) => {
+            const data = JSON.parse(messageOutput.body);
+            if (targetMemberId && String(data.uid) === String(targetMemberId)) {
+                appendSystemNotice(`${data.name || '상대방'}님이 온라인으로 복귀했습니다.`);
+                setChatInputEnabled(true);
+            }
+        });
+    };
+
+    // 웹소켓 이미 연결되어 있는 상태라면 즉시 구독 함수 실행
+    if (window.globalStompClient && window.globalStompClient.connected) {
+        window.onWebSocketConnected(window.globalStompClient);
+    }
+
+	// 나가기 버튼 클릭 이벤트
+	if (leaveRoomBtn) {
+	    leaveRoomBtn.addEventListener('click', () => {
+	        if (!confirm('대화방을 나가시겠습니까?')) return;
+
+	        // 1. 소켓이 연결되어 있다면 상대방에게 퇴장 알림 전송
+	        if (window.globalStompClient && window.globalStompClient.connected && currentRoomId) {
+	            const leaveMessage = {
+	                type: 'LEAVE',
+	                roomId: String(currentRoomId),
+	                senderId: Number(currentMemberId),
+	                senderName: currentMemberName,
+	                content: `${currentMemberName}님이 대화방을 나갔습니다.`
+	            };
+
+	            window.globalStompClient.send(
+	                `/app/chat.sendMessage/${currentRoomId}`, 
+	                {}, 
+	                JSON.stringify(leaveMessage)
+	            );
+	        }
+
+	        // 2. 메시지 전송 후 메인 채팅 페이지로 이동
+	        window.location.href = '/my/chat';
+	    });
+	}
+
+    function appendSystemNotice(text) {
+        if (!chatMessageArea) return;
+        const noticeDiv = document.createElement('div');
+        noticeDiv.className = 'system-notice';
+        noticeDiv.style.cssText = 'text-align: center; margin: 10px 0; color: #857868; font-size: 13px; font-weight: bold; background: #f0e8dc; padding: 6px 12px; border-radius: 12px;';
+        noticeDiv.textContent = text;
+        chatMessageArea.appendChild(noticeDiv);
         scrollToBottom();
     }
 
-    // STOMP 연결
-    function connectStomp(roomId) {
-        const socket = new SockJS('/ws-stomp');
-        stompClient = Stomp.over(socket);
-
-        // stompClient.debug = null;
-
-        stompClient.connect({}, () => {
-            console.log(`[STOMP] Connected to room: ${roomId}`);
-
-            // /sub/chat/room/{roomId} 구독
-            stompClient.subscribe(`/sub/chat/room/${roomId}`, (output) => {
-                const messageDto = JSON.parse(output.body);
-                appendMessageWithTemplate(messageDto);
-                scrollToBottom();
-            });
-        }, (error) => {
-            console.error('[STOMP] Connection error:', error);
-        });
+    function setChatInputEnabled(enabled) {
+        if (chatInput) {
+            chatInput.disabled = !enabled;
+            chatInput.placeholder = enabled ? "메시지를 입력하세요..." : "상대방이 오프라인 상태입니다.";
+        }
+        if (btnSend) {
+            btnSend.disabled = !enabled;
+        }
     }
 
-    //메시지 전송
-    btnSend?.addEventListener('click', sendMessage);
-    chatInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
     function sendMessage() {
+        if (!chatInput || chatInput.disabled) return;
         const content = chatInput.value.trim();
-        if (!content || !stompClient) return;
+
+        if (!content) return;
+        if (!window.globalStompClient || !window.globalStompClient.connected) {
+            alert('채팅 서버에 연결되어 있지 않습니다.');
+            return;
+        }
 
         const chatMessage = {
-            roomId: parseInt(roomId, 10),
-            senderId: parseInt(currentMemberId, 10),
-            messageType: 1, // 1: TEXT
-            content: content
+            roomId: String(currentRoomId),
+            senderId: Number(currentMemberId),
+            senderName: currentMemberName,
+            content: content,
+            createdAtText: formatCurrentTime()
         };
 
-        stompClient.send('/pub/chat/message', {}, JSON.stringify(chatMessage));
+        window.globalStompClient.send(`/app/chat.sendMessage/${currentRoomId}`, {}, JSON.stringify(chatMessage));
         chatInput.value = '';
         chatInput.focus();
     }
 
-    //<template> 태그 활용한 메시지 출력
-    function appendMessageWithTemplate(msg) {
+    function appendMessage(msg) {
+        if (!chatMessageArea) return;
+
         const template = document.getElementById('chatMessageTemplate');
-        if (!template || !chatMessageArea) return;
+        if (!template) return;
 
-        // 템플릿 복사 Deep Clone
         const clone = template.content.cloneNode(true);
-        const groupDiv = clone.querySelector('.message-group');
-        const senderSpan = clone.querySelector('.sender-name');
-        const bubbleDiv = clone.querySelector('.message-bubble');
-        const timeSpan = clone.querySelector('.message-time');
+        const messageGroup = clone.querySelector('.message-group');
+        const senderName = clone.querySelector('.sender-name');
+        const messageBubble = clone.querySelector('.message-bubble');
+        const messageTime = clone.querySelector('.message-time');
 
-        const isMyMsg = String(msg.senderId) === String(currentMemberId);
+        const isMyMessage = String(msg.senderId) === String(currentMemberId);
 
-        if (isMyMsg) {
-            groupDiv.classList.add('my-message');
-            if (senderSpan) senderSpan.remove(); // 내 메시지일 때는 닉네임 영역 제거
+        if (isMyMessage) {
+            messageGroup.classList.add('my-message');
+            if (senderName) senderName.remove();
         } else {
-            groupDiv.classList.add('other-message');
-            // 상대방 닉네임 설정 (STOMP DTO에 닉네임이 없으면 대화창 헤더의 닉네임 사용)
-            const targetNicknameHeader = document.querySelector('.chat-target strong')?.textContent;
-            if (senderSpan) {
-                senderSpan.textContent = msg.senderNickname || targetNicknameHeader || '상대방';
-            }
+            messageGroup.classList.add('other-message');
+            if (senderName) senderName.textContent = msg.senderName || '상대방';
         }
 
-        bubbleDiv.textContent = msg.content;
-        timeSpan.textContent = msg.createdAtText || getCurrentTimeString();
+        messageBubble.textContent = msg.content || '';
+        messageTime.textContent = msg.createdAtText || formatCurrentTime();
 
         chatMessageArea.appendChild(clone);
     }
 
-    // 대화창 하단 자동 스크롤
     function scrollToBottom() {
         if (chatMessageArea) {
             chatMessageArea.scrollTop = chatMessageArea.scrollHeight;
         }
     }
 
-    // 시간 포맷 생성기 (HH:mm)
-    function getCurrentTimeString() {
+    function formatCurrentTime() {
         const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
+        let hours = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
+        const ampm = hours >= 12 ? '오후' : '오전';
+        hours = hours % 12 || 12;
+        return `${ampm} ${hours}:${minutes}`;
     }
-
-    //회원 검색 모달 및 1:1 방 생성 
-    const openSearchModalBtn = document.getElementById('openSearchModalBtn');
-    const closeSearchModalBtn = document.getElementById('closeSearchModalBtn');
-    const memberSearchModal = document.getElementById('memberSearchModal');
-    const searchKeywordInput = document.getElementById('searchKeyword');
-    const btnSearchMember = document.getElementById('btnSearchMember');
-    const searchResultList = document.getElementById('searchResultList');
-
-    // 모달 열기/닫기
-    openSearchModalBtn?.addEventListener('click', () => {
-        if (memberSearchModal) memberSearchModal.style.display = 'flex';
-        searchKeywordInput?.focus();
-    });
-
-    closeSearchModalBtn?.addEventListener('click', closeModal);
-
-    // 모달 바깥 영역 클릭 시 닫기
-    memberSearchModal?.addEventListener('click', (e) => {
-        if (e.target === memberSearchModal) closeModal();
-    });
-
-    function closeModal() {
-        if (memberSearchModal) memberSearchModal.style.display = 'none';
-    }
-
-    // 회원 검색 (엔터키 및 버튼 클릭)
-    btnSearchMember?.addEventListener('click', searchMembers);
-    searchKeywordInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            searchMembers();
-        }
-    });
 
     async function searchMembers() {
         const keyword = searchKeywordInput.value.trim();
         if (!keyword) {
-            alert('검색할 닉네임을 입력해 주세요.');
+            alert('검색어를 입력해 주세요.');
             return;
         }
 
         try {
-            const response = await fetch(`/api/members/search?keyword=${encodeURIComponent(keyword)}`);
-            if (!response.ok) throw new Error('검색 실패');
+            const response = await fetch(`/mychat/searchMember?keyword=${encodeURIComponent(keyword)}`);
+            if (!response.ok) throw new Error('회원 검색 실패');
 
             const members = await response.json();
             renderSearchResults(members);
         } catch (error) {
-            console.error('회원 검색 중 오류 발생:', error);
-            alert('회원 목록을 불러오는 중 오류가 발생했습니다.');
+            console.error('검색 오류:', error);
+            searchResultList.innerHTML = `<li class="empty-text">검색 중 오류가 발생했습니다.</li>`;
         }
     }
 
-    // 검색 결과 목록 출력
     function renderSearchResults(members) {
-        if (!searchResultList) return;
         searchResultList.innerHTML = '';
 
-        if (!members || members.length === 0) {
-            searchResultList.innerHTML = '<li class="empty-text muted">검색 결과가 없습니다.</li>';
+        if (!Array.isArray(members) || members.length === 0) {
+            searchResultList.innerHTML = `<li class="empty-text">검색 결과가 없습니다.</li>`;
             return;
         }
 
-        members.forEach(member => {
+        const filtered = members.filter(m => String(m.member_id) !== String(currentMemberId));
+
+        if (filtered.length === 0) {
+            searchResultList.innerHTML = `<li class="empty-text">검색된 회원이 없거나 본인입니다.</li>`;
+            return;
+        }
+
+        filtered.forEach(member => {
             const li = document.createElement('li');
-            li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0;';
+            li.className = 'search-result-item';
 
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = member.nickname;
+            li.innerHTML = `
+                <div class="user-info">
+                    <strong>${escapeHtml(member.name)}</strong>
+                    <small class="muted">(${escapeHtml(member.login_id)})</small>
+                </div>
+                <button type="button" class="btn btn-primary btn-small start-chat-btn" data-target-id="${member.member_id}">
+                    대화하기
+                </button>
+            `;
 
-            const chatBtn = document.createElement('button');
-            chatBtn.type = 'button';
-            chatBtn.className = 'btn btn-primary btn-small';
-            chatBtn.textContent = '대화하기';
-            chatBtn.addEventListener('click', () => createOrGetChatRoom(member.memberId));
-
-            li.appendChild(nameSpan);
-            li.appendChild(chatBtn);
             searchResultList.appendChild(li);
         });
     }
 
-    // 1:1 방 생성 및 이동 API 연동
-    async function createOrGetChatRoom(targetMemberId) {
-        const headers = { 'Content-Type': 'application/json' };
-        if (csrfToken && csrfHeader) {
-            headers[csrfHeader] = csrfToken;
-        }
-
+    async function startChat(targetMemberId) {
         try {
-            const response = await fetch('/api/chat/room', {
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            const response = await fetch('/mychat/room', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({ targetMemberId: targetMemberId })
             });
 
-            if (!response.ok) throw new Error('채팅방 생성 실패');
+            if (!response.ok) {
+                throw new Error(`채팅방 생성 실패 (Status: ${response.status})`);
+            }
 
-            const data = await response.json(); // { roomId: 123 }
-            // 해당 채팅방으로 페이지 이동
-            window.location.href = `/my/chat?roomId=${data.roomId}`;
+            const data = await response.json();
+
+            if (data.isOnline === false) {
+                alert(data.message || '상대방이 현재 오프라인 상태입니다.');
+                return;
+            }
+
+            if (data.isOnline && data.roomId) {
+                alert('상대방에게 대화 요청을 보냈습니다.');
+                window.location.href = `/my/chat?roomId=${data.roomId}`;
+            } else {
+                alert('채팅방 정보를 불러오지 못했습니다.');
+            }
         } catch (error) {
-            console.error('채팅방 이동 중 오류 발생:', error);
-            alert('채팅방을 생성하거나 이동할 수 없습니다.');
+            console.error('1:1 채팅 시작 오류:', error);
+            alert('채팅방 생성 중 오류가 발생했습니다.');
         }
     }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
+                  .replace(/'/g, "&#039;");
+    }
+
+    if (btnSend) btnSend.addEventListener('click', sendMessage);
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    if (openSearchModalBtn) {
+        openSearchModalBtn.addEventListener('click', () => {
+            searchModal.style.display = 'flex';
+            searchKeywordInput.value = '';
+            searchResultList.innerHTML = `<li class="empty-text">검색어를 입력 후 검색 버튼을 눌러주세요.</li>`;
+            searchKeywordInput.focus();
+        });
+    }
+
+    if (closeSearchModalBtn) {
+        closeSearchModalBtn.addEventListener('click', () => {
+            searchModal.style.display = 'none';
+        });
+    }
+
+    if (searchModal) {
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                searchModal.style.display = 'none';
+            }
+        });
+    }
+
+    if (btnSearchMember) btnSearchMember.addEventListener('click', searchMembers);
+    if (searchKeywordInput) {
+        searchKeywordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchMembers();
+            }
+        });
+    }
+
+    if (searchResultList) {
+        searchResultList.addEventListener('click', (e) => {
+            const btn = e.target.closest('.start-chat-btn');
+            if (btn) {
+                const targetId = btn.dataset.targetId;
+                startChat(targetId);
+            }
+        });
+    }
+
+    if (currentRoomId) scrollToBottom();
 });
