@@ -1,6 +1,6 @@
 .home-main .hero.hero-layout { align-items:start; row-gap:28px; }
 .home-main .hero-layout > .ai-island-anchor { grid-column:1 / -1; width:100%; margin-top:0; }
-.home-main .ai-island-anchor { position:relative; margin-top:30px; z-index:30; }
+.home-main .ai-island-anchor { position:relative; margin-top:30px; z-index:10; }
 .home-main .hero .compact-basket { align-self:start; height:auto; min-height:0; padding:26px; gap:0; }
 .home-main .compact-basket .basket-heading { margin-bottom:14px; }
 .home-main .compact-basket .basket-heading h2 { font-size:18px; margin:0; }
@@ -51,6 +51,11 @@
 .ai-island input.ai-placeholder-changing::placeholder { opacity:0; }
 .ai-island #ai-recipe-submit { display:inline-flex; flex:0 0 76px; width:76px; height:44px; align-items:center; justify-content:center; padding:0 12px; border-radius:9px; color:#fff; background:#ec603e; font-size:13px; font-weight:700; white-space:nowrap; transition:background .24s ease; }
 .ai-island #ai-recipe-submit:hover { background:#d54e30; }
+.ai-island #ai-recipe-submit { flex-basis:46px; width:46px; height:44px; padding:0; border:0; border-radius:12px; background:#f8eee4; color:#a76c46; box-shadow:none; transition:background .22s ease,color .22s ease,box-shadow .22s ease; }
+.ai-island #ai-recipe-submit:hover { background:#f0dfce; color:#8e5030; }
+.ai-island #ai-recipe-submit[data-mode='search'] { background:#ed623f; color:#fffaf4; box-shadow:0 3px 9px #dd583421; }
+.ai-island #ai-recipe-submit[data-mode='search']:hover { background:#d95333; box-shadow:0 4px 12px #dd583432; }
+.ai-island .ai-submit-icon { display:grid; place-items:center; line-height:1; }
 .ai-island .ai-suggestions { position:absolute; top:calc(100% + 6px); left:0; right:0; max-height:220px; overflow:auto; background:#fffefa; border:1px solid #e4d2be; border-radius:12px; padding:6px; box-shadow:0 8px 20px #56311819; z-index:3; }
 .ai-island .ai-suggestion { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:42px; border:0; border-radius:7px; padding:10px 12px; text-align:left; color:#4d3b2c; background:transparent; font-size:13px; transition:background .2s ease; }
 .ai-island .ai-suggestion small { font-size:10px; color:#9e896f; }

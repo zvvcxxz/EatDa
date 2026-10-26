@@ -1,320 +1,418 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
-<head><title>홈 · 잇다</title>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout}">
+<head>
+<title>홈 · 잇다</title>
 <th:block layout:fragment="css">
-    <link rel="stylesheet" th:href="@{/dist/css/intro-curtain.css}">
-    <link rel="stylesheet" th:href="@{/dist/css/home-community.css}">
-    <link rel="stylesheet" th:href="@{/dist/css/home-mini-fridge.css}">
-    <link rel="stylesheet" th:href="@{/dist/css/home-ai-search.css}">
-    <style>
-    /* 메인페이지에서 사용하는 챗봇 모달 */
-    dialog.lunch-chat-dialog {
-        box-sizing: border-box;
-        width: min(1100px, 94vw);
-        max-width: none;
-        height: min(850px, 92vh);
-        max-height: 92vh;
-        margin: auto;
-        padding: 0;
-        overflow: hidden;
-        border: 0;
-        border-radius: 22px;
-        background: #ffffff;
-        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.2);
-    }
+	<link rel="stylesheet" th:href="@{/dist/css/intro-curtain.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/home-community.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/home-mini-fridge.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/home-ai-search.css}">
+	<style>
+/* 메인페이지에서 사용하는 챗봇 모달 */
+dialog.lunch-chat-dialog {
+	box-sizing: border-box;
+	width: min(1100px, 94vw);
+	max-width: none;
+	height: min(850px, 92vh);
+	max-height: 92vh;
+	margin: auto;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	border-radius: 22px;
+	background: #ffffff;
+	box-shadow: 0 20px 70px rgba(0, 0, 0, 0.2);
+}
 
-    dialog.lunch-chat-dialog::backdrop {
-        background: rgba(25, 25, 25, 0.45);
-    }
+dialog.lunch-chat-dialog::backdrop {
+	background: rgba(25, 25, 25, 0.45);
+}
 
-    .lunch-modal-header {
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 54px;
-        padding: 0 22px;
-        border-bottom: 1px solid #eeeeee;
-        background: #ffffff;
-    }
+.lunch-modal-header {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 54px;
+	padding: 0 22px;
+	border-bottom: 1px solid #eeeeee;
+	background: #ffffff;
+}
 
-    .lunch-modal-header h2 {
-        margin: 0;
-        color: #333333;
-        font-size: 15px;
-        font-weight: 700;
-    }
+.lunch-modal-header h2 {
+	margin: 0;
+	color: #333333;
+	font-size: 15px;
+	font-weight: 700;
+}
 
-    .lunch-modal-header button {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        border: 0;
-        border-radius: 50%;
-        color: #444444;
-        background: #f3f3f3;
-        font-size: 17px;
-        cursor: pointer;
-    }
+.lunch-modal-header button {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	color: #444444;
+	background: #f3f3f3;
+	font-size: 17px;
+	cursor: pointer;
+}
 
-    .lunch-modal-header button:hover {
-        background: #ffe9d8;
-    }
+.lunch-modal-header button:hover {
+	background: #ffe9d8;
+}
 
-    #lunch-chat-frame {
-        display: block;
-        width: 100%;
-        height: calc(100% - 54px);
-        border: 0;
-        background: #ffffff;
-    }
-	</style>
+#lunch-chat-frame {
+	display: block;
+	width: 100%;
+	height: calc(100% - 54px);
+	border: 0;
+	background: #ffffff;
+}
+</style>
+	<link rel="stylesheet" th:href="@{/dist/css/home-recipe-slide.css}">
 </th:block>
 </head>
-<body><th:block layout:fragment="content">
-    <!-- 브랜드 인트로: 샘플 데이터와 별개. JS가 실패하면 홈을 가리지 않습니다. -->
-    <dialog id="intro-dialog" class="intro-dialog" aria-label="잇다 시작 화면">
-      <button id="intro-skip" class="intro-skip" aria-label="인트로 건너뛰고 홈으로 이동">
-        <img src="../../static/dist/images/itda-logo.png" th:src="@{/dist/images/itda-logo.png}" alt="잇다 로고" />
-        <span class="intro-brand">EAT-DA</span>
-        <span class="intro-lines" aria-hidden="true">
-          <span id="intro-line-one"></span>
-          <span id="intro-line-two"></span>
-        </span>
-        <span class="intro-hint">화면을 클릭하거나 아무 키나 누르면 바로 이동합니다</span>
-      </button>
-    </dialog>
-    
-    
-    <main class="wrap home-main">
-      <section class="hero hero-layout">
-        <div>
-          <span class="pill">✨ 재료를 이어 요리로, 요리를 이어 우리로</span>
-          <h1>냉장고를 열고,<br /><span>한 끼를 잇다.</span></h1>
-          <p>남은 김치 한 포기, 계란 두 개로도 근사한 순간이 완성됩니다.<br />냉장고 속 잊혀졌던 재료들을 맛있는 레시피와 따뜻한 이야기로 이어 드릴게요.</p>
-        </div>
-        <section class="basket-panel">
-          <div class="basket-heading"><h2><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> 빠른 재료 조합기</h2><button id="basket-clear">초기화</button></div>
-          <div id="quick-ingredients" class="tags"></div>
-          <p id="quick-status" class="status">재료 목록을 불러오는 중입니다.</p>
-          <div class="basket-summary"><p>선택된 나의 냉장고 재료:</p><div id="basket-selected" class="tags"><em>위의 재료를 선택해보세요!</em></div>
-          <button id="basket-search" class="button yellow">
-            이 재료로 만들 수 있는 레시피 찾기 ✨</button></div>
-        </section>
-<div class="ai-island-anchor">
-<section class="ai-island" aria-label="AI 레시피 검색">
-  <div class="ai-launcher">
-  <div id="open-search" tabindex="-1" class="ai-launcher-heading"><strong>AI 레시피 검색</strong><span>남은 재료로, 오늘의 한식 한 끼.</span></div>
-  <!-- 메인 검색 : 재료 입력 > 후보 선택 > 검색 결과창 출력 -->
-      <form id="ai-island-form" novalidate>
-        <label class="ai-field-label" for="ai-ingredient-input">어떤 재료가 남아 있나요?</label>
-        <div class="ai-input-wrap">
-          <div class="ai-ingredient-entry"><input id="ai-ingredient-input" data-home-ai-input type="text" placeholder="예: 계란, 두부, 대파" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="ai-ingredient-options" aria-autocomplete="list" aria-describedby="ai-input-help"><button type="submit" id="ai-recipe-submit">검색</button></div>
-          <div id="ai-ingredient-options" class="ai-suggestions" role="listbox" aria-label="재료 후보" hidden></div>
-        </div>
-        <p class="ai-input-help" id="ai-input-help">등록된 후보를 선택해 주세요. 같은 재료는 한 번만 추가돼요.</p>
-        <div class="ai-picked" id="ai-picked" aria-label="선택한 재료"></div>
-        <div class="ai-search-feedback"><p id="ai-island-status" role="status" aria-live="polite"></p><div class="ai-demo-actions"><button type="button" class="ai-demo-button" id="ai-demo-results">계란·두부·대파로 예시 보기</button><button type="button" class="ai-demo-button" id="ai-demo-cook">조리 모드 미리보기</button></div></div>
-      </form>
-  </div>
-  <div class="ai-results-panel" role="region" aria-label="레시피 검색 결과" tabindex="-1">
-    <div class="ai-panel-heading"><div class="ai-island-copy"><strong>AI 레시피 검색</strong><small>선택한 재료로 찾은 한식 레시피</small></div><button id="ai-island-toggle" class="ai-panel-close" type="button" aria-label="검색 결과 닫기"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
-    <div class="ai-island-reveal" id="ai-island-body" inert>
-    <div class="ai-island-inner">
-      <div class="ai-scope-line"><span>디자인 검토본 · 실제 API/AI 미연결</span><button type="button" id="ai-edit-ingredients">재료 다시 선택</button></div>
-      <section class="ai-results" id="ai-results" aria-labelledby="ai-results-title" hidden>
-        <div class="ai-results-head"><div><span class="ai-eyebrow">선택한 재료에서 시작하는 한 끼</span><h2 id="ai-results-title" tabindex="-1">이런 요리는 어떠세요?</h2><p id="ai-results-query"></p></div><span class="ai-example-label">모든 결과는 예시 데이터</span></div>
-        <div class="ai-results-tools">
-          <div class="ai-source-filters" role="group" aria-label="레시피 출처"><button type="button" data-source="all" aria-pressed="true">전체</button><button type="button" data-source="official" aria-pressed="false">공식 API 예시</button><button type="button" data-source="member" aria-pressed="false">공개 회원 예시</button></div>
-          <label class="ai-availability-label">재료 상태 <select id="ai-availability"><option value="all">전체</option><option value="complete">주재료 모두 있음</option><option value="missing">추가 재료 필요</option></select></label>
-        </div>
-        <div class="ai-sort-line"><span id="ai-result-total"></span><span>재료 일치순 · 동률은 이름순</span></div>
-        <p class="ai-match-note">예시에서는 주재료만 비교하며, 양념은 제외합니다. 실제 포함 범위는 팀 기준 확정 후 적용해요.</p>
-        <div class="ai-results-list" id="ai-results-list" aria-busy="false"></div>
-        <div class="ai-more-wrap"><p id="ai-result-count" aria-live="polite"></p><button type="button" id="ai-results-more" hidden>레시피 더보기</button></div>
-      </section>
-    </div>
-  </div>
-  </div>
-</section>
-</div>
+<body>
+	<th:block layout:fragment="content">
+		<!-- 브랜드 인트로: 샘플 데이터와 별개. JS가 실패하면 홈을 가리지 않습니다. -->
+		<dialog id="intro-dialog" class="intro-dialog" aria-label="잇다 시작 화면">
+		<button id="intro-skip" class="intro-skip"
+			aria-label="인트로 건너뛰고 홈으로 이동">
+			<img src="../../static/dist/images/itda-logo.png"
+				th:src="@{/dist/images/itda-logo.png}" alt="잇다 로고" /> <span
+				class="intro-brand">EAT-DA</span> <span class="intro-lines"
+				aria-hidden="true"> <span id="intro-line-one"></span> <span
+				id="intro-line-two"></span>
+			</span> <span class="intro-hint">화면을 클릭하거나 아무 키나 누르면 바로 이동합니다</span>
+		</button>
+		</dialog>
 
-      </section>
-      <section>
-        <div class="section-head">
-          <div>
-            <p class="eyebrow"><i class="fa-solid fa-fire" aria-hidden="true"></i> TODAY'S RECOMMENDATION</p>
-            <h2>지금 가장 인기 있는 레시피 잇다 🔥</h2>
-          </div>
-          <div id="category-filters" class="filters">
-            <button data-category="" class="active">전체</button
-            ><button data-category="자취" class="">자취요리</button
-            ><button data-category="건강" class="">건강식</button
-            ><button data-category="초간단" class="">초간단 10분</button
-            ><button data-category="야식/안주" class="">야식/안주</button>
-          </div>
-        </div>
-        <p id="home-recipe-status" class="status" role="status"></p>
-        <div id="home-recipes" class="recipe-grid"></div>
-      </section>
-      <section class="home-bottom">
-        <article class="panel mf-fridge" aria-labelledby="mf-title">
-          <div class="mf-freezer">
-            <div><span class="mf-label">나의 주방</span><h2 id="mf-title">냉장고 신선도 매니저</h2></div>
-            <span class="mf-brand" aria-hidden="true">EAT-DA</span>
-          </div>
-          <div class="mf-door">
-            <div class="mf-window">
-              <p class="mf-caption">냉장고 속 재료</p>
-              <div id="fridge-items" aria-live="polite"></div>
-              <div class="mf-shelf" aria-hidden="true"></div>
-              <div class="mf-drawer" aria-hidden="true"><span></span></div>
-            </div>
-            <div class="actions mf-actions">
-              <a class="button" href="/my/fridge" th:href="@{/my/fridge}">냉장고 관리 <span aria-hidden="true">→</span></a>
-            </div>
-          </div>
-          <div class="mf-plinth" aria-hidden="true"></div>
-        </article>
-        <article class="panel hc-panel" data-home-community
-          th:data-api="@{/home/community-preview}"
-          th:data-meet-base="@{/together/meet/}" th:data-share-base="@{/together/share/}">
-          <div class="hc-heading">
-            <div><p class="hc-eyebrow">함께하는 주방</p><h2 id="hc-title">같이 먹어요</h2></div>
-            <button type="button" class="hc-switch" aria-controls="community-highlights">재료 나눔 보기 <span aria-hidden="true">⇄</span></button>
-          </div>
-          <p class="hc-status" role="status" aria-live="polite"></p>
-          <div id="community-highlights" class="hc-list" aria-labelledby="hc-title"></div>
-          <div class="hc-bottom"><span>최신 등록순 · 최대 4개</span><a class="hc-all" th:href="@{/together/meet}">전체 글 보기 <span aria-hidden="true">→</span></a></div>
-        </article>
-      </section>
-    </main>
-    <aside class="mini-rail" aria-label="미니게임">
-      <small><i class="fa-solid fa-gamepad" aria-hidden="true"></i><br />미니게임</small
-      ><button data-unlinked aria-label="메뉴 추천 챗봇"><i class="fa-solid fa-robot" aria-hidden="true"></i></button
-      ><button type="button" id="open-lunch-chat"
-        aria-label="점심 추천 챗봇"
-        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
+
+		<main class="wrap home-main">
+			<section class="hero hero-layout">
+				<div>
+					<span class="pill">✨ 재료를 이어 요리로, 요리를 이어 우리로</span>
+					<h1>
+						냉장고를 열고,<br /> <span>한 끼를 잇다.</span>
+					</h1>
+					<p>
+						남은 김치 한 포기, 계란 두 개로도 근사한 순간이 완성됩니다.<br />냉장고 속 잊혀졌던 재료들을 맛있는 레시피와
+						따뜻한 이야기로 이어 드릴게요.
+					</p>
+				</div>
+				<section class="basket-panel">
+					<div class="basket-heading">
+						<h2>
+							<i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> 빠른
+							재료 조합기
+						</h2>
+						<button id="basket-clear">초기화</button>
+					</div>
+					<div id="quick-ingredients" class="tags"></div>
+					<p id="quick-status" class="status">재료 목록을 불러오는 중입니다.</p>
+					<div class="basket-summary">
+						<p>선택된 나의 냉장고 재료:</p>
+						<div id="basket-selected" class="tags">
+							<em>위의 재료를 선택해보세요!</em>
+						</div>
+						<button id="basket-search" class="button yellow">이 재료로 만들
+							수 있는 레시피 찾기 ✨</button>
+					</div>
+				</section>
+				<div class="ai-island-anchor">
+					<section class="ai-island" aria-label="AI 레시피 검색">
+						<div class="ai-launcher">
+							<div id="open-search" tabindex="-1" class="ai-launcher-heading">
+								<strong>AI 레시피 검색</strong><span>남은 재료로, 오늘의 한식 한 끼.</span>
+							</div>
+							<!-- 메인 검색 : 재료 입력 > 후보 선택 > 검색 결과창 출력 -->
+							<form id="ai-island-form" novalidate>
+								<label class="ai-field-label" for="ai-ingredient-input">어떤
+									재료가 남아 있나요?</label>
+								<div class="ai-input-wrap">
+									<div class="ai-ingredient-entry">
+										<input id="ai-ingredient-input" type="text"
+											placeholder="예: 계란, 두부, 대파" autocomplete="off"
+											role="combobox" aria-expanded="false"
+											aria-controls="ai-ingredient-options"
+											aria-autocomplete="list" aria-describedby="ai-input-help">
+										<button type="submit" id="ai-recipe-submit">검색</button>
+									</div>
+									<div id="ai-ingredient-options" class="ai-suggestions"
+										role="listbox" aria-label="재료 후보" hidden></div>
+								</div>
+								<p class="ai-input-help" id="ai-input-help">등록된 후보를 선택해 주세요.
+									같은 재료는 한 번만 추가돼요.</p>
+								<div class="ai-picked" id="ai-picked" aria-label="선택한 재료"></div>
+								<div class="ai-search-feedback">
+									<p id="ai-island-status" role="status" aria-live="polite"></p>
+									<div class="ai-demo-actions">
+										<button type="button" class="ai-demo-button"
+											id="ai-demo-results">계란·두부·대파로 예시 보기</button>
+										<button type="button" class="ai-demo-button" id="ai-demo-cook">조리
+											모드 미리보기</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="ai-results-panel" role="region" aria-label="레시피 검색 결과"
+							tabindex="-1">
+							<div class="ai-panel-heading">
+								<div class="ai-island-copy">
+									<strong>AI 레시피 검색</strong><small>선택한 재료로 찾은 한식 레시피</small>
+								</div>
+								<button id="ai-island-toggle" class="ai-panel-close"
+									type="button" aria-label="검색 결과 닫기">
+									<svg width="21" height="21" viewBox="0 0 24 24" fill="none"
+										stroke="currentColor" stroke-width="1.8"
+										stroke-linecap="round" aria-hidden="true">
+										<path d="m6 6 12 12M18 6 6 18" /></svg>
+								</button>
+							</div>
+							<div class="ai-island-reveal" id="ai-island-body" inert>
+								<div class="ai-island-inner">
+									<div class="ai-scope-line">
+										<span>디자인 검토본 · 실제 API/AI 미연결</span>
+										<button type="button" id="ai-edit-ingredients">재료 다시
+											선택</button>
+									</div>
+									<section class="ai-results" id="ai-results"
+										aria-labelledby="ai-results-title" hidden>
+										<div class="ai-results-head">
+											<div>
+												<span class="ai-eyebrow">선택한 재료에서 시작하는 한 끼</span>
+												<h2 id="ai-results-title" tabindex="-1">이런 요리는 어떠세요?</h2>
+												<p id="ai-results-query"></p>
+											</div>
+											<span class="ai-example-label">모든 결과는 예시 데이터</span>
+										</div>
+										<div class="ai-results-tools">
+											<div class="ai-source-filters" role="group"
+												aria-label="레시피 출처">
+												<button type="button" data-source="all" aria-pressed="true">전체</button>
+												<button type="button" data-source="official"
+													aria-pressed="false">공식 API 예시</button>
+												<button type="button" data-source="member"
+													aria-pressed="false">공개 회원 예시</button>
+											</div>
+											<label class="ai-availability-label">재료 상태 <select
+												id="ai-availability"><option value="all">전체</option>
+													<option value="complete">주재료 모두 있음</option>
+													<option value="missing">추가 재료 필요</option></select></label>
+										</div>
+										<div class="ai-sort-line">
+											<span id="ai-result-total"></span><span>재료 일치순 · 동률은
+												이름순</span>
+										</div>
+										<p class="ai-match-note">예시에서는 주재료만 비교하며, 양념은 제외합니다. 실제 포함
+											범위는 팀 기준 확정 후 적용해요.</p>
+										<div class="ai-results-list" id="ai-results-list"
+											aria-busy="false"></div>
+										<div class="ai-more-wrap">
+											<p id="ai-result-count" aria-live="polite"></p>
+											<button type="button" id="ai-results-more" hidden>레시피
+												더보기</button>
+										</div>
+									</section>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+
+			</section>
+			<section class="community-showcase" aria-roledescription="캐러셀"
+				aria-label="우리의 주방 이야기">
+				<div class="section-head">
+					<div>
+						<p class="eyebrow">FROM OUR KITCHENS</p>
+						<h2>오늘, 이웃의 식탁에는</h2>
+						<p class="slide-subtitle">나누고 싶은 레시피와 직접 만들어본 한 끼를 만나보세요.</p>
+					</div>
+					<div class="slide-tabs" role="group" aria-label="게시판 선택">
+						<button type="button" data-slide-type="all" aria-pressed="true">전체</button>
+						<button type="button" data-slide-type="모두의 레시피"
+							aria-pressed="false">모두의 레시피</button>
+						<button type="button" data-slide-type="따라 만든 요리"
+							aria-pressed="false">따라 만든 요리</button>
+					</div>
+				</div>
+				<div class="slide-window">
+					<div class="slide-track"></div>
+				</div>
+				<div class="slide-controls">
+					<div class="slide-line" aria-hidden="true">
+						<span></span>
+					</div>
+					<span class="slide-counter" aria-label="슬라이드 위치"></span>
+					<button type="button" id="slide-play">일시정지</button>
+					<button type="button" id="slide-prev" aria-label="이전 슬라이드">‹</button>
+					<button type="button" id="slide-next" aria-label="다음 슬라이드">›</button>
+				</div>
+				<p id="slide-announcement" role="status" class="sr-only"
+					style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)"></p>
+				<p class="slide-demo-note">디자인 미리보기 · 프로젝트 내 사진을 사용한 예시이며, 제목과
+					게시판 구분은 실제 게시글 정보가 아닙니다.</p>
+			</section>
+			<section class="home-bottom">
+				<article class="panel mf-fridge" aria-labelledby="mf-title">
+					<div class="mf-freezer">
+						<div>
+							<span class="mf-label">나의 주방</span>
+							<h2 id="mf-title">냉장고 신선도 매니저</h2>
+						</div>
+						<span class="mf-brand" aria-hidden="true">EAT-DA</span>
+					</div>
+					<div class="mf-door">
+						<div class="mf-window">
+							<p class="mf-caption">냉장고 속 재료</p>
+							<div id="fridge-items" aria-live="polite"></div>
+							<div class="mf-shelf" aria-hidden="true"></div>
+							<div class="mf-drawer" aria-hidden="true">
+								<span></span>
+							</div>
+						</div>
+						<div class="actions mf-actions">
+							<a class="button" href="/my/fridge" th:href="@{/my/fridge}">냉장고
+								관리 <span aria-hidden="true">→</span>
+							</a>
+						</div>
+					</div>
+					<div class="mf-plinth" aria-hidden="true"></div>
+				</article>
+				<article class="panel hc-panel" data-home-community
+					th:data-api="@{/home/community-preview}"
+					th:data-meet-base="@{/together/meet/}"
+					th:data-share-base="@{/together/share/}">
+					<div class="hc-heading">
+						<div>
+							<p class="hc-eyebrow">함께하는 주방</p>
+							<h2 id="hc-title">같이 먹어요</h2>
+						</div>
+						<button type="button" class="hc-switch"
+							aria-controls="community-highlights">
+							재료 나눔 보기 <span aria-hidden="true">⇄</span>
+						</button>
+					</div>
+					<p class="hc-status" role="status" aria-live="polite"></p>
+					<div id="community-highlights" class="hc-list"
+						aria-labelledby="hc-title"></div>
+					<div class="hc-bottom">
+						<span>최신 등록순 · 최대 4개</span><a class="hc-all"
+							th:href="@{/together/meet}">전체 글 보기 <span aria-hidden="true">→</span></a>
+					</div>
+				</article>
+			</section>
+		</main>
+		<aside class="mini-rail" aria-label="미니게임">
+			<small><i class="fa-solid fa-gamepad" aria-hidden="true"></i><br />미니게임</small>
+			<button data-unlinked aria-label="메뉴 추천 챗봇">
+				<i class="fa-solid fa-robot" aria-hidden="true"></i>
+			</button>
+			<button type="button" id="open-lunch-chat" aria-label="점심 추천 챗봇"
+				th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
                  data-login-url=@{/member/login}">
-    		<i class="fa-solid fa-dice" aria-hidden="true"></i></button
-      ><button data-unlinked aria-label="메뉴 추천 미니게임"><i class="fa-solid fa-trophy" aria-hidden="true"></i></button
-      ><button data-unlinked aria-label="오늘의 괴식"><i class="fa-solid fa-flask" aria-hidden="true"></i></button>
-    </aside>
+				<i class="fa-solid fa-dice" aria-hidden="true"></i>
+			</button>
+			<button data-unlinked aria-label="메뉴 추천 미니게임">
+				<i class="fa-solid fa-trophy" aria-hidden="true"></i>
+			</button>
+			<button data-unlinked aria-label="오늘의 괴식">
+				<i class="fa-solid fa-flask" aria-hidden="true"></i>
+			</button>
+		</aside>
 
-    <!-- 점심 추천 챗봇 모달 -->
-	<dialog id="lunch-chat-dialog" class="lunch-chat-dialog"
-	        aria-labelledby="lunch-modal-title">
-	    <div class="lunch-modal-header">
-	        <h2 id="lunch-modal-title">점심메이트</h2>
-	        <button type="button" id="close-lunch-chat"
-	                aria-label="점심 추천 챗봇 닫기">
-	            ✕
-	        </button>
-	    </div>
-	
-	    <!-- 작성한 챗봇 화면을 모달 안에 표시 -->
-	    <iframe id="lunch-chat-frame"
-	            title="점심 추천 챗봇"
-	            th:attr="data-src=@{/ai/aichatbot}">
-	    </iframe>
-	</dialog>
-    
-    <div th:replace="~{fragments/recipe-dialogs :: recipeDialogs}">
-      <dialog id="search-dialog" class="modal wide">
-        <div class="modal-head">
-          <h2>레시피 검색</h2>
-          <button
-            class="icon-button"
-            data-close="search-dialog"
-            aria-label="검색 닫기"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="modal-body">
-          <form id="recipe-search-form" class="search-form">
-            <input
-              id="ingredient-query"
-              class="text-input"
-              placeholder="재료 검색"
-              aria-label="재료 검색어"
-              autocomplete="off"
-            /><button class="button">검색</button>
-          </form>
-          <div
-            id="ingredient-options"
-            class="ingredient-results"
-            aria-label="재료 검색 결과"
-          ></div>
-          <div id="search-selected" class="tags"></div>
-          <p id="search-status" class="status" role="status"></p>
-          <div id="search-results" class="recipe-grid"></div>
-          <div class="more-wrap">
-            <button id="search-more" class="button secondary" hidden>
-              더 보기
-            </button>
-          </div>
-        </div>
-      </dialog>
-      <dialog id="recipe-dialog" class="modal">
-        <div class="modal-head">
-          <h2>레시피 상세</h2>
-          <button
-            class="icon-button"
-            data-close="recipe-dialog"
-            aria-label="상세 닫기"
-          >
-            ✕
-          </button>
-        </div>
-        <div id="recipe-detail" class="modal-body"></div>
-      </dialog>
-      <dialog id="cook-dialog" class="modal">
-        <div class="modal-head">
-          <h2 id="cook-title">단계별 조리</h2>
-          <button
-            class="icon-button"
-            data-close="cook-dialog"
-            aria-label="조리 닫기"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="modal-body">
-          <p id="cook-counter" class="muted"></p>
-          <div class="cook-progress"><div id="cook-progress"></div></div>
-          <section id="cook-step" class="cook-step"></section>
-          <div class="cook-actions">
-            <button id="cook-prev" class="button secondary">이전</button
-            ><button id="cook-next" class="button">다음</button
-            ><button id="cook-complete" class="button yellow">단계 완료</button>
-          </div>
-          <p class="muted">좌우로 스와이프하거나 버튼으로 단계를 이동하세요.</p>
-        </div>
-      </dialog>
-      <dialog id="complete-dialog" class="modal">
-        <div class="modal-body complete-card">
-          <div class="check">✓</div>
-          <b>OK!</b>
-          <p id="complete-message"></p>
-          <button class="button" data-close="complete-dialog">확인</button>
-        </div>
-      </dialog>
-    </div>
-    
-    
-  </th:block>
-<th:block layout:fragment="script"><script type="module" src="../../static/dist/js/intro.js" th:src="@{/dist/js/intro.js}"></script>
-<script
-      type="module"
-      src="../../static/dist/js/home.js"
-      th:src="@{/dist/js/home.js}"
-    ></script><script defer th:src="@{/dist/js/home-community.js}"></script>
-<script defer th:src="@{/dist/js/home-ai-search.js}"></script>
+		<!-- 점심 추천 챗봇 모달 -->
+		<dialog id="lunch-chat-dialog" class="lunch-chat-dialog"
+			aria-labelledby="lunch-modal-title">
+		<div class="lunch-modal-header">
+			<h2 id="lunch-modal-title">점심메이트</h2>
+			<button type="button" id="close-lunch-chat" aria-label="점심 추천 챗봇 닫기">
+				✕</button>
+		</div>
 
-<script>
+		<!-- 작성한 챗봇 화면을 모달 안에 표시 --> <iframe id="lunch-chat-frame"
+			title="점심 추천 챗봇" th:attr="data-src=@{/ai/aichatbot}"> </iframe> </dialog>
+
+		<div th:replace="~{fragments/recipe-dialogs :: recipeDialogs}">
+			<dialog id="search-dialog" class="modal wide">
+			<div class="modal-head">
+				<h2>레시피 검색</h2>
+				<button class="icon-button" data-close="search-dialog"
+					aria-label="검색 닫기">✕</button>
+			</div>
+			<div class="modal-body">
+				<form id="recipe-search-form" class="search-form">
+					<input id="ingredient-query" class="text-input" placeholder="재료 검색"
+						aria-label="재료 검색어" autocomplete="off" />
+					<button class="button">검색</button>
+				</form>
+				<div id="ingredient-options" class="ingredient-results"
+					aria-label="재료 검색 결과"></div>
+				<div id="search-selected" class="tags"></div>
+				<p id="search-status" class="status" role="status"></p>
+				<div id="search-results" class="recipe-grid"></div>
+				<div class="more-wrap">
+					<button id="search-more" class="button secondary" hidden>
+						더 보기</button>
+				</div>
+			</div>
+			</dialog>
+			<dialog id="recipe-dialog" class="modal">
+			<div class="modal-head">
+				<h2>레시피 상세</h2>
+				<button class="icon-button" data-close="recipe-dialog"
+					aria-label="상세 닫기">✕</button>
+			</div>
+			<div id="recipe-detail" class="modal-body"></div>
+			</dialog>
+			<dialog id="cook-dialog" class="modal">
+			<div class="modal-head">
+				<h2 id="cook-title">단계별 조리</h2>
+				<button class="icon-button" data-close="cook-dialog"
+					aria-label="조리 닫기">✕</button>
+			</div>
+			<div class="modal-body">
+				<p id="cook-counter" class="muted"></p>
+				<div class="cook-progress">
+					<div id="cook-progress"></div>
+				</div>
+				<section id="cook-step" class="cook-step"></section>
+				<div class="cook-actions">
+					<button id="cook-prev" class="button secondary">이전</button>
+					<button id="cook-next" class="button">다음</button>
+					<button id="cook-complete" class="button yellow">단계 완료</button>
+				</div>
+				<p class="muted">좌우로 스와이프하거나 버튼으로 단계를 이동하세요.</p>
+			</div>
+			</dialog>
+			<dialog id="complete-dialog" class="modal">
+			<div class="modal-body complete-card">
+				<div class="check">✓</div>
+				<b>OK!</b>
+				<p id="complete-message"></p>
+				<button class="button" data-close="complete-dialog">확인</button>
+			</div>
+			</dialog>
+		</div>
+
+
+	</th:block>
+	<th:block layout:fragment="script">
+		<script type="module" src="../../static/dist/js/intro.js"
+			th:src="@{/dist/js/intro.js}"></script>
+		<script type="module" src="../../static/dist/js/home.js"
+			th:src="@{/dist/js/home.js}"></script>
+		<script defer th:src="@{/dist/js/home-community.js}"></script>
+		<script defer th:src="@{/dist/js/home-ai-search.js}"></script>
+		<script defer th:src="@{/dist/js/home-recipe-slide.js}"></script>
+
+		<script>
     document.addEventListener('DOMContentLoaded', function () {
         const openButton = document.querySelector('#open-lunch-chat');
         const closeButton = document.querySelector('#close-lunch-chat');
@@ -389,6 +487,7 @@
         }
     });
 </script>
-</th:block>
+	</th:block>
 </body>
 </html>
+

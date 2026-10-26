@@ -56,6 +56,8 @@ async function loadIngredients(query = "", target = "quick-ingredients") {
     }
 }
 async function recommendations() {
+    // 메인 레시피 : 슬라이드 사용 시 기존 목록 조회 제외
+    if (!$("home-recipes") || !$("home-recipe-status")) return;
     const version = ++recommendationVersion;
     $("home-recipe-status").textContent = "불러오는 중입니다.";
     try {
