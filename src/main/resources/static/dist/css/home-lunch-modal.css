@@ -1,0 +1,63 @@
+/* 메인페이지에서 사용하는 챗봇 모달 */
+dialog.lunch-chat-dialog {
+    box-sizing: border-box;
+    width: min(1100px, 94vw);
+    max-width: none;
+    height: min(850px, 92vh);
+    max-height: 92vh;
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.2);
+}
+
+dialog.lunch-chat-dialog::backdrop {
+    background: rgba(25, 25, 25, 0.45);
+}
+
+.lunch-modal-header {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 54px;
+    padding: 0 22px;
+    border-bottom: 1px solid #eeeeee;
+    background: #ffffff;
+}
+
+.lunch-modal-header h2 {
+    margin: 0;
+    color: #333333;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.lunch-modal-header button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: #444444;
+    background: #f3f3f3;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.lunch-modal-header button:hover {
+    background: #ffe9d8;
+}
+
+#lunch-chat-frame {
+    display: block;
+    width: 100%;
+    height: calc(100% - 54px);
+    border: 0;
+    background: #ffffff;
+}
