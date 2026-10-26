@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+
+<th:block th:fragment="InquiryList">
+
+    <template id="inquiry-list-template">
+        <div class="inquiry-page">
+
+            <div class="inquiry-page-heading">
+                <div>
+                    <h2>문의 내역</h2>
+                    <p>문의 내용과 답변 상태를 확인할 수 있습니다.</p>
+                </div>
+
+                <button type="button" class="inquiry-btn inquiry-btn-primary" @click="$router.push('/write')">
+                    문의 작성
+                </button>
+            </div>
+
+            <!-- 유형 탭 -->
+            <div class="inquiry-filter-bar">
+                <div class="inquiry-tabs">
+                    <button type="button" class="inquiry-tab-btn"
+                            :class="{ active: filters.inquiryType === null }" @click="changeType(null)">
+                        전체
+                    </button>
+
+                    <button type="button" class="inquiry-tab-btn"
+                            :class="{ active: filters.inquiryType === 0 }" @click="changeType(0)">
+                        서비스
+                    </button>
+
+                    <button type="button" class="inquiry-tab-btn"
+                            :class="{ active: filters.inquiryType === 1 }" @click="changeType(1)">
+                        레시피
+                    </button>
+
+                    <button type="button" class="inquiry-tab-btn"
+                            :class="{ active: filters.inquiryType === 2 }" @click="changeType(2)">
+                        커뮤니티
+                    </button>
+
+                    <button type="button" class="inquiry-tab-btn"
+                            :class="{ active: filters.inquiryType === 3 }" @click="changeType(3)">
+                        기타
+                    </button>
+                </div>
+
+                <!-- 검색 -->
+                <form class="inquiry-search-box" @submit.prevent="search">
+
+                    <select v-model="filters.schType" aria-label="검색 조건">
+                        <option value="all">제목 + 내용</option>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="reg_date">날짜</option>
+                    </select>
+
+                    <input type="text" v-model.trim="filters.kwd"
+                           placeholder="검색어 입력" aria-label="검색어">
+
+                    <button type="submit" class="inquiry-btn inquiry-btn-outline">
+                        검색
+                    </button>
+                </form>
+            </div>
+
+            <!-- 목록 상태 -->
+            <div v-if="loading" class="inquiry-message">
+                문의 내역을 불러오는 중입니다.
+            </div>
+
+            <div v-else-if="inquiries.length === 0" class="inquiry-empty">
+                <h3>문의 내역이 없습니다.</h3>
+                <p>궁금한 점이 있다면 문의를 작성해 주세요.</p>
+            </div>
+
+            <!-- 문의 아코디언 -->
+            <div v-else class="inquiry-list">
+                <inquiry-detail v-for="inquiry in inquiries" :key="inquiry.inquiryId"
+                    :inquiry="inquiry" @edit="$emit('edit', $event)" @deleted="$emit('refresh')">
+                </inquiry-detail>
+            </div>
+
+            <!-- 페이징 -->
+            <nav v-if="totalPage > 0" class="inquiry-pagination" aria-label="문의 목록 페이지">
+
+                <button type="button" :disabled="page <= 1" @click="changePage(page - 1)">
+                    이전
+                </button>
+
+                <span> {{ page }} / {{ totalPage }} </span>
+
+                <button type="button":disabled="page >= totalPage" @click="changePage(page + 1)">
+                    다음
+                </button>
+            </nav>
+
+        </div>
+    </template>
+
+</th:block>
+</html>

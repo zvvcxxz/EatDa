@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+<th:block th:fragment="InquiryForm">
+
+    <template id="inquiry-form-template">
+        <section class="inquiry-form-page">
+
+            <div class="inquiry-page-heading">
+                <div>
+                    <h2>{{ formTitle }}</h2>
+                    <p>문의 내용을 작성해 주세요.</p>
+                </div>
+            </div>
+
+            <form class="inquiry-form"
+                  @submit.prevent="submit">
+
+                <div class="inquiry-form-field"
+                     v-if="mode !== 'reply'">
+
+                    <label for="inquiryType">문의 유형</label>
+
+                    <select id="inquiryType"
+                            v-model.number="form.inquiryType"
+                            required>
+                        <option :value="0">서비스</option>
+                        <option :value="1">레시피</option>
+                        <option :value="2">커뮤니티</option>
+                        <option :value="3">기타</option>
+                    </select>
+                </div>
+
+                <div class="inquiry-form-field">
+                    <label for="inquiryTitle">제목</label>
+
+                    <input id="inquiryTitle"
+                           type="text"
+                           v-model.trim="form.title"
+                           maxlength="200"
+                           placeholder="제목을 입력하세요."
+                           required>
+                </div>
+
+                <div class="inquiry-form-field">
+                    <label>문의 내용</label>
+
+                    <!-- JS에서 Quill을 초기화할 요소 -->
+                    <div class="quill-editor-wrapper">
+                        <div ref="quillElement"></div>
+                    </div>
+                </div>
+
+                <!-- 수정 모드에서 기존 첨부파일 -->
+                <section v-if="mode === 'edit'"
+                         class="file-attach-list">
+
+                    <h3>기존 첨부파일</h3>
+
+                    <p v-if="existingFiles.length === 0">
+                        등록된 첨부파일이 없습니다.
+                    </p>
+
+                    <ul>
+                        <li v-for="file in existingFiles"
+                            :key="file.inquiryFileId"
+                            class="file-item">
+
+                            <span>{{ file.originalFileName }}</span>
+
+                            <button type="button"
+                                    class="inquiry-file-remove"
+                                    @click="deleteExistingFile(file)">
+                                삭제
+                            </button>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 신규 첨부파일 선택 -->
+                <div class="inquiry-form-field">
+                    <label for="inquiryFiles">첨부파일</label>
+
+                    <input id="inquiryFiles"
+                           type="file"
+                           multiple
+                           @change="selectFiles">
+
+                    <p class="inquiry-help">
+                        선택한 파일은 저장하기 전까지 서버에 업로드되지 않습니다.
+                    </p>
+
+                    <ul v-if="newFiles.length"
+                        class="selected-file-list">
+
+                        <li v-for="(file, index) in newFiles"
+                            :key="file.id"
+                            class="file-item">
+
+                            <span>{{ file.file.name }}</span>
+
+                            <button type="button"
+                                    class="inquiry-file-remove"
+                                    @click="removeSelectedFile(index)"
+                                    aria-label="선택 파일 제거">
+                                ×
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="inquiry-form-actions">
+                    <button type="button"
+                            class="inquiry-btn inquiry-btn-outline"
+                            @click="$emit('cancel')">
+                        취소
+                    </button>
+
+                    <button type="submit"
+                            class="inquiry-btn inquiry-btn-primary"
+                            :disabled="saving">
+                        {{ saving ? '저장 중...' : '저장' }}
+                    </button>
+                </div>
+
+            </form>
+        </section>
+    </template>
+
+</th:block>
+
+</html>

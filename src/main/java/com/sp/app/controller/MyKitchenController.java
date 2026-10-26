@@ -224,7 +224,7 @@ public class MyKitchenController {
         model.addAttribute("tab", "inquiries");
         model.addAttribute("pageTitle", "신고 / 문의");
         
-        return "mykitchen/myinquiries";
+        return "mykitchen/myinquiry";
     }    
 
     // 9. ai추천

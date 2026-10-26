@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{mykitchen/mykitchenLayout}">
+
+<th:block th:fragment="InquiryDetail">
+
+    <template id="inquiry-detail-template">
+        <article class="inquiry-item">
+
+            <!-- 아코디언 제목 -->
+            <details @toggle="toggleDetail">
+                <summary class="inquiry-summary">
+
+                    <span class="inquiry-status"
+                          :class="inquiry.status === 1
+                              ? 'status-answered'
+                              : 'status-waiting'">
+                        {{ inquiry.status === 1 ? '답변 완료' : '답변 대기' }}
+                    </span>
+
+                    <strong class="inquiry-title">
+                        {{ inquiry.title }}
+                    </strong>
+
+                    <span class="inquiry-date">
+                        {{ inquiry.createdAt }}
+                    </span>
+
+                </summary>
+
+                <div class="inquiry-body">
+
+                    <div v-if="loading" class="inquiry-message">
+                        문의 내용을 불러오는 중입니다.
+                    </div>
+
+                    <template v-else>
+
+                        <div class="inquiry-detail-meta">
+                            <span>문의 유형: {{ typeLabel }}</span>
+                        </div>
+
+                        <h3>문의 내용</h3>
+
+                        <div class="inquiry-detail-content"
+                             v-html="detail.content">
+                        </div>
+
+                        <!-- 기존 첨부파일 -->
+                        <div v-if="detail.files && detail.files.length"
+                             class="file-attach-list">
+
+                            <h3>첨부파일</h3>
+
+                            <ul>
+                                <li v-for="file in detail.files"
+                                    :key="file.inquiryFileId"
+                                    class="file-item">
+
+                                    <a :href="fileDownloadUrl(file.inquiryFileId)">
+                                        {{ file.originalFileName }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 관리자 답변 -->
+                        <section v-if="detail.status === 1 && detail.answerContent"
+                                 class="admin-answer">
+
+                            <h3>관리자 답변</h3>
+
+                            <div v-html="detail.answerContent"></div>
+
+                            <p v-if="detail.answeredAt" class="answer-date">
+                                답변일: {{ detail.answeredAt }}
+                            </p>
+                        </section>
+
+                        <!-- 원문 작업 버튼 -->
+                        <div class="inquiry-actions">
+
+                            <button v-if="detail.status === 0"
+                                    type="button"
+                                    class="inquiry-btn inquiry-btn-outline"
+                                    @click="$emit('edit', inquiry.inquiryId)">
+                                수정
+                            </button>
+
+                            <button v-if="detail.status === 0"
+                                    type="button"
+                                    class="inquiry-btn inquiry-btn-danger"
+                                    @click="removeInquiry">
+                                삭제
+                            </button>
+
+                            <button v-if="detail.status === 1"
+                                    type="button"
+                                    class="inquiry-btn inquiry-btn-primary"
+                                    @click="showReplyForm = !showReplyForm">
+                                추가 문의 작성
+                            </button>
+
+                        </div>
+
+                        <!-- 추가 문의는 답변 완료된 최상위 원문에만 표시 -->
+                        <section v-if="detail.status === 1"
+                                 class="child-inquiry-section">
+
+                            <h3 class="child-inquiry-title">
+                                추가 문의 내역
+                            </h3>
+
+                            <div v-if="replies.length === 0"
+                                 class="inquiry-message">
+                                추가 문의가 없습니다.
+                            </div>
+
+                            <div v-else>
+                                <inquiry-reply
+                                    v-for="reply in replies"
+                                    :key="reply.inquiryId"
+                                    :reply="reply"
+                                    :parent-id="inquiry.inquiryId">
+                                </inquiry-reply>
+                            </div>
+
+                            <inquiry-form
+                                v-if="showReplyForm"
+                                mode="reply"
+                                :parent-id="inquiry.inquiryId"
+                                @saved="onReplySaved"
+                                @cancel="showReplyForm = false">
+                            </inquiry-form>
+
+                        </section>
+
+                    </template>
+                </div>
+            </details>
+        </article>
+    </template>
+
+</th:block>
+
+</html>
