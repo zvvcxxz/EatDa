@@ -189,3 +189,14 @@
 .home-main .basket-panel .basket-summary { margin-top:0; padding:16px; }
 .home-main .basket-panel #quick-status { margin:0; font-size:12px; }
 .home-main .basket-panel #basket-selected { min-height:0; }
+
+/* 검색 안내 : 스플릿 텍스트 효과 */
+.ai-island .ai-ingredient-entry { position:relative; }
+.ai-island input.ai-has-split-hint::placeholder { opacity:0; }
+.ai-island .ai-split-hint { position:absolute; left:19px; right:70px; top:50%; transform:translateY(-50%); height:28px; line-height:28px; overflow:hidden; white-space:nowrap; color:#a59686; font-size:14px; pointer-events:none; }
+.ai-island .ai-split-hint[hidden] { display:none; }
+.ai-island .ai-split-letter { display:inline-block; animation:ai-letter-in .48s cubic-bezier(.22,1,.36,1) both; animation-delay:var(--letter-delay); }
+.ai-island .ai-split-hint.is-leaving .ai-split-letter { animation:ai-letter-out .26s ease-in both; animation-delay:var(--letter-delay); }
+@keyframes ai-letter-in { from { opacity:0; transform:translateY(11px); filter:blur(3px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+@keyframes ai-letter-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-8px); } }
+@media(prefers-reduced-motion:reduce) { .ai-island .ai-split-letter { animation:none; } }

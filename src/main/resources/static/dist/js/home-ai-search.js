@@ -134,24 +134,51 @@
     toggle.addEventListener('click', () => setOpen(false));
     $('ai-edit-ingredients').addEventListener('click', () => setOpen(false));
     let placeholderTimer, placeholderFade;
-    const examples = ['예: 계란 또는 달걀', '예: 두부, 대파', '예: 김치, 돼지고기', '예: 감자, 애호박'];
-    let exampleIndex = Math.floor(Math.random() * examples.length);
-    input.placeholder = examples[exampleIndex];
-    function stopPlaceholder() { clearTimeout(placeholderTimer); clearTimeout(placeholderFade); input.classList.remove('ai-placeholder-changing'); }
-    function rotatePlaceholder() {
-        stopPlaceholder();
-        if (document.hidden || input.value || document.activeElement === input || reduced()) return;
-        placeholderTimer = setTimeout(() => {
-            input.classList.add('ai-placeholder-changing');
-            placeholderFade = setTimeout(() => {
-                exampleIndex = (exampleIndex + 1 + Math.floor(Math.random() * (examples.length - 1))) % examples.length;
-                input.placeholder = examples[exampleIndex]; input.classList.remove('ai-placeholder-changing'); rotatePlaceholder();
-            }, 180);
-        }, 3500);
+    const examples=[
+        '예: 돼지고기와 김치로 간단한 저녁 추천해줘',
+        '예: 계란, 두부, 대파',
+        '예: 김치를 활용한 국물 요리 알려줘',
+        '예: 두부로 만들 수 있는 한식 추천해줘',
+        '예: 돼지고기, 김치',
+        '예: 계란으로 간단하게 먹을 요리 알려줘'
+    ];
+    let exampleIndex=Math.floor(Math.random()*examples.length);
+    input.placeholder=examples[exampleIndex];
+    // 검색 안내 : 글자별 등장 / 퇴장 효과
+    const splitHint=el('span','ai-split-hint');
+    splitHint.setAttribute('aria-hidden','true');splitHint.hidden=true;
+    input.parentElement.append(splitHint);
+    function drawHint(){
+        splitHint.replaceChildren();
+        Array.from(examples[exampleIndex]).forEach((letter,index)=>{
+            const character=el('span','ai-split-letter',letter===' '?'\u00a0':letter);
+            character.style.setProperty('--letter-delay',Math.min(index*22,700)+'ms');
+            splitHint.append(character);
+        });
+        splitHint.classList.remove('is-leaving');splitHint.hidden=false;
+        input.classList.add('ai-has-split-hint');
     }
-    input.addEventListener('focus', stopPlaceholder);
-    input.addEventListener('blur', rotatePlaceholder);
-    document.addEventListener('visibilitychange', () => document.hidden ? stopPlaceholder() : rotatePlaceholder());
+    function stopPlaceholder(){
+        clearTimeout(placeholderTimer);clearTimeout(placeholderFade);
+        splitHint.hidden=true;splitHint.classList.remove('is-leaving');
+        input.classList.remove('ai-placeholder-changing','ai-has-split-hint');
+    }
+    function rotatePlaceholder(){
+        stopPlaceholder();
+        if(document.hidden||input.value||document.activeElement===input||reduced())return;
+        drawHint();
+        placeholderTimer=setTimeout(()=>{
+            splitHint.classList.add('is-leaving');
+            placeholderFade=setTimeout(()=>{
+                exampleIndex=(exampleIndex+1+Math.floor(Math.random()*(examples.length-1)))%examples.length;
+                input.placeholder=examples[exampleIndex];input.classList.remove('ai-placeholder-changing');rotatePlaceholder();
+            },1000);
+        },4500);
+    }
+    input.addEventListener('focus',stopPlaceholder);
+    input.addEventListener('blur',rotatePlaceholder);
+    document.addEventListener('visibilitychange',()=>document.hidden?stopPlaceholder():rotatePlaceholder());
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',rotatePlaceholder);
 
     // 재료 자동완성 : 등록된 예시 재료만 선택 가능
     let candidates = [], active = -1, composing = false;
