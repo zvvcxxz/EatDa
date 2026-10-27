@@ -28,14 +28,15 @@ public class LunchChatBotService {
             String systemPrompt = promptResource.getContentAsString(
                     StandardCharsets.UTF_8);
 
-            Flux<String> result = chatClient.prompt()
+            Flux<String> f = chatClient.prompt()
                     .system(systemPrompt)
                     .user(userMessage)
                     .stream()
                     .content();
 
-            return result;
+            return f;
         } catch (Exception e) {
+            // 오류를 호출한 쪽으로 전달
             return Flux.error(e);
         }
     }
