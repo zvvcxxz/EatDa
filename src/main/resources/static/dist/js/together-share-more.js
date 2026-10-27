@@ -1,3 +1,4 @@
+// 재료 나눔 목록 : 게시글 더보기와 카드 생성
 (() => {
     'use strict';
 
@@ -88,19 +89,17 @@
         });
 
         setText('.tg-status', post.share_status === 0 ? '나눔 진행 중' : '진행 상태 확인 필요');
-        setText('.sl-type', post.share_type === 0 ? '무료 나눔' : post.share_type === 1 ? '교환' : '재료 나눔');
+        setText(
+            '.sl-type',
+            post.share_type === 0 ? '무료 나눔' : post.share_type === 1 ? '교환' : '재료 나눔'
+        );
 
         // 복제한 카드의 작성자 버튼을 그대로 사용하지 않기
         const menu = card.querySelector('.tg-card-menu');
         if (menu) {
-            menu.replaceChildren(
-                makeAction('좋아요', 'is-like', 'fa-regular fa-heart')
-            );
+            menu.replaceChildren(makeAction('좋아요', 'is-like', 'fa-regular fa-heart'));
             if (loginMemberId && loginMemberId === String(post.author_id)) {
-                menu.append(
-                    makeUpdateLink(post.share_id),
-                    makeDeleteForm(post.share_id)
-                );
+                menu.append(makeUpdateLink(post.share_id), makeDeleteForm(post.share_id));
             }
         }
 
@@ -122,13 +121,17 @@
             const response = await fetch(url, { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('목록 조회 실패');
             const data = await response.json();
-            if (!Array.isArray(data.posts) || typeof data.hasMore !== 'boolean'
-                || !Number.isInteger(data.nextOffset) || data.nextOffset < 0) {
+            if (
+                !Array.isArray(data.posts) ||
+                typeof data.hasMore !== 'boolean' ||
+                !Number.isInteger(data.nextOffset) ||
+                data.nextOffset < 0
+            ) {
                 throw new Error('목록 응답 오류');
             }
 
             const fragment = document.createDocumentFragment();
-            data.posts.forEach(post => fragment.append(makeCard(post)));
+            data.posts.forEach((post) => fragment.append(makeCard(post)));
             list.append(fragment);
             button.dataset.offset = String(data.nextOffset);
             if (!data.hasMore) wrap.hidden = true;

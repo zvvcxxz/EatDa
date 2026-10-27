@@ -1,3 +1,4 @@
+// 같이 먹어요 수정 : 내용과 날짜 확인
 (() => {
     'use strict';
     // 수정 폼
@@ -24,14 +25,14 @@
     deadline.addEventListener('input', validateDates);
     validateDates();
     // 다시 입력하면 이전 안내 지우기
-    ['title', 'content', 'location_text'].forEach(name => {
+    ['title', 'content', 'location_text'].forEach((name) => {
         const field = form.elements.namedItem(name);
         field.addEventListener('input', () => field.setCustomValidity(''));
     });
     // 저장 전 날짜 / 공백 확인
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', (event) => {
         validateDates();
-        ['title', 'content', 'location_text'].forEach(name => {
+        ['title', 'content', 'location_text'].forEach((name) => {
             const field = form.elements.namedItem(name);
             field.setCustomValidity(field.value.trim() ? '' : '내용을 입력해주세요.');
         });

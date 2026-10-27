@@ -5,6 +5,9 @@
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
+	align-self: start;
+	height: auto;
+	min-height: 0;
 }
 
 .home-main .hc-panel.is-share {
@@ -61,7 +64,7 @@
 }
 
 .home-main .hc-list {
-	min-height: 288px;
+	min-height: 0;
 }
 
 .home-main .hc-status {
@@ -138,8 +141,8 @@
 	display: flex;
 	justify-content: space-between;
 	gap: 16px;
-	margin-top: auto;
-	padding-top: 20px;
+	margin-top: 16px;
+	padding-top: 0;
 	align-items: center;
 }
 

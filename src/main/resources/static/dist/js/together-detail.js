@@ -1,3 +1,4 @@
+// 같이 먹어요 상세 : 안내 문구와 댓글 더보기
 (() => {
     'use strict';
     const page = document.querySelector('.together-detail');
@@ -6,7 +7,7 @@
     const text = page.querySelector('[data-detail-toast-text]');
     let timer;
     // 안내 문구 표시
-    const notify = message => {
+    const notify = (message) => {
         if (!toast || !text) return;
         clearTimeout(timer);
         text.textContent = message;
@@ -14,11 +15,12 @@
         timer = setTimeout(() => toast.classList.remove('show'), 4000);
     };
     // 미구현 버튼 안내
-    page.querySelectorAll('[data-pending]').forEach(button => {
-        button.addEventListener('click', () => notify(`${button.dataset.pending} 기능은 아직 서버 연결 전입니다.`));
+    page.querySelectorAll('[data-pending]').forEach((button) => {
+        button.addEventListener('click', () =>
+            notify(`${button.dataset.pending} 기능은 아직 서버 연결 전입니다.`)
+        );
     });
 })();
-
 
 (() => {
     const button = document.querySelector('#btnLoadMoreComments');
@@ -50,17 +52,14 @@
             <p class="reply-content"></p>
         `;
 
-        item.querySelector('[data-comment-name]').textContent =
-            comment.name ?? '';
+        item.querySelector('[data-comment-name]').textContent = comment.name ?? '';
 
         item.querySelector('[data-comment-author]').hidden =
             String(comment.member_id) !== button.dataset.authorId;
 
-        item.querySelector('.reply-date').textContent =
-            comment.created_at ?? '';
+        item.querySelector('.reply-date').textContent = comment.created_at ?? '';
 
-        item.querySelector('.reply-content').textContent =
-            comment.content ?? '';
+        item.querySelector('.reply-content').textContent = comment.content ?? '';
 
         return item;
     }
@@ -96,9 +95,11 @@
 
             const data = await response.json();
 
-            if (!Array.isArray(data.comments)
-                || typeof data.hasMore !== 'boolean'
-                || !Number.isInteger(data.nextOffset)) {
+            if (
+                !Array.isArray(data.comments) ||
+                typeof data.hasMore !== 'boolean' ||
+                !Number.isInteger(data.nextOffset)
+            ) {
                 throw new Error('댓글 응답 형식이 올바르지 않습니다.');
             }
 
@@ -109,27 +110,27 @@
             // 추가된 댓글 부드럽게 표시
             if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 items.forEach((item, index) => {
-                    item.animate([
-                        { opacity: 0, transform: 'translateY(20px)' },
-                        { opacity: 1, transform: 'translateY(0)' }
-                    ], {
-                        duration: 350,
-                        delay: index * 40,
-                        easing: 'ease-out',
-                        fill: 'backwards'
-                    });
+                    item.animate(
+                        [
+                            { opacity: 0, transform: 'translateY(20px)' },
+                            { opacity: 1, transform: 'translateY(0)' }
+                        ],
+                        {
+                            duration: 350,
+                            delay: index * 40,
+                            easing: 'ease-out',
+                            fill: 'backwards'
+                        }
+                    );
                 });
             }
 
             button.dataset.offset = data.nextOffset;
             wrap.hidden = !data.hasMore;
-
         } catch (error) {
             console.error('댓글 더보기 실패', error);
-            feedback.textContent =
-                '댓글을 불러오지 못했습니다. 다시 눌러주세요.';
+            feedback.textContent = '댓글을 불러오지 못했습니다. 다시 눌러주세요.';
             feedback.hidden = false;
-
         } finally {
             loading = false;
             button.disabled = false;

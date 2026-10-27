@@ -1,15 +1,15 @@
-import { api } from "./api.js";
-import { $, escapeHtml as e, show, notify } from "./common.js";
-import { recipeCards } from "./recipe.js";
+// 메인 냉장고 : 임박 재료 조회와 빠른 재료 선택
+import { $, escapeHtml as e } from './common.js';
+
+// 빠른 재료 조합기 : 선택한 재료 저장
 const selected = new Map();
-let searchPage = 1,
-    searchMore = false,
-    category = new URLSearchParams(location.search).get('category') || "",
-    searching = false,
-    recommendationVersion = 0;
+
+// 냉장고 안내 : 빈 목록 문구 생성
+
 function empty(message) {
-    return '<p class="empty">' + e(message) + "</p>";
+    return '<p class="empty">' + e(message) + '</p>';
 }
+// 선택 재료 : 삭제 버튼과 목록 표시
 function renderSelection() {
     const markup = [...selected.values()]
         .map(
@@ -20,231 +20,178 @@ function renderSelection() {
                 e(item.name) +
                 ' 삭제">' +
                 e(item.name) +
-                " ×</button>",
+                ' ×</button>'
         )
-        .join("");
-    $("basket-selected").innerHTML = markup || '<em>위의 재료를 선택해보세요!</em>';
-    $("search-selected").innerHTML = markup;
+        .join('');
+    $('basket-selected').innerHTML = markup || '<em>위의 재료를 선택해보세요!</em>';
 }
-async function loadIngredients(query = "", target = "quick-ingredients") {
-    try {
-        const items = await api.call("ingredients", { query });
-        if (!Array.isArray(items))
-            throw new Error("재료 응답은 배열이어야 합니다.");
-        $(target).replaceChildren();
-        for (const item of items) {
-            const button = document.createElement("button");
-            button.className = "tag";
-            button.textContent = item.name;
-            button.onclick = () => {
-                selected.set(String(item.id), item);
-                renderSelection();
-            };
-            $(target).append(button);
-        }
-        if (target === "quick-ingredients")
-            $("quick-status").textContent = items.length
-                ? ""
-                : "등록된 재료가 없습니다.";
-    } catch (error) {
-        if (target === "quick-ingredients")
-            $("quick-status").textContent =
-                error.code === "NOT_CONNECTED"
-                    ? "등록된 재료가 없습니다."
-                    : "재료 목록을 불러오지 못했습니다.";
-        else notify(error.message);
-    }
-}
-async function recommendations() {
-    // 메인 레시피 : 슬라이드 사용 시 기존 목록 조회 제외
-    if (!$("home-recipes") || !$("home-recipe-status")) return;
-    const version = ++recommendationVersion;
-    $("home-recipe-status").textContent = "불러오는 중입니다.";
-    try {
-        const data = await api.call("recipes", {
-            category,
-            page: 1,
-            pageSize: 8,
-            ingredientIds: [],
-        });
-        if (version !== recommendationVersion) return;
-        $("home-recipes").innerHTML = recipeCards(data.items);
-        $("home-recipe-status").textContent = "";
-    } catch (error) {
-        if (version !== recommendationVersion) return;
-        $("home-recipes").innerHTML = empty(
-            error.code === "NOT_CONNECTED"
-                ? "등록된 레시피가 없습니다."
-                : "레시피를 불러오지 못했습니다.",
-        );
-        $("home-recipe-status").textContent = "";
-    }
-}
-async function search(append = false) {
-    if (searching) return;
+
+// 빠른 재료 조합기 : AI 검색창 연결 / 선택 초기화
+$('basket-search').onclick = () => {
     if (!selected.size) {
-        $("search-status").textContent = "검색할 재료를 먼저 선택하세요.";
+        $('quick-status').textContent = '재료를 하나 이상 선택해주세요.';
         return;
     }
-    searching = true;
-    $("search-more").disabled = true;
-    $("search-status").textContent = "검색 중입니다.";
-    const page = append ? searchPage + 1 : 1;
-    try {
-        const data = await api.call("recipes", {
-            category,
-            ingredientIds: [...selected.keys()],
-            page,
-            pageSize: 12,
-        });
-        const markup = recipeCards(data.items);
-        if (append && data.items.length)
-            $("search-results").insertAdjacentHTML("beforeend", markup);
-        else if (!append) $("search-results").innerHTML = markup;
-        searchPage = page;
-        searchMore = Boolean(data.hasMore);
-        $("search-more").hidden = !searchMore;
-        $("search-status").textContent =
-            data.total === undefined ? "" : "검색 결과 " + data.total + "개";
-    } catch (error) {
-        $("search-status").textContent =
-            error.code === "NOT_CONNECTED"
-                ? "레시피 검색 API 연결 전입니다."
-                : error.message;
-        if (!append)
-            $("search-results").innerHTML = empty("검색 결과를 표시할 수 없습니다.");
-    } finally {
-        searching = false;
-        $("search-more").disabled = false;
-    }
-}
-function openSearch() {
-    show($("search-dialog"));
-    $("ingredient-query").focus();
-}
-// 메인 AI 검색창 열기는 home-ai-search.js에서 처리합니다.
-$("basket-search").onclick = () => {
-    openSearch();
-    search();
+
+    document.dispatchEvent(
+        new CustomEvent('ai-fridge-search', {
+            detail: [...selected.values()]
+        })
+    );
 };
-$("basket-clear").onclick = () => {
+$('basket-clear').onclick = () => {
     selected.clear();
     renderSelection();
 };
-document.addEventListener("click", (event) => {
-    const remove = event.target.closest("[data-remove-ingredient]");
-    if (remove) {
-        selected.delete(remove.dataset.removeIngredient);
-        renderSelection();
-    }
-    const filter = event.target.closest("[data-category]");
-    if (filter) {
-        category = filter.dataset.category;
-        document
-            .querySelectorAll("[data-category]")
-            .forEach((button) =>
-                button.classList.toggle("active", button === filter),
-            );
-        recommendations();
-    }
-    const menu = event.target.closest("[data-recipe-category], [data-open-search]");
-    if (menu) {
-        event.preventDefault();
-        category = menu.dataset.recipeCategory || '';
-        openSearch();
-    }
+
+// 선택한 재료 : 삭제 버튼 처리
+document.addEventListener('click', (event) => {
+    const remove = event.target.closest('[data-remove-ingredient]');
+    if (!remove) return;
+    selected.delete(remove.dataset.removeIngredient);
+    renderSelection();
 });
-let debounce;
-$("ingredient-query").addEventListener("input", () => {
-    clearTimeout(debounce);
-    debounce = setTimeout(
-        () =>
-            loadIngredients($("ingredient-query").value.trim(), "ingredient-options"),
-        250,
-    );
-});
-$("recipe-search-form").onsubmit = (event) => {
-    event.preventDefault();
-    search();
-};
-$("search-more").onclick = () => search(true);
 
 // 메인 냉장고 : 소비기한 임박 재료 조회
 async function preview() {
-    const target = $("fridge-items");
+    const target = $('fridge-items');
 
     if (!target) return;
 
-    target.innerHTML = empty("재료를 불러오는 중입니다.");
+    target.innerHTML = empty('재료를 불러오는 중입니다.');
 
     try {
         // 로그인한 회원의 냉장고 재료 요청
-        const response = await fetch("/home/items", {
+        const response = await fetch('/home/items', {
             headers: {
-                Accept: "application/json"
+                Accept: 'application/json'
             }
         });
 
         // 비로그인 또는 로그인 페이지로 이동한 경우
-        if (response.status === 401 ||
-            response.status === 403 ||
-            response.redirected) {
-            target.innerHTML = empty("로그인 후 냉장고를 확인해보세요.");
+        if (response.status === 401 || response.status === 403 || response.redirected) {
+            target.innerHTML = empty('로그인 후 냉장고를 확인해보세요.');
             return;
         }
 
         if (!response.ok) {
-            throw new Error("냉장고 조회 실패");
+            throw new Error('냉장고 조회 실패');
         }
 
         const data = await response.json();
 
         // 비로그인이면 안내 후 종료
-        if (data.state === "logout") {
-            target.innerHTML = empty("로그인 후 냉장고를 확인해보세요.");
+        if (data.state === 'logout') {
+            target.innerHTML = empty('로그인 후 냉장고를 확인해보세요.');
             return;
         }
 
         // 로그인 상태와 목록 형식 확인
-        if (data.state !== "login" || !Array.isArray(data.list)) {
-            throw new Error("냉장고 응답 형식 오류");
+        if (data.state !== 'login' || !Array.isArray(data.list)) {
+            throw new Error('냉장고 응답 형식 오류');
         }
 
-           const items = data.list;
+        const items = data.list;
 
         // 임박 재료만 선택 → 기한순 정렬 → 최대 4개
         const urgentItems = items
-            .filter(item => item.expiring === true)
+            .filter((item) => item.expiring === true)
             .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn))
             .slice(0, 4);
 
         if (urgentItems.length === 0) {
-            target.innerHTML = empty("3일 이내 기한이 오는 재료가 없습니다.");
+            target.innerHTML = empty('3일 이내 기한이 오는 재료가 없습니다.');
             return;
         }
 
         // 냉장고 안에 재료 목록 출력
-        target.innerHTML = urgentItems.map(item => {
-            const remaining = item.dDay === 0
-                ? "오늘까지"
-                : `D-${item.dDay}`;
+        target.innerHTML = urgentItems
+            .map((item) => {
+                const remaining = item.dDay === 0 ? '오늘까지' : `D-${item.dDay}`;
 
-            return `
+                return `
                 <div class="list-row">
                     <span>
                         ${e(item.ingredientName)}
-                        ${e(item.quantity ?? "")} ${e(item.unit || "")}
+                        ${e(item.quantity ?? '')} ${e(item.unit || '')}
                     </span>
                     <span>${e(remaining)}</span>
                 </div>
             `;
-        }).join("");
-
+            })
+            .join('');
     } catch (error) {
-        console.error("메인 냉장고 조회 실패", error);
-        target.innerHTML = empty("냉장고 정보를 불러오지 못했습니다.");
+        console.error('메인 냉장고 조회 실패', error);
+        target.innerHTML = empty('냉장고 정보를 불러오지 못했습니다.');
     }
 }
-loadIngredients();
-recommendations();
+
+// 빠른 재료 조합기 : 내 냉장고 재료 조회
+
+async function loadFridgeIngredients() {
+    const target = $('quick-ingredients');
+    const status = $('quick-status');
+
+    if (!target || !status) return;
+
+    target.replaceChildren();
+    status.textContent = '냉장고 재료를 불러오는 중입니다.';
+
+    try {
+        const response = await fetch('/home/items', {
+            headers: {
+                Accept: 'application/json'
+            }
+        });
+
+        if (!response.ok || response.redirected) {
+            throw new Error('냉장고 재료 조회 실패');
+        }
+
+        const data = await response.json();
+
+        if (data.state === 'logout') {
+            status.textContent = '로그인 후 내 냉장고 재료를 확인해보세요.';
+            return;
+        }
+
+        if (data.state !== 'login' || !Array.isArray(data.list)) {
+            throw new Error('냉장고 응답 형식 오류');
+        }
+
+        // 같은 재료를 여러 번 등록했어도 선택 버튼은 하나만 표시
+        const ingredients = new Map();
+
+        data.list.forEach((item) => {
+            ingredients.set(String(item.ingredientId), {
+                id: item.ingredientId,
+                name: item.ingredientName
+            });
+        });
+
+        ingredients.forEach((item) => {
+            const button = document.createElement('button');
+
+            button.type = 'button';
+            button.className = 'tag';
+            button.textContent = item.name;
+
+            button.onclick = () => {
+                selected.set(String(item.id), item);
+                renderSelection();
+            };
+
+            target.append(button);
+        });
+
+        status.textContent = ingredients.size ? '' : '냉장고에 등록된 재료가 없습니다.';
+    } catch (error) {
+        console.error('빠른 재료 조합기 조회 실패', error);
+        status.textContent = '냉장고 재료를 불러오지 못했습니다.';
+    }
+}
+loadFridgeIngredients();
 preview();
+
+// 메인 냉장고 : 관리 페이지 이동 효과
+import './home-fridge-door.js';

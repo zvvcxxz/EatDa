@@ -1,3 +1,4 @@
+// 함께하는 주방 목록 : 처리 결과 안내
 (() => {
     'use strict';
     const toast = document.querySelector('[data-list-result-toast]');

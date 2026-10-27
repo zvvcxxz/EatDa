@@ -1,3 +1,4 @@
+// 메인 인트로 : 첫 방문 표시와 화면 전환
 // 문장 단위 커튼 등장, 종료와 포커스 복귀
 const dialog = document.getElementById('intro-dialog');
 const first = document.getElementById('intro-line-one');
@@ -43,8 +44,10 @@ function cleanup() {
 function finish() {
     if (dialog.open) dialog.close();
     cleanup();
-    const target = previousFocus instanceof HTMLElement && previousFocus !== document.body
-        ? previousFocus : document.getElementById('open-search');
+    const target =
+        previousFocus instanceof HTMLElement && previousFocus !== document.body
+            ? previousFocus
+            : document.getElementById('open-search');
     target?.focus({ preventScroll: true });
 }
 
@@ -63,8 +66,15 @@ function skip() {
 
 function onKey(event) {
     // Tab은 포커스 이동, 한글 조합과 보조 키는 건너뛰기로 처리하지 않기
-    if (event.key === 'Tab' || event.isComposing || event.ctrlKey || event.metaKey
-        || event.altKey || ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) return;
+    if (
+        event.key === 'Tab' ||
+        event.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)
+    )
+        return;
     event.preventDefault();
     skip();
 }
@@ -79,11 +89,17 @@ if (dialog && first && second && skipButton && !hasSeenIntro()) {
         document.documentElement.style.overflow = 'hidden';
         skipButton.addEventListener('click', skip);
         document.addEventListener('keydown', onKey);
-        dialog.addEventListener('cancel', event => { event.preventDefault(); skip(); });
-        dialog.addEventListener('transitionend', event => {
+        dialog.addEventListener('cancel', (event) => {
+            event.preventDefault();
+            skip();
+        });
+        dialog.addEventListener('transitionend', (event) => {
             if (closed && event.target === dialog && event.propertyName === 'opacity') finish();
         });
-        dialog.addEventListener('close', () => { closed = true; cleanup(); });
+        dialog.addEventListener('close', () => {
+            closed = true;
+            cleanup();
+        });
         first.textContent = lines[0];
         second.textContent = lines[1];
         dialog.classList.add('intro-curtain');

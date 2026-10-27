@@ -1,3 +1,4 @@
+// 함께하는 주방 : 게시글 쪽지 보내기
 (() => {
     'use strict';
     // 신청 결과 알림
@@ -11,9 +12,11 @@
     toast.querySelector('[autofocus]')?.removeAttribute('autofocus');
     // 알림 표시
     toast.setAttribute('open', '');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        toast.classList.add('tg-toast-visible');
-    }));
+    requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+            toast.classList.add('tg-toast-visible');
+        })
+    );
     // 3.5초 뒤 알림 닫기
     const duration = 3500;
     window.setTimeout(() => {

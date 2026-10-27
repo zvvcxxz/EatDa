@@ -37,23 +37,18 @@ public class TogetherShareController {
 
         int size = 10;
 
-        List<TogetherShareDto> posts = service.listShare(0 , size + 1);
+        List<TogetherShareDto> posts = service.listShare(0, size + 1);
         boolean hasMore = posts.size() > size;
 
-        if(hasMore) {
+        if (hasMore) {
             posts = posts.subList(0, size);
         }
 
         model.addAttribute("posts", posts);
         model.addAttribute("hasMore", hasMore);
         model.addAttribute("nextOffset", posts.size());
-        model.addAttribute("shareTypeOptions", Map.of(
-                0, "무료 나눔",
-                1, "교환"
-        ));
-        model.addAttribute("loginMemberId",
-                info == null ? null : info.getMember_id()
-        );
+        model.addAttribute("shareTypeOptions", Map.of(0, "무료 나눔", 1, "교환"));
+        model.addAttribute("loginMemberId", info == null ? null : info.getMember_id());
 
         return "together/share/list";
     }
@@ -61,34 +56,28 @@ public class TogetherShareController {
     // 재료나눔 글 더보기
     @GetMapping("/together/share/more")
     @ResponseBody
-    public Map<String, Object> more (
-            @RequestParam(name = "offset", defaultValue = "0") int offset) throws Exception {
+    public Map<String, Object> more(@RequestParam(name = "offset", defaultValue = "0") int offset)
+            throws Exception {
 
         int size = 10;
 
         List<TogetherShareDto> posts = service.listShare(offset, size + 1);
         boolean hasMore = posts.size() > size;
 
-        if(hasMore) {
+        if (hasMore) {
             posts = posts.subList(0, size);
         }
 
-        return Map.of(
-                "posts" , posts,
-                "hasMore", hasMore,
-                "nextOffset" , offset + posts.size()
-                );
+        return Map.of("posts", posts, "hasMore", hasMore, "nextOffset", offset + posts.size());
     }
 
     // 글 등록
     @PostMapping("/together/share/write")
-    public String writeSubmit(
-            @ModelAttribute TogetherShareDto dto,
-            RedirectAttributes redirectAttributes) {
+    public String writeSubmit(@ModelAttribute TogetherShareDto dto, RedirectAttributes redirectAttributes) {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-        if(info == null) {
+        if (info == null) {
             return "redirect:/member/login";
         }
 
@@ -99,16 +88,13 @@ public class TogetherShareController {
 
             service.insertShare(dto);
 
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글이 등록되었습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글이 등록되었습니다.");
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            redirectAttributes.addFlashAttribute(
-                    "message", e.getMessage());
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
         } catch (Exception e) {
             log.error("재료나눔 글 등록 오류", e);
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글 등록 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글 등록 중 오류가 발생했습니다.");
         }
 
         return "redirect:/together/share";
@@ -126,22 +112,20 @@ public class TogetherShareController {
     // 분류별 재료 목록
     @GetMapping("/together/share/ingredients/by-type")
     @ResponseBody
-    public List<TogetherShareItemDto> listIngredientByType(
-            @RequestParam("type") String type) throws Exception {
+    public List<TogetherShareItemDto> listIngredientByType(@RequestParam("type") String type)
+            throws Exception {
 
         return service.listIngredientsByType(type);
     }
 
     // 재료나눔 글 상세보기
     @GetMapping("/together/share/detail/{share_id}")
-    public String detail(
-            @PathVariable("share_id") Long share_id,
-            Model model) throws Exception {
+    public String detail(@PathVariable("share_id") Long share_id, Model model) throws Exception {
 
         TogetherShareDto dto = service.findShareById(share_id);
 
         // 없거나 삭제된 글이면 목록으로 리다이렉트
-        if(dto == null) {
+        if (dto == null) {
             return "redirect:/together/share";
         }
 
@@ -159,34 +143,30 @@ public class TogetherShareController {
 
     // 재료나눔 수정폼
     @GetMapping("/together/share/update/{share_id}")
-    public String updateForm (
-            @PathVariable("share_id") Long share_id,
-            Model model,
+    public String updateForm(@PathVariable("share_id") Long share_id, Model model,
             RedirectAttributes redirectAttributes) throws Exception {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-        if(info == null) {
+        if (info == null) {
             return "redirect:/member/login";
         }
 
         TogetherShareDto share = service.findShareById(share_id);
 
-        if(share == null) {
-            redirectAttributes.addFlashAttribute(
-                    "message" , "게시글이 없거나 삭제되었습니다.");
+        if (share == null) {
+            redirectAttributes.addFlashAttribute("message", "게시글이 없거나 삭제되었습니다.");
             return "redirect:/together/share";
         }
 
         // 실제 글 작성자 확인
-        if(!Objects.equals(share.getAuthor_id(), info.getMember_id())) {
-            redirectAttributes.addFlashAttribute(
-                    "message" , "글 작성자만 수정할 수 있습니다.");
-                return "redirect:/together/share";
+        if (!Objects.equals(share.getAuthor_id(), info.getMember_id())) {
+            redirectAttributes.addFlashAttribute("message", "글 작성자만 수정할 수 있습니다.");
+            return "redirect:/together/share";
         }
 
         // 저장 실패 후 돌아오면 입력값 유지
-        if(!model.containsAttribute("share")) {
+        if (!model.containsAttribute("share")) {
             model.addAttribute("share", share);
         }
 
@@ -197,9 +177,7 @@ public class TogetherShareController {
 
     // 재료나눔 글 수정
     @PostMapping("/together/share/update/{share_id}")
-    public String updateSubmit(
-            @PathVariable("share_id") Long share_id,
-            @ModelAttribute TogetherShareDto dto,
+    public String updateSubmit(@PathVariable("share_id") Long share_id, @ModelAttribute TogetherShareDto dto,
             RedirectAttributes redirectAttributes) {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -215,19 +193,16 @@ public class TogetherShareController {
         try {
             service.updateShare(dto);
 
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글을 수정했습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글을 수정했습니다.");
 
             return "redirect:/together/share/detail/" + share_id;
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            redirectAttributes.addFlashAttribute(
-                    "message", e.getMessage());
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
 
         } catch (Exception e) {
             log.error("재료나눔 글 수정 실패", e);
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글 수정 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글 수정 중 오류가 발생했습니다.");
         }
 
         // 실패하면 입력한 게시글과 재료를 수정폼에 다시 전달
@@ -238,13 +213,11 @@ public class TogetherShareController {
 
     // 재료나눔 글 삭제
     @PostMapping("/together/share/delete/{share_id}")
-    public String delete(
-            @PathVariable("share_id") Long share_id,
-            RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable("share_id") Long share_id, RedirectAttributes redirectAttributes) {
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-        if(info == null) {
+        if (info == null) {
             return "redirect:/member/login";
         }
 
@@ -252,19 +225,16 @@ public class TogetherShareController {
             // 로그인한 회원의 작성자 권한을 확인한 뒤 삭제
             service.deleteShare(share_id, info.getMember_id());
 
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글이 삭제 되었습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글이 삭제 되었습니다.");
 
             return "redirect:/together/share";
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            redirectAttributes.addFlashAttribute(
-                    "message" , e.getMessage());
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
         } catch (Exception e) {
-            log.error("재료나눔 글 삭제 실패" , e);
+            log.error("재료나눔 글 삭제 실패", e);
 
-            redirectAttributes.addFlashAttribute(
-                    "message", "나눔 글 삭제 중 오류가 발생했습니다.");
+            redirectAttributes.addFlashAttribute("message", "나눔 글 삭제 중 오류가 발생했습니다.");
         }
 
         return "redirect:/together/share/detail/" + share_id;

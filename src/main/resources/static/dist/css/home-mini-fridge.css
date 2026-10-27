@@ -27,3 +27,17 @@
 .home-main .mf-plinth::before { left:24px; } .home-main .mf-plinth::after { right:24px; }
 @media(max-width:600px) { .home-main .home-bottom .mf-fridge h2 { font-size:16px; } }
 @media(prefers-reduced-motion:reduce) { .home-main .mf-actions .button span { transition:none; } }
+
+
+/* 메인 냉장고 : 두께가 있는 냉장실 문 */
+.home-main .mf-fridge.mf-opening { z-index:5; }
+.home-main .mf-opening > .mf-door { box-shadow:inset 0 0 28px #c9f3ff; }
+.home-main .mf-opening > .mf-door::before,.home-main .mf-opening > .mf-door .mf-actions { visibility:hidden; }
+.home-main .mf-door-scene { position:absolute;left:0;right:0;z-index:2;perspective:1050px;perspective-origin:65% 45%;pointer-events:none; }
+.home-main .mf-door-pivot { position:absolute;inset:0;transform-origin:right center;transform-style:preserve-3d; }
+.home-main .mf-door-pivot > .mf-door-front { position:absolute;inset:0;margin:0;box-sizing:border-box;background:linear-gradient(100deg,#b5bdc0,#edf0ef 32%,#cbd1d2 78%,#9ca8ad);border-radius:0 0 6px 6px;backface-visibility:hidden;transform:translateZ(14px);box-shadow:-5px 8px 18px #31444b30; }
+.home-main .mf-door-front .mf-items-copy { min-height:110px; }
+.home-main .mf-door-front .mf-items-copy .list-row { border-bottom:3px solid #c0caba;box-shadow:0 1px 0 #fff;padding:12px 0;font-size:12px;gap:8px; }
+.home-main .mf-door-back { position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:35px 20px;border:10px solid #7f9297;border-radius:8px;background:linear-gradient(110deg,#d1e3e8,#f5fcfc 40%,#c4d8df);box-shadow:inset 0 0 0 4px #edf7f9,inset 0 6px 25px #506a7540;backface-visibility:hidden;transform:rotateY(180deg) translateZ(14px); }
+.home-main .mf-door-back > span { height:48px;border:2px solid #b2cbd2;border-top:4px solid #f3ffff;border-radius:4px 4px 10px 10px;background:linear-gradient(#e4f4f67a,#b0ceda80);box-shadow:0 8px 12px #4a6c7926; }
+.home-main .mf-door-edge { position:absolute;top:0;bottom:0;left:0;width:28px;background:linear-gradient(90deg,#84959c,#e6edef 45%,#b4c4cb);transform-origin:left center;transform:translateZ(14px) rotateY(90deg); }

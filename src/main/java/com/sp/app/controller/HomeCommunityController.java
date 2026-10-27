@@ -28,10 +28,10 @@ public class HomeCommunityController {
     private final TogetherShareService shareService;
     private final MyFridgeService fridgeService;
 
-    public record PreviewItem(Long id, String title, String location, String date) {}
+    public record PreviewItem(Long id, String title, String location, String date) {
+    }
 
-
-    // 메인에서 보여줄 최신 게시글 네 개
+    // 메인 슬라이드 아래 : 최신 게시글 최대 5개 조회
     @GetMapping("/home/community-preview")
     public List<PreviewItem> preview(@RequestParam(defaultValue = "meet", name = "type") String type) {
         if (!"meet".equals(type) && !"share".equals(type)) {
@@ -39,36 +39,27 @@ public class HomeCommunityController {
         }
         try {
             if ("meet".equals(type)) {
-                return meetService.listMeet(0, 4).stream()
-                    .map(post -> new PreviewItem(post.getMeet_id(), post.getTitle(), post.getLocation_text(), post.getMeet_at()))
-                    .toList();
+                return meetService.listMeet(0, 5).stream().map(post -> new PreviewItem(post.getMeet_id(),
+                        post.getTitle(), post.getLocation_text(), post.getMeet_at())).toList();
             }
-            return shareService.listShare(0, 4).stream()
-                .map(post -> new PreviewItem(post.getShare_id(), post.getTitle(), post.getLocation_text(), post.getAvailable_until()))
-                .toList();
+            return shareService.listShare(0, 5).stream().map(post -> new PreviewItem(post.getShare_id(),
+                    post.getTitle(), post.getLocation_text(), post.getAvailable_until())).toList();
         } catch (Exception e) {
             log.error("메인 게시글 미리보기 조회 실패: {}", type, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "게시글을 불러오지 못했습니다.");
         }
     }
 
-
+    // 메인 : 로그인 상태와 내 냉장고 재료 반환
     @GetMapping("/home/items")
     public ResponseEntity<?> getFridgeItems() {
         SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-        if(info != null && info.getMember_id() != null) {
+        if (info != null && info.getMember_id() != null) {
             List<MyFridgeDto.ItemResponse> items = fridgeService.getMemberFridgeItems(info.getMember_id());
-            return ResponseEntity.ok(Map.of(
-                    "state","login",
-                    "list",items
-                    ));
+            return ResponseEntity.ok(Map.of("state", "login", "list", items));
         }
 
-
-        return ResponseEntity.ok(Map.of(
-                "state","logout"));
+        return ResponseEntity.ok(Map.of("state", "logout"));
     }
-
-
 }

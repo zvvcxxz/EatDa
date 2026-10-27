@@ -19,290 +19,304 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TogetherMeetServiceImpl implements TogetherMeetService {
 
-	private final TogetherMeetMapper mapper;
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public void insertMeet(TogetherMeetDto dto) throws Exception {
-
-		try {
-			mapper.insertMeet(dto);
-			log.info("같이 먹어요 글 등록 성공");
-		} catch (Exception e) {
-			log.error("같이 먹어요 글 등록 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<TogetherMeetDto> listMeet(int offset, int size) throws Exception {
-
-		try {
-			List<TogetherMeetDto> list = mapper.listMeet(offset, size);
-
-			log.info("같이 먹어요 글 목록 조회 완료 : {} 건", list.size());
-
-			return list;
-
-		} catch (Exception e) {
-			log.error("같이 먹어요 글 목록 조회 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public TogetherMeetDto findMeetById(Long meet_id) throws Exception {
-
-		try {
-
-			mapper.updateViewCount(meet_id);
-
-			return mapper.findMeetById(meet_id);
-
-		} catch (Exception e) {
-			log.error("같이 먹어요 글 상세보기 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public int countMeetParticipants(Long meet_id) throws Exception {
-
-		try {
-			return mapper.countMeetParticipants(meet_id);
-		} catch (Exception e) {
-			log.error("같이 먹어요 참여 인원 조회 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int createMeetParticipants(Long meet_id, Long member_id) throws Exception {
-
-		try {
-			TogetherMeetDto dto = mapper.findMeetById(meet_id);
-
-			if (dto == null) {
-				throw new IllegalArgumentException("게시글이 없습니다.");
-			}
-
-			if (Objects.equals(dto.getAuthor_id(), member_id)) {
-				throw new IllegalStateException("작성자는 이미 참여 인원에 포함되어 있습니다.");
-			}
-
-			if (mapper.countMeetApplication(meet_id, member_id) > 0) {
-				throw new IllegalStateException("이미 참여 신청한 모임입니다. 참여 신청은 한 번만 가능합니다.");
-			}
-			int count = mapper.createMeetParticipant(meet_id, member_id);
-
-			if (count != 1) {
-				throw new IllegalStateException("참여 신청을 저장하지 못했습니다.");
-			}
-
-			return count;
-		} catch (Exception e) {
-			log.error("같이먹어요 참여 신청 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<TogetherMeetParticipantDto> listParticipant(Long meet_id) throws Exception {
-
-		try {
-			return mapper.listParticipant(meet_id);
-		} catch (Exception e) {
-			log.error("같이먹어요 신청자 목록 조회 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int approveMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception {
-
-		try {
-			TogetherMeetDto dto = mapper.findMeetById(meet_id);
-
-			if (dto == null) {
-				throw new IllegalArgumentException("게시글이 없습니다.");
-			}
-
-			if (author_id == null || !Objects.equals(dto.getAuthor_id(), author_id)) {
-				throw new IllegalStateException("글 작성자만 승인할 수 있습니다.");
-			}
-
-			int count = mapper.approveMeetParticipant(meet_id, member_id);
-
-			if (count != 1) {
-				throw new IllegalStateException("대기 중인 신청이 없거나 이미 처리된 신청입니다.");
-			}
-
-			return count;
-
-		} catch (Exception e) {
-			log.error("같이 먹어요 참여 신청 승인 오류", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int rejectMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception {
-
-		try {
-			TogetherMeetDto dto = mapper.findMeetById(meet_id);
-
-			if (dto == null) {
-				throw new IllegalArgumentException("게시글이 없습니다.");
-			}
-
-			if (author_id == null || !Objects.equals(dto.getAuthor_id(), author_id)) {
-				throw new IllegalStateException("글 작성자만 거절할 수 있습니다.");
-			}
-
-			int count = mapper.rejectMeetParticipant(meet_id, member_id);
-
-			if (count != 1) {
-				throw new IllegalStateException("대기 중인 신청이 없거나 이미 처리된 신청입니다.");
-			}
-
-			return count;
-		} catch (Exception e) {
-			log.error("같이 먹어요 참여 신청 거절 오류", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception {
-
-		try {
-			return mapper.listAcceptedParticipants(meet_id);
-		} catch (Exception e) {
-			log.error("같이먹어요 참여자 목록 조회 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception {
-
-		try {
-			if (dto.getContent() == null || dto.getContent().isBlank()) {
-				throw new IllegalArgumentException("댓글 내용을 입력해주세요.");
-			}
-
-			TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
-
-			if (meet == null) {
-				throw new IllegalArgumentException("게시글이 없습니다.");
-			}
-
-			mapper.insertMeetComment(dto);
-
-		} catch (Exception e) {
-			log.error("같이먹어요 댓글 등록 오류", e);
-			throw e;
-		}
-
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<TogetherMeetCommentDto> listMeetComment(Long meet_id, int offset, int size) throws Exception {
-
-		try {
-			return mapper.listMeetComment(meet_id, offset, size);
-		} catch (Exception e) {
-			log.error("같이먹어요 댓글 목록 불러오기 오류", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int updateMeet(TogetherMeetDto dto) throws Exception {
-
-		try {
-			TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
-
-			if (meet == null) {
-				throw new IllegalArgumentException("게시글이 없습니다.");
-			}
-
-			if (dto.getAuthor_id() == null || !Objects.equals(meet.getAuthor_id(), dto.getAuthor_id())) {
-				throw new IllegalStateException("글 작성자만 수정할 수 있습니다.");
-			}
-
-			if (dto.getTitle() == null || dto.getTitle().isBlank() || dto.getContent() == null
-					|| dto.getContent().isBlank()) {
-				throw new IllegalArgumentException("제목과 내용을 입력해주세요.");
-			}
-
-			int participantCount = mapper.countMeetParticipants(dto.getMeet_id());
-
-			if (dto.getMax_participants() == null || dto.getMax_participants() < participantCount) {
-				throw new IllegalArgumentException("최대 인원은 현재 참여 인원보다 적을 수 없습니다.");
-			}
-
-			int count = mapper.updateMeet(dto);
-
-			if (count != 1) {
-				throw new IllegalStateException("게시글을 수정하지 못했습니다.");
-			}
-
-			return count;
-
-		} catch (Exception e) {
-			log.error("같이먹어요 글 수정 오류", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int deleteMeet(Long meet_id, Long author_id) throws Exception {
-
-		try {
-			TogetherMeetDto meet = mapper.findMeetById(meet_id);
-
-			if (meet == null) {
-				throw new IllegalArgumentException("게시글이 없거나 이미 삭제된 게시글입니다.");
-			}
-			if (author_id == null && !Objects.equals(meet.getAuthor_id(), author_id)) {
-				throw new IllegalStateException("글 작성자만 삭제할 수 있습니다.");
-			}
-			int count = mapper.deleteMeet(meet_id, author_id);
-
-			if (count != 1) {
-				throw new IllegalStateException("게시글을 삭제하지 못했습니다.");
-			}
-
-			return count;
-
-		} catch (Exception e) {
-			log.error("같이 먹어요 글 삭제 실패", e);
-			throw e;
-		}
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public int countMeetComments(Long meet_id) throws Exception {
-
-		try {
-			return mapper.countMeetComments(meet_id);
-		} catch (Exception e) {
-			log.error("같이 먹어요 댓글 수 조회 실패", e);
-			throw e;
-		}
-	}
+    private final TogetherMeetMapper mapper;
+
+    // 같이 먹어요 : 모임 글과 입력 정보 저장
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void insertMeet(TogetherMeetDto dto) throws Exception {
+
+        try {
+            mapper.insertMeet(dto);
+            log.info("같이 먹어요 글 등록 성공");
+        } catch (Exception e) {
+            log.error("같이 먹어요 글 등록 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 모임 글 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<TogetherMeetDto> listMeet(int offset, int size) throws Exception {
+
+        try {
+            List<TogetherMeetDto> list = mapper.listMeet(offset, size);
+
+            log.info("같이 먹어요 글 목록 조회 완료 : {} 건", list.size());
+
+            return list;
+
+        } catch (Exception e) {
+            log.error("같이 먹어요 글 목록 조회 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 모임 글 상세 조회
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public TogetherMeetDto findMeetById(Long meet_id) throws Exception {
+
+        try {
+
+            mapper.updateViewCount(meet_id);
+
+            return mapper.findMeetById(meet_id);
+
+        } catch (Exception e) {
+            log.error("같이 먹어요 글 상세보기 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 승인된 참여 인원 조회
+    @Override
+    @Transactional(readOnly = true)
+    public int countMeetParticipants(Long meet_id) throws Exception {
+
+        try {
+            return mapper.countMeetParticipants(meet_id);
+        } catch (Exception e) {
+            log.error("같이 먹어요 참여 인원 조회 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 참여 신청 조건 확인 후 저장
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int createMeetParticipants(Long meet_id, Long member_id) throws Exception {
+
+        try {
+            TogetherMeetDto dto = mapper.findMeetById(meet_id);
+
+            if (dto == null) {
+                throw new IllegalArgumentException("게시글이 없습니다.");
+            }
+
+            if (Objects.equals(dto.getAuthor_id(), member_id)) {
+                throw new IllegalStateException("작성자는 이미 참여 인원에 포함되어 있습니다.");
+            }
+
+            if (mapper.countMeetApplication(meet_id, member_id) > 0) {
+                throw new IllegalStateException("이미 참여 신청한 모임입니다. 참여 신청은 한 번만 가능합니다.");
+            }
+            int count = mapper.createMeetParticipant(meet_id, member_id);
+
+            if (count != 1) {
+                throw new IllegalStateException("참여 신청을 저장하지 못했습니다.");
+            }
+
+            return count;
+        } catch (Exception e) {
+            log.error("같이먹어요 참여 신청 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 참여 신청자 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<TogetherMeetParticipantDto> listParticipant(Long meet_id) throws Exception {
+
+        try {
+            return mapper.listParticipant(meet_id);
+        } catch (Exception e) {
+            log.error("같이먹어요 신청자 목록 조회 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 참여 인원과 권한 확인 후 승인
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int approveMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception {
+
+        try {
+            TogetherMeetDto dto = mapper.findMeetById(meet_id);
+
+            if (dto == null) {
+                throw new IllegalArgumentException("게시글이 없습니다.");
+            }
+
+            if (author_id == null || !Objects.equals(dto.getAuthor_id(), author_id)) {
+                throw new IllegalStateException("글 작성자만 승인할 수 있습니다.");
+            }
+
+            int count = mapper.approveMeetParticipant(meet_id, member_id);
+
+            if (count != 1) {
+                throw new IllegalStateException("대기 중인 신청이 없거나 이미 처리된 신청입니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            log.error("같이 먹어요 참여 신청 승인 오류", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 작성자 권한 확인 후 신청 거절
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int rejectMeetParticipant(Long meet_id, Long member_id, Long author_id) throws Exception {
+
+        try {
+            TogetherMeetDto dto = mapper.findMeetById(meet_id);
+
+            if (dto == null) {
+                throw new IllegalArgumentException("게시글이 없습니다.");
+            }
+
+            if (author_id == null || !Objects.equals(dto.getAuthor_id(), author_id)) {
+                throw new IllegalStateException("글 작성자만 거절할 수 있습니다.");
+            }
+
+            int count = mapper.rejectMeetParticipant(meet_id, member_id);
+
+            if (count != 1) {
+                throw new IllegalStateException("대기 중인 신청이 없거나 이미 처리된 신청입니다.");
+            }
+
+            return count;
+        } catch (Exception e) {
+            log.error("같이 먹어요 참여 신청 거절 오류", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 승인된 참여자 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<TogetherMeetParticipantDto> listAcceptedParticipants(Long meet_id) throws Exception {
+
+        try {
+            return mapper.listAcceptedParticipants(meet_id);
+        } catch (Exception e) {
+            log.error("같이먹어요 참여자 목록 조회 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 댓글 저장
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void insertMeetComment(TogetherMeetCommentDto dto) throws Exception {
+
+        try {
+            if (dto.getContent() == null || dto.getContent().isBlank()) {
+                throw new IllegalArgumentException("댓글 내용을 입력해주세요.");
+            }
+
+            TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
+
+            if (meet == null) {
+                throw new IllegalArgumentException("게시글이 없습니다.");
+            }
+
+            mapper.insertMeetComment(dto);
+
+        } catch (Exception e) {
+            log.error("같이먹어요 댓글 등록 오류", e);
+            throw e;
+        }
+
+    }
+
+    // 같이 먹어요 : 댓글 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<TogetherMeetCommentDto> listMeetComment(Long meet_id, int offset, int size) throws Exception {
+
+        try {
+            return mapper.listMeetComment(meet_id, offset, size);
+        } catch (Exception e) {
+            log.error("같이먹어요 댓글 목록 불러오기 오류", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 모임 글 수정
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateMeet(TogetherMeetDto dto) throws Exception {
+
+        try {
+            TogetherMeetDto meet = mapper.findMeetById(dto.getMeet_id());
+
+            if (meet == null) {
+                throw new IllegalArgumentException("게시글이 없습니다.");
+            }
+
+            if (dto.getAuthor_id() == null || !Objects.equals(meet.getAuthor_id(), dto.getAuthor_id())) {
+                throw new IllegalStateException("글 작성자만 수정할 수 있습니다.");
+            }
+
+            if (dto.getTitle() == null || dto.getTitle().isBlank() || dto.getContent() == null
+                    || dto.getContent().isBlank()) {
+                throw new IllegalArgumentException("제목과 내용을 입력해주세요.");
+            }
+
+            int participantCount = mapper.countMeetParticipants(dto.getMeet_id());
+
+            if (dto.getMax_participants() == null || dto.getMax_participants() < participantCount) {
+                throw new IllegalArgumentException("최대 인원은 현재 참여 인원보다 적을 수 없습니다.");
+            }
+
+            int count = mapper.updateMeet(dto);
+
+            if (count != 1) {
+                throw new IllegalStateException("게시글을 수정하지 못했습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            log.error("같이먹어요 글 수정 오류", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 모임 글 삭제
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteMeet(Long meet_id, Long author_id) throws Exception {
+
+        try {
+            TogetherMeetDto meet = mapper.findMeetById(meet_id);
+
+            if (meet == null) {
+                throw new IllegalArgumentException("게시글이 없거나 이미 삭제된 게시글입니다.");
+            }
+            if (author_id == null && !Objects.equals(meet.getAuthor_id(), author_id)) {
+                throw new IllegalStateException("글 작성자만 삭제할 수 있습니다.");
+            }
+            int count = mapper.deleteMeet(meet_id, author_id);
+
+            if (count != 1) {
+                throw new IllegalStateException("게시글을 삭제하지 못했습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            log.error("같이 먹어요 글 삭제 실패", e);
+            throw e;
+        }
+    }
+
+    // 같이 먹어요 : 삭제되지 않은 댓글 수 조회
+    @Override
+    @Transactional(readOnly = true)
+    public int countMeetComments(Long meet_id) throws Exception {
+
+        try {
+            return mapper.countMeetComments(meet_id);
+        } catch (Exception e) {
+            log.error("같이 먹어요 댓글 수 조회 실패", e);
+            throw e;
+        }
+    }
 }

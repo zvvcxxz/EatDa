@@ -31,7 +31,33 @@
 .community-showcase .slide-controls button { display:grid; place-items:center; width:38px; height:38px; padding:0; border:1px solid #e9d7c5; background:transparent; color:#6b5040; border-radius:50%; font-size:18px; }
 .community-showcase .slide-controls #slide-play { width:auto; padding:0 14px; font-size:11px; border-radius:20px; }
 .community-showcase button:focus-visible { outline:2px solid #df603f; outline-offset:4px; }
-.community-showcase .slide-demo-note { font-size:10px; color:#a49382; margin-top:12px; }
 @media(max-width:1000px) { .community-showcase .slide-card { flex-basis:calc((100% - 24px)/2); } }
 @media(max-width:600px) { .community-showcase .slide-card { flex-basis:100%; } .home-main .community-showcase .section-head { display:block; } .community-showcase .slide-tabs { margin-top:15px; gap:20px; } }
 @media(prefers-reduced-motion:reduce) { .community-showcase .slide-track,.community-showcase .slide-line span,.community-showcase .slide-photo img,.community-showcase .slide-photo-actions,.community-showcase .slide-photo::after,.community-showcase .slide-action { transition:none; } }
+
+/* 슬라이드 버튼 : 재생과 이동 아이콘 */
+.community-showcase .slide-controls button,
+.community-showcase .slide-controls #slide-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    line-height: 1;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.community-showcase .slide-controls button svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.community-showcase .slide-controls button:hover { background: #fff0e3; }
+.community-showcase .slide-controls button:focus-visible { outline: 2px solid #e86342; outline-offset: 3px; }

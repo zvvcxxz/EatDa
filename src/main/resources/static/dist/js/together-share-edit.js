@@ -1,3 +1,4 @@
+// 재료 나눔 수정 : 재료 검색과 입력값 확인
 (() => {
     'use strict';
     const form = document.querySelector('[data-share-edit]');
@@ -39,17 +40,17 @@
 
     // 수정 후 다시 입력하면 이전 안내 초기화
     const textFields = ['title', 'content', 'location_text'];
-    textFields.forEach(name => {
-        form.elements.namedItem(name).addEventListener('input', event => {
+    textFields.forEach((name) => {
+        form.elements.namedItem(name).addEventListener('input', (event) => {
             event.target.setCustomValidity('');
         });
     });
 
     // 저장 전 공백과 날짜 확인
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', (event) => {
         updateType();
         validateDates();
-        textFields.forEach(name => {
+        textFields.forEach((name) => {
             const field = form.elements.namedItem(name);
             field.setCustomValidity(field.value.trim() ? '' : '내용을 입력해주세요.');
         });
@@ -59,7 +60,6 @@
         if (!validateMaterials() || !form.reportValidity()) event.preventDefault();
     });
 
-
     // 재료 편집
     const items = form.querySelector('[data-edit-items]');
     const itemTemplate = form.querySelector('#se-item-template');
@@ -67,9 +67,14 @@
     const states = new WeakMap();
     const field = (row, name) => row.querySelector(`[data-item-field="${name}"]`);
 
+    // 재료 검색 : 이전 검색과 예약 요청 취소
+
     function stopSearch(input) {
         const state = states.get(input);
-        if (state) { clearTimeout(state.timer); state.controller.abort(); }
+        if (state) {
+            clearTimeout(state.timer);
+            state.controller.abort();
+        }
         states.delete(input);
     }
 
@@ -78,7 +83,7 @@
         const rows = [...items.querySelectorAll('[data-edit-item]')];
         rows.forEach((row, index) => {
             row.querySelector('[data-item-title]').textContent = `나눔 재료 ${index + 1}`;
-            row.querySelectorAll('[data-item-field]').forEach(input => {
+            row.querySelectorAll('[data-item-field]').forEach((input) => {
                 input.name = `items[${index}].${input.dataset.itemField}`;
             });
             row.querySelector('[data-remove-edit-item]').disabled = rows.length === 1;
@@ -98,7 +103,7 @@
     form.querySelector('[data-add-edit-item]').addEventListener('click', addItem);
 
     // 화면에서만 제거, 실제 삭제는 저장할 때 처리
-    items.addEventListener('click', event => {
+    items.addEventListener('click', (event) => {
         const button = event.target.closest('[data-remove-edit-item]');
         if (!button || button.disabled) return;
         const row = button.closest('[data-edit-item]');
@@ -132,12 +137,15 @@
             try {
                 const url = new URL(items.dataset.searchUrl, location.origin);
                 url.searchParams.set('keyword', keyword);
-                const response = await fetch(url, { signal: state.controller.signal, headers: { Accept: 'application/json' } });
+                const response = await fetch(url, {
+                    signal: state.controller.signal,
+                    headers: { Accept: 'application/json' }
+                });
                 if (!response.ok) throw new Error('재료 검색 실패');
                 const data = await response.json();
                 if (!Array.isArray(data)) throw new Error('검색 응답 오류');
                 if (states.get(input) !== state || !row.isConnected) return;
-                data.forEach(ingredient => {
+                data.forEach((ingredient) => {
                     const option = document.createElement('button');
                     option.type = 'button';
                     option.className = 'se-search-option';
@@ -160,20 +168,22 @@
                     results.append(option);
                 });
                 results.hidden = data.length === 0;
-                status.textContent = data.length ? `${data.length}개 검색됨 · 사용할 재료를 선택해 주세요.` : '검색된 재료가 없습니다. 다른 이름으로 검색해 주세요.';
+                status.textContent = data.length
+                    ? `${data.length}개 검색됨 · 사용할 재료를 선택해 주세요.`
+                    : '검색된 재료가 없습니다. 다른 이름으로 검색해 주세요.';
             } catch (error) {
                 if (error.name === 'AbortError' || states.get(input) !== state || !row.isConnected) return;
                 status.textContent = '검색하지 못했어요. 잠시 후 다시 입력해 주세요.';
             }
         }, 250);
     }
-    items.addEventListener('input', event => {
+    items.addEventListener('input', (event) => {
         if (event.target.matches('[data-edit-search]')) searchIngredient(event.target, event.isComposing);
     });
-    items.addEventListener('compositionend', event => {
+    items.addEventListener('compositionend', (event) => {
         if (event.target.matches('[data-edit-search]')) searchIngredient(event.target);
     });
-    items.addEventListener('keydown', event => {
+    items.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && event.target.matches('[data-edit-search]')) event.preventDefault();
     });
 
@@ -181,10 +191,15 @@
     function validateMaterials() {
         renameItems();
         const rows = [...items.querySelectorAll('[data-edit-item]')];
-        if (!rows.length) { feedback.textContent = '재료를 하나 이상 추가해 주세요.'; return false; }
-        rows.forEach(row => {
+        if (!rows.length) {
+            feedback.textContent = '재료를 하나 이상 추가해 주세요.';
+            return false;
+        }
+        rows.forEach((row) => {
             const input = row.querySelector('[data-edit-search]');
-            input.setCustomValidity(field(row, 'ingredient_id').value ? '' : '검색 결과에서 재료를 선택해 주세요.');
+            input.setCustomValidity(
+                field(row, 'ingredient_id').value ? '' : '검색 결과에서 재료를 선택해 주세요.'
+            );
         });
         return true;
     }

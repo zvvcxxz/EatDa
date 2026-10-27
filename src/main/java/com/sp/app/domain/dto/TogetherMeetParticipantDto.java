@@ -8,9 +8,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TogetherMeetParticipantDto {
-	private Long meet_id;
-	private Long member_id;
-	private String name;
-	private Integer status;
-	private String created_at;
+    private Long meet_id;
+    private Long member_id;
+    private String name;
+    private Integer status;
+    private String created_at;
 }

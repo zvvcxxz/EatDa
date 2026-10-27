@@ -1,3 +1,4 @@
+// 재료 나눔 : 등록 대화상자와 재료 입력 항목
 const dialog = document.getElementById('shareWriteDialog');
 
 // 글쓰기 모달 열기
@@ -36,7 +37,7 @@ function updateIngredientCardNumbers() {
         }
 
         // 재료 입력 순서 다시 맞추기
-        card.querySelectorAll('[name]').forEach(input => {
+        card.querySelectorAll('[name]').forEach((input) => {
             const nameAttr = input.getAttribute('name');
             if (nameAttr) {
                 const newName = nameAttr.replace(/items\[\d+\]/, `items[${index}]`);
@@ -61,7 +62,7 @@ function addIngredientItem() {
     const newCard = firstCard.cloneNode(true);
 
     // 추가한 재료 입력값 비우기
-    newCard.querySelectorAll('input, select').forEach(input => {
+    newCard.querySelectorAll('input, select').forEach((input) => {
         if (input.tagName === 'SELECT') {
             input.selectedIndex = 0;
         } else {
@@ -71,7 +72,8 @@ function addIngredientItem() {
 
     newCard.querySelector('[data-search-results]').replaceChildren();
     newCard.querySelector('[data-search-results]').hidden = true;
-    newCard.querySelector('[data-search-status]').textContent = '재료명이나 별칭으로 검색한 뒤 결과를 선택해 주세요.';
+    newCard.querySelector('[data-search-status]').textContent =
+        '재료명이나 별칭으로 검색한 뒤 결과를 선택해 주세요.';
     container.appendChild(newCard);
     updateIngredientCardNumbers();
 }

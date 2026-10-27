@@ -20,35 +20,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HomeRecipeSlideController {
 
-	private final CommunityRecipeService recipeService;
-	private final CommunityReviewService reviewService;
+    private final CommunityRecipeService recipeService;
+    private final CommunityReviewService reviewService;
 
-	// 메인 슬라이드 : 모두의 레시피 목록 조회
-	@GetMapping("/home/recipe-slides")
-	public ResponseEntity<?> getRecipeSlide() {
+    // 메인 슬라이드 : 모두의 레시피 목록 조회
+    @GetMapping("/home/recipe-slides")
+    public ResponseEntity<?> getRecipeSlide() {
 
-		Map<String, Object> map = Map.of(
-				"offset" , 0,
-				"size", 6
-				);
+        Map<String, Object> map = Map.of("offset", 0, "size", 6);
 
-		List<CommunityRecipeDto> recipes = recipeService.listRecipe(map);
+        List<CommunityRecipeDto> recipes = recipeService.listRecipe(map);
 
-		return ResponseEntity.ok(recipes);
-	}
+        return ResponseEntity.ok(recipes);
+    }
 
-	// 메인 슬라이드 : 따라 만든 요리 목록 조회
-	@GetMapping("/home/cooking-slides")
-	public ResponseEntity<?> getCookingSlide() {
+    // 메인 슬라이드 : 따라 만든 요리 목록 조회
+    @GetMapping("/home/cooking-slides")
+    public ResponseEntity<?> getCookingSlide() {
 
-		Map<String, Object> map = Map.of(
-				"offset" , 0,
-				"size" , 6
-				);
+        Map<String, Object> map = Map.of("offset", 0, "size", 6);
 
-		List<CommunityReviewDto> reviews =
-				reviewService.listReview(map);
+        List<CommunityReviewDto> reviews = reviewService.listReview(map);
 
-		return ResponseEntity.ok(reviews);
-	}
+        return ResponseEntity.ok(reviews);
+    }
 }

@@ -1,148 +1,185 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html
+    lang="ko"
+    xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layout/layout}">
-<head>
-<title>같이 먹어요 · 잇다</title>
+    layout:decorate="~{layout/layout}"
+>
+    <head>
+        <title>같이 먹어요 · 잇다</title>
 
-<th:block layout:fragment="css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap">
-<link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}">
-<link rel="stylesheet" th:href="@{/dist/css/together-meet-editorial.css}">
-</th:block>
-</head>
-<body>
-    <main layout:fragment="content" class="together-page ml-page">
-        <!-- 등록 / 수정 결과 알림 -->
-        <div class="tg-result-toast" data-list-result-toast role="status"
-            aria-live="polite" aria-atomic="true" th:if="${message != null}">
-             <span
-                th:text="${message}"></span>
-        </div>
-        <div class="sl-path"><span>함께하는 주방 / 같이 먹어요</span><span>잇다 EAT-DA</span></div>
-        <header class="sl-intro">
-            <div><p class="sl-kicker">이웃과 마주 앉는 시간</p><h1>오늘의 한 끼,<br><em>함께라서 더 맛있게.</em></h1></div>
-            <div class="sl-intro-note"><p>가까운 곳에서 함께 식사할<br>이웃을 만나 보세요.</p><small>메뉴보다 반가운 건, 마주 앉은 사람.</small></div>
-        </header>
-
-
-        <div class="sl-toolbar">
-            <nav class="sl-tabs" aria-label="Together 게시판">
-                <a class="sl-tab is-active" aria-current="page"
-                    th:href="@{/together/meet}">같이 먹어요</a> <a class="sl-tab"
-                    th:href="@{/together/share}">재료 나눔</a>
-            </nav>
-            <button type="button" class="sl-write" data-open-write>
-                 글쓰기
-            </button>
-        </div>
-
-        <div class="sl-list-head"><h2>함께할 이웃을 기다리는 식탁</h2><span>최신 등록순 · 10개씩</span></div>
-        <!-- 글 목록 -->
-        <section class="tg-list" aria-label="같이 먹어요 게시글">
-            <p class="tg-empty" th:if="${posts == null or #lists.isEmpty(posts)}">
-                등록된 게시글이 없습니다. 첫 글을 작성해 보세요.</p>
-            <!-- 게시글 반복 출력 -->
-            <article class="tg-card" th:each="post : ${posts}">
+        <!-- 같이 먹어요 : 화면 스타일 연결 -->
+        <th:block layout:fragment="css">
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+            <link
+                rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap"
+            />
+            <link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}" />
+            <link rel="stylesheet" th:href="@{/dist/css/together-meet-editorial.css}" />
+        </th:block>
+    </head>
+    <body>
+        <main layout:fragment="content" class="together-page ml-page">
+            <!-- 등록 / 수정 결과 알림 -->
+            <div
+                class="tg-result-toast"
+                data-list-result-toast
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                th:if="${message != null}"
+            >
+                <span th:text="${message}"></span>
+            </div>
+            <div class="sl-path"><span>함께하는 주방 / 같이 먹어요</span><span>잇다 EAT-DA</span></div>
+            <header class="sl-intro">
                 <div>
-                    <div class="tg-card-top">
-                        <span class="tg-badge">같이 먹어요</span> <span
-                            class="tg-badge tg-status" th:if="${post.meet_status != null}"
-                            th:text="${statusLabels != null and statusLabels.containsKey(post.meet_status) ? statusLabels.get(post.meet_status) : '상태 ' + post.meet_status}"></span>
+                    <p class="sl-kicker">이웃과 마주 앉는 시간</p>
+                    <h1>오늘의 한 끼,<br /><em>함께라서 더 맛있게.</em></h1>
+                </div>
+                <div class="sl-intro-note">
+                    <p>가까운 곳에서 함께 식사할<br />이웃을 만나 보세요.</p>
+                    <small>메뉴보다 반가운 건, 마주 앉은 사람.</small>
+                </div>
+            </header>
+
+            <div class="sl-toolbar">
+                <nav class="sl-tabs" aria-label="Together 게시판">
+                    <a class="sl-tab is-active" aria-current="page" th:href="@{/together/meet}"
+                        >같이 먹어요</a
+                    >
+                    <a class="sl-tab" th:href="@{/together/share}">재료 나눔</a>
+                </nav>
+                <button type="button" class="sl-write" data-open-write>글쓰기</button>
+            </div>
+
+            <div class="sl-list-head">
+                <h2>함께할 이웃을 기다리는 식탁</h2>
+                <span>최신 등록순 · 10개씩</span>
+            </div>
+            <!-- 글 목록 -->
+            <section class="tg-list" aria-label="같이 먹어요 게시글">
+                <p class="tg-empty" th:if="${posts == null or #lists.isEmpty(posts)}">
+                    등록된 게시글이 없습니다. 첫 글을 작성해 보세요.
+                </p>
+                <!-- 게시글 반복 출력 -->
+                <article class="tg-card" th:each="post : ${posts}">
+                    <div>
+                        <div class="tg-card-top">
+                            <span class="tg-badge">같이 먹어요</span>
+                            <span
+                                class="tg-badge tg-status"
+                                th:if="${post.meet_status != null}"
+                                th:text="${statusLabels != null and statusLabels.containsKey(post.meet_status) ? statusLabels.get(post.meet_status) : '상태 ' + post.meet_status}"
+                            ></span>
+                        </div>
+
+                        <a
+                            class="tg-title"
+                            th:href="@{/together/meet/detail/{id}(id=${post.meet_id})}"
+                            th:text="${post.title}"
+                        ></a>
+                        <p class="tg-excerpt" th:text="${post.content}"></p>
+                        <dl class="tg-meta">
+                            <div>
+                                <dt>장소</dt>
+                                <dd th:text="${post.location_text}"></dd>
+                            </div>
+                            <div>
+                                <dt>모임 일시</dt>
+                                <dd th:text="${post.meet_at}"></dd>
+                            </div>
+                            <div>
+                                <dt>신청 마감</dt>
+                                <dd th:text="${post.application_deadline} ?: '별도 마감 없음'"></dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="tg-card-side">
+                        <p>최대 참여 인원 <strong th:text="${post.max_participants}"></strong>명</p>
+
+                        <div class="tg-author">
+                            <span th:text="${post.name}"></span>
+                        </div>
+                        <p class="tg-date">작성 <span th:text="${post.created_at}"></span></p>
+                        <p class="tg-date">조회 <span th:text="${post.view_count}"></span></p>
+                    </div>
+                </article>
+            </section>
+
+            <!-- 게시글 더보기 버튼 -->
+            <div class="tg-more-wrap" th:if="${hasMore == true}">
+                <button
+                    type="button"
+                    class="tg-btn-more"
+                    id="btnLoadMorePosts"
+                    th:attr="data-offset=${nextOffset},
+                     data-url=@{/together/meet/more}"
+                >
+                    <span>게시글 더보기</span>
+                </button>
+            </div>
+
+            <!-- 글쓰기 모달 -->
+            <dialog class="tg-dialog" data-write-dialog aria-labelledby="meet-write-title">
+                <div class="tg-dialog-scroll">
+                    <div class="tg-dialog-head">
+                        <div>
+                            <span class="tg-modal-badge">같이 먹어요</span>
+                            <h2 id="meet-write-title">한 끼의 약속 만들기</h2>
+                        </div>
+                        <button type="button" class="tg-close" data-close-write aria-label="글쓰기 닫기">
+                            ×
+                        </button>
                     </div>
 
-                    <a class="tg-title"
-                        th:href="@{/together/meet/detail/{id}(id=${post.meet_id})}"
-                        th:text="${post.title}"></a>
-                    <p class="tg-excerpt" th:text="${post.content}"></p>
-                    <dl class="tg-meta">
-                        <div>
-                            <dt>장소</dt>
-                            <dd th:text="${post.location_text}"></dd>
+                    <!-- 글 등록 -->
+                    <form th:action="@{/together/meet/write}" method="post" data-write-form>
+                        <label class="tg-field"
+                            >제목 * <input type="text" name="title" maxlength="200" required />
+                        </label>
+                        <label class="tg-field"
+                            >모임 장소 * <input type="text" name="location_text" maxlength="300" required />
+                        </label>
+
+                        <div class="tg-form-grid">
+                            <label class="tg-field"
+                                >모임 일시 * <input type="datetime-local" name="meet_at" data-date required />
+                            </label>
+                            <label class="tg-field"
+                                >신청 마감 일시
+                                <input type="datetime-local" name="application_deadline" data-date />
+                            </label>
                         </div>
-                        <div>
-                            <dt>모임 일시</dt>
-                            <dd th:text="${post.meet_at}"></dd>
+                        <label class="tg-field"
+                            >최대 참여 인원 *
+                            <input
+                                type="number"
+                                name="max_participants"
+                                min="1"
+                                max="99999"
+                                step="1"
+                                required
+                            />
+                        </label>
+                        <label class="tg-field"
+                            >상세 내용 * <textarea name="content" rows="5" required></textarea>
+                        </label>
+                        <p class="tg-note">* 필수 입력 항목입니다. 등록하려면 로그인이 필요합니다.</p>
+                        <div class="tg-actions">
+                            <button type="button" class="tg-button" data-close-write>취소</button>
+                            <button type="submit" class="tg-button primary">등록하기</button>
                         </div>
-                        <div>
-                            <dt>신청 마감</dt>
-                            <dd th:text="${post.application_deadline} ?: '별도 마감 없음'"></dd>
-                        </div>
-                    </dl>
+                    </form>
                 </div>
-                <div class="tg-card-side">
-                    <p>
-                        최대 참여 인원 <strong th:text="${post.max_participants}"></strong>명
-                    </p>
-
-                    <div class="tg-author">
-                        <span
-                            th:text="${post.name}"></span>
-                    </div>
-                    <p class="tg-date">
-                        작성 <span th:text="${post.created_at}"></span>
-                    </p>
-                    <p class="tg-date">
-                        조회 <span th:text="${post.view_count}"></span>
-                    </p>
-                </div>
-            </article>
-        </section>
-
-        <!-- 게시글 더보기 버튼 -->
-        <div class="tg-more-wrap" th:if="${hasMore == true}">
-            <button type="button" class="tg-btn-more" id="btnLoadMorePosts"
-                th:attr="data-offset=${nextOffset},
-                     data-url=@{/together/meet/more}">
-                <span>게시글 더보기</span>
-            </button>
-        </div>
-
-        <!-- 글쓰기 모달 -->
-        <dialog class="tg-dialog" data-write-dialog
-            aria-labelledby="meet-write-title">
-<div class="tg-dialog-scroll">
-        <div class="tg-dialog-head">
-            <div><span class="tg-modal-badge">같이 먹어요</span><h2 id="meet-write-title">한 끼의 약속 만들기</h2></div>
-            <button type="button" class="tg-close" data-close-write
-                aria-label="글쓰기 닫기">×</button>
-        </div>
-
-        <!-- 글 등록 -->
-        <form th:action="@{/together/meet/write}" method="post"
-            data-write-form>
-            <label class="tg-field">제목 * <input type="text" name="title"
-                maxlength="200" required>
-            </label> <label class="tg-field">모임 장소 * <input type="text"
-                name="location_text" maxlength="300" required>
-            </label>
-
-            <div class="tg-form-grid">
-                <label class="tg-field">모임 일시 * <input type="datetime-local"
-                    name="meet_at" data-date required>
-                </label> <label class="tg-field">신청 마감 일시 <input
-                    type="datetime-local" name="application_deadline" data-date>
-                </label>
-            </div>
-            <label class="tg-field">최대 참여 인원 * <input type="number"
-                name="max_participants" min="1" max="99999" step="1" required>
-            </label> <label class="tg-field">상세 내용 * <textarea name="content"
-                    rows="5" required></textarea>
-            </label>
-            <p class="tg-note">* 필수 입력 항목입니다. 등록하려면 로그인이 필요합니다.</p>
-            <div class="tg-actions">
-                <button type="button" class="tg-button" data-close-write>취소</button>
-                <button type="submit" class="tg-button primary">등록하기</button>
-            </div>
-        </form>
-        </div>
-</dialog>
-    </main>
-    <th:block layout:fragment="script">
-        <script defer th:src="@{/dist/js/together.js}"></script>
-        <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
-    </th:block>
-</body>
+            </dialog>
+        </main>
+        <!-- 같이 먹어요 : 화면 기능 스크립트 연결 -->
+        <th:block layout:fragment="script">
+            <script defer th:src="@{/dist/js/together.js}"></script>
+            <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
+        </th:block>
+    </body>
 </html>

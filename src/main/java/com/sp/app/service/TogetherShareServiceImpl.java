@@ -53,8 +53,8 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             }
 
             // 시작일 / 종료일 입력 확인
-            if (dto.getAvailable_from() == null || dto.getAvailable_from().isBlank() || dto.getAvailable_until() == null
-                    || dto.getAvailable_until().isBlank()) {
+            if (dto.getAvailable_from() == null || dto.getAvailable_from().isBlank()
+                    || dto.getAvailable_until() == null || dto.getAvailable_until().isBlank()) {
                 throw new IllegalArgumentException("나눔 시작일과 종료일을 입력해주세요.");
             }
 
@@ -183,46 +183,45 @@ public class TogetherShareServiceImpl implements TogetherShareService {
 
         try {
             // 글 번호와 로그인 정보 확인
-            if(dto == null || dto.getShare_id() == null || dto.getShare_id() < 1) {
+            if (dto == null || dto.getShare_id() == null || dto.getShare_id() < 1) {
                 throw new IllegalArgumentException("게시글 번호가 올바르지 않습니다.");
             }
 
-            if(dto.getAuthor_id() == null) {
+            if (dto.getAuthor_id() == null) {
                 throw new IllegalArgumentException("로그인이 필요합니다.");
             }
 
             // 수정할 글이 있는지 확인
             TogetherShareDto share = mapper.findShareById(dto.getShare_id());
 
-            if(share == null) {
+            if (share == null) {
                 throw new IllegalArgumentException("게시글이 없거나 삭제되었습니다.");
             }
 
             // 작성자 확인
-            if(!Objects.equals(share.getAuthor_id(), dto.getAuthor_id())) {
+            if (!Objects.equals(share.getAuthor_id(), dto.getAuthor_id())) {
                 throw new IllegalArgumentException("글 작성자만 수정할 수 있습니다.");
             }
 
             // 제목과 내용 확인
-            if(dto.getTitle() == null || dto.getTitle().isBlank()
-                    || dto.getContent() == null || dto.getContent().isBlank()) {
+            if (dto.getTitle() == null || dto.getTitle().isBlank() || dto.getContent() == null
+                    || dto.getContent().isBlank()) {
                 throw new IllegalArgumentException("제목과 내용을 입력해주세요.");
             }
 
             // 나눔 장소 확인
-            if(dto.getLocation_text() == null || dto.getLocation_text().isBlank()) {
+            if (dto.getLocation_text() == null || dto.getLocation_text().isBlank()) {
                 throw new IllegalArgumentException("나눔 장소를 입력해주세요.");
             }
 
             // 나눔 유형 확인
-            if(dto.getShare_type() == null || (dto.getShare_type() != 0 &&
-                    dto.getShare_type() != 1)) {
+            if (dto.getShare_type() == null || (dto.getShare_type() != 0 && dto.getShare_type() != 1)) {
                 throw new IllegalArgumentException("나눔 유형을 선택해주세요.");
             }
 
             // 교환이면 조건 입력 확인
-            if(dto.getShare_type() == 1) {
-                if(dto.getExchange_note() == null || dto.getExchange_note().isBlank()) {
+            if (dto.getShare_type() == 1) {
+                if (dto.getExchange_note() == null || dto.getExchange_note().isBlank()) {
                     throw new IllegalArgumentException("교환 조건을 입력해주세요.");
                 }
             } else {
@@ -230,13 +229,13 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             }
 
             // 최대 수령인원 확인
-            if(dto.getMax_recipients() == null || dto.getMax_recipients() < 1) {
+            if (dto.getMax_recipients() == null || dto.getMax_recipients() < 1) {
                 throw new IllegalArgumentException("최대 수령인원은 1명 이상이어야 합니다.");
             }
 
             // 시작일과 종료일 입력 확인
-            if(dto.getAvailable_from() == null || dto.getAvailable_from().isBlank() ||
-                    dto.getAvailable_until() == null || dto.getAvailable_until().isBlank()) {
+            if (dto.getAvailable_from() == null || dto.getAvailable_from().isBlank()
+                    || dto.getAvailable_until() == null || dto.getAvailable_until().isBlank()) {
                 throw new IllegalArgumentException("나눔 시작일과 종료일을 입력해주세요.");
             }
 
@@ -252,14 +251,14 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             }
 
             // 종료일이 시작일 이후인지 확인
-            if(!end.isAfter(start)) {
+            if (!end.isAfter(start)) {
                 throw new IllegalArgumentException("나눔 종료일은 시작일보다 이후여야 합니다.");
             }
 
             // 게시글 수정
             int count = mapper.updateShare(dto);
 
-            if(count != 1) {
+            if (count != 1) {
                 throw new IllegalStateException("게시글을 수정하지 못했습니다.");
             }
 
@@ -268,7 +267,7 @@ public class TogetherShareServiceImpl implements TogetherShareService {
 
             return count;
         } catch (Exception e) {
-            log.error("재료나눔 글 수정 실패" , e);
+            log.error("재료나눔 글 수정 실패", e);
             throw e;
         }
     }
@@ -279,12 +278,12 @@ public class TogetherShareServiceImpl implements TogetherShareService {
     public int deleteShare(Long share_id, Long author_id) throws Exception {
         try {
             // 글 번호 확인
-            if(share_id == null || share_id < 1) {
+            if (share_id == null || share_id < 1) {
                 throw new IllegalArgumentException("게시글 번호가 올바르지 않습니다.");
             }
 
             // 로그인 정보 확인
-            if(author_id == null) {
+            if (author_id == null) {
                 throw new IllegalArgumentException("로그인이 필요합니다.");
             }
 
@@ -303,14 +302,14 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             // 삭제일 기록
             int count = mapper.deleteShare(share_id, author_id);
 
-            if(count != 1) {
+            if (count != 1) {
                 throw new IllegalStateException("게시글을 삭제하지 못했습니다.");
             }
 
             return count;
 
         } catch (Exception e) {
-            log.error("재료나눔 글 삭제 실패" , e);
+            log.error("재료나눔 글 삭제 실패", e);
             throw e;
         }
     }
@@ -321,39 +320,37 @@ public class TogetherShareServiceImpl implements TogetherShareService {
         List<TogetherShareItemDto> items = dto.getItems();
 
         // 재료를 전부 지우고 저장하지 못하게 확인
-        if(items == null || items.isEmpty()) {
+        if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("나눔할 재료를 하나 이상 추가해주세요.");
         }
 
         // 현재 글에 등록된 재료 번호
-        List<TogetherShareItemDto> originalItems =
-                mapper.listShareItems(dto.getShare_id());
+        List<TogetherShareItemDto> originalItems = mapper.listShareItems(dto.getShare_id());
 
         Set<Long> originalIds = new HashSet<>();
 
-        for(TogetherShareItemDto item : originalItems) {
+        for (TogetherShareItemDto item : originalItems) {
             originalIds.add(item.getShare_item_id());
         }
 
         Set<Long> requestIds = new HashSet<>();
 
         // 저장하기 전에 입력값 확인
-        for(TogetherShareItemDto item : items) {
+        for (TogetherShareItemDto item : items) {
 
-            if(item == null || item.getIngredient_id() == null ||
-                    item.getIngredient_id() < 1) {
+            if (item == null || item.getIngredient_id() == null || item.getIngredient_id() < 1) {
                 throw new IllegalArgumentException("재료를 검색해서 선택해주세요.");
             }
 
             // 기존 재료 번호가 현재 글에 속하는지 확인
             Long itemId = item.getShare_item_id();
 
-            if(itemId != null) {
-                if(!originalIds.contains(itemId)) {
+            if (itemId != null) {
+                if (!originalIds.contains(itemId)) {
                     throw new IllegalArgumentException("이 게시글에 등록된 재료가 아닙니다.");
                 }
 
-                if(!requestIds.add(itemId)) {
+                if (!requestIds.add(itemId)) {
                     throw new IllegalArgumentException("같은 나눔 재료가 중복 전달되었습니다.");
                 }
             }
@@ -361,61 +358,61 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             // 수량 확인
             BigDecimal quantity = item.getQuantity();
 
-            if(quantity == null || quantity.signum() <= 0) {
+            if (quantity == null || quantity.signum() <= 0) {
                 throw new IllegalArgumentException("재료 수량은 0보다 커야 합니다.");
             }
 
             // 단위 확인
-            if(item.getUnit() == null || item.getUnit().isBlank()) {
+            if (item.getUnit() == null || item.getUnit().isBlank()) {
                 throw new IllegalArgumentException("재료 단위를 입력해주세요.");
             }
 
             // 소비기한은 입력한 경우에만 확인
-            if(item.getExpires_on() == null || item.getExpires_on().isBlank()) {
+            if (item.getExpires_on() == null || item.getExpires_on().isBlank()) {
                 item.setExpires_on(null);
             } else {
                 try {
                     LocalDate.parse(item.getExpires_on());
                 } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException(
-                            "소비기한을 올바른 날짜로 입력해주세요.");
+                    throw new IllegalArgumentException("소비기한을 올바른 날짜로 입력해주세요.");
                 }
             }
         }
 
         // 기존 목록에는 있지만 수정폼에서 빠진 재료 삭제
-        for(TogetherShareItemDto original : originalItems) {
+        for (TogetherShareItemDto original : originalItems) {
             Long itemId = original.getShare_item_id();
 
-            if(!requestIds.contains(itemId)) {
+            if (!requestIds.contains(itemId)) {
                 int count = mapper.deleteShareItem(dto.getShare_id(), itemId);
 
-                if(count != 1) {
+                if (count != 1) {
                     throw new IllegalStateException("나눔 재료를 삭제하지 못했습니다.");
                 }
             }
         }
 
         // 기존 재료는 수정하고 새 재료는 추가
-        for(TogetherShareItemDto item : items) {
+        for (TogetherShareItemDto item : items) {
 
             // 폼에서 넘어온 게시글 번호 대신에 서버 값 사용
             item.setShare_id(dto.getShare_id());
 
             int count;
 
-            if(item.getShare_item_id() == null) {
+            if (item.getShare_item_id() == null) {
                 count = mapper.insertShareItem(item);
             } else {
                 count = mapper.updateShareItem(item);
             }
 
-            if(count != 1) {
+            if (count != 1) {
                 throw new IllegalStateException("나눔 재료를 저장하지 못했습니다.");
             }
         }
     }
 
+    // 재료 나눔 : 나눔 글 상세 조회
     @Override
     @Transactional(readOnly = true)
     public TogetherShareDto findShareById(Long share_id) throws Exception {
@@ -433,6 +430,7 @@ public class TogetherShareServiceImpl implements TogetherShareService {
         }
     }
 
+    // 재료 나눔 : 게시글의 나눔 재료 조회
     @Override
     @Transactional(readOnly = true)
     public List<TogetherShareItemDto> listShareItems(Long share_id) throws Exception {
@@ -449,6 +447,5 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             throw e;
         }
     }
-
 
 }
