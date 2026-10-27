@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+	
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+
+<head>
+    <title>1:1 문의 상세 - 관리자</title>
+</head>
+<body>
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div onclick="location.href='/admin/inquiry/list'" style="cursor: pointer;">
+				<p class="eyebrow">INQUIRY MANAGEMENT</p>
+				<h2>1:1 문의 상세</h2>
+				<p class="subtitle">회원의 문의 내용을 확인하고 답변을 등록하세요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>원본 문의 내용</h2></div>
+			</div>
+			<div class="panel-body inquiry-detail-body">
+				<div class="inquiry-badge-wrap">
+					<span class="custom-badge inquiry-type-badge" 
+						  th:text="${dto.inquiryType == null ? '미분류' : (dto.inquiryType == 0 ? '서비스' : (dto.inquiryType == 1 ? '레시피' : (dto.inquiryType == 2 ? '커뮤니티' : '기타')))}"></span>
+					<span class="custom-badge orange" th:if="${dto.status == 0}">답변대기</span>
+					<span class="custom-badge green" th:if="${dto.status == 1}">답변완료</span>
+				</div>
+				
+				<h3 class="inquiry-title" th:text="${dto.title}"></h3>
+				<div class="muted inquiry-meta">
+					작성자: <span th:text="${dto.userName}"></span>(<span th:text="${dto.loginId}"></span>) 
+					<span class="inquiry-meta-divider">|</span> 등록일: <span th:text="${dto.createdAt}"></span>
+				</div>
+				
+				<div class="inquiry-content-box" th:utext="${dto.content}"></div>
+				
+				<div class="inquiry-attach-box" th:if="${not #lists.isEmpty(dto.files)}">
+					<h4 class="inquiry-attach-title">📁 첨부파일</h4>
+					<ul class="inquiry-attach-list">
+						<li class="inquiry-attach-item" th:each="file : ${dto.files}">
+							<a class="inquiry-attach-link" 
+							   th:href="@{/api/inquiries/{inquiryId}/files/{fileId}(inquiryId=${dto.inquiryId}, fileId=${file.inquiryFileId})}" 
+							   th:text="${file.originalFileName}"></a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div><h2>관리자 답변 등록 / 수정</h2></div>
+			</div>
+			<div class="panel-body inquiry-detail-body">
+				<form th:action="@{/admin/inquiry/answer}" method="post">
+					<input type="hidden" name="inquiryId" th:value="${dto.inquiryId}">
+					<input type="hidden" name="page" th:value="${page}">
+					
+					<textarea class="inquiry-answer-textarea" name="answerContent" rows="6" 
+					          placeholder="답변 내용을 상세히 적어주세요." th:text="${dto.answerContent}" required></textarea>
+					
+					<div class="inquiry-form-actions">
+						<button type="submit" class="custom-btn primary">답변 저장하기</button>
+					</div>
+				</form>
+			</div>
+		</section>
+
+		<th:block th:if="${not #lists.isEmpty(dto.followUps)}">
+			<h3 class="followup-section-title">↳ 추가 문의 내역</h3>
+			
+			<section class="panel followup-panel" th:each="child : ${dto.followUps}">
+				<div class="panel-head followup-panel-head">
+					<div class="followup-head-flex">
+						<h2 class="followup-title" th:text="${child.title}">추가문의 제목</h2>
+						<span class="muted followup-meta" th:text="${child.createdAt}"></span>
+					</div>
+				</div>
+				<div class="panel-body inquiry-detail-body">
+					<div class="followup-content" th:utext="${child.content}"></div>
+					
+					<form class="followup-answer-form" th:action="@{/admin/inquiry/answer}" method="post">
+						<input type="hidden" name="inquiryId" th:value="${child.inquiryId}">
+						<input type="hidden" name="page" th:value="${page}">
+						
+						<h4 class="followup-answer-title">관리자 추가 답변</h4>
+						<textarea class="followup-answer-textarea" name="answerContent" rows="4" 
+						          placeholder="추가 문의에 대한 답변을 입력하세요." th:text="${child.answerContent}" required></textarea>
+						
+						<div class="inquiry-form-actions">
+							<button type="submit" class="custom-btn primary followup-answer-btn">추가 답변 저장</button>
+						</div>
+					</form>
+				</div>
+			</section>
+		</th:block>
+
+		<div class="inquiry-bottom-actions">
+			<button type="button" class="custom-btn secondary btn-return-list" th:onclick="|location.href='@{/admin/inquiry/list(page=${page})}'|">
+				<i class="bi bi-list"></i> 목록으로 돌아가기
+			</button>
+		</div>
+	</div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</body>
+</html>

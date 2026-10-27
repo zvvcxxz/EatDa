@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout/layout3}">
+      
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="admin-wrap">
+		<section class="page-heading">
+			<div onclick="location.href='/'" style="cursor: pointer;">
+				<p class="eyebrow">INQUIRY MANAGEMENT</p>
+				<h2>1:1 문의 관리</h2>
+				<p class="subtitle">회원들의 문의에 답변하고 소통하세요.</p>
+			</div>
+		</section>
+
+		<section class="panel">
+			<div class="panel-head">
+				<div>
+					<h2>1:1 문의 목록 <span style="font-size: 14px; font-weight: normal; color: #857868; margin-left: 8px;" th:text="|총 ${dataCount}건|"></span></h2>
+				</div>
+			</div>
+            
+            <div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th width="10%">번호</th>
+							<th width="15%">유형</th>
+							<th width="35%">제목</th>
+							<th width="15%">작성자</th>
+							<th width="15%">등록일</th>
+							<th width="10%">상태</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="dto : ${list}" 
+						    th:onclick="|location.href='@{/admin/inquiry/article(inquiryId=${dto.inquiryId}, page=${page}, inquiryType=${inquiryType}, status=${status}, schType=${schType}, kwd=${kwd})}'|" 
+						    style="cursor: pointer;">
+						    
+						    <td th:text="${dto.inquiryId}">번호</td>
+						    
+						    <td>
+						        <span class="custom-badge" style="background-color: #f0e8dc; color: #857868;" 
+						              th:text="${dto.inquiryType == null ? '미분류' : (dto.inquiryType == 0 ? '서비스' : (dto.inquiryType == 1 ? '레시피' : (dto.inquiryType == 2 ? '커뮤니티' : '기타')))}">유형</span>
+						    </td>
+						    
+						    <td class="cell-title" th:text="${dto.title}">제목</td>
+						    
+						    <td th:text="|${dto.userName}(${dto.loginId})|">작성자</td>
+						    
+						    <td class="muted" th:text="${#strings.substring(dto.createdAt, 0, 10)}">등록일</td>
+						    
+						    <td>
+						        <span class="custom-badge orange" th:if="${dto.status == 0}">답변대기</span>
+						        <span class="custom-badge green" th:if="${dto.status == 1}">답변완료</span>
+						    </td>
+						</tr>
+						
+						<tr th:if="${#lists.isEmpty(list)}">
+						    <td colspan="6">조회된 문의 내역이 없습니다.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+            
+            <div class="page-navigation page-navigation-wrap" th:utext="${paging}"></div>
+
+            <div class="search-section">
+                <form name="searchForm" th:action="@{/admin/inquiry/list}" method="get" class="form-search">
+                    <select name="inquiryType" class="select-ui">
+                        <option value="" th:selected="${inquiryType == ''}">전체 유형</option>
+                        <option value="0" th:selected="${inquiryType == '0'}">서비스</option>
+                        <option value="1" th:selected="${inquiryType == '1'}">레시피</option>
+                        <option value="2" th:selected="${inquiryType == '2'}">커뮤니티</option>
+                        <option value="3" th:selected="${inquiryType == '3'}">기타</option>
+                    </select>
+                    
+                    <select name="status" class="select-ui">
+                        <option value="" th:selected="${status == ''}">전체 상태</option>
+                        <option value="0" th:selected="${status == '0'}">답변대기</option>
+                        <option value="1" th:selected="${status == '1'}">답변완료</option>
+                    </select>
+                    
+                    <select name="schType" class="select-ui">
+                        <option value="all" th:selected="${schType == 'all'}">제목+내용</option>
+                        <option value="title" th:selected="${schType == 'title'}">제목</option>
+                        <option value="userName" th:selected="${schType == 'userName'}">작성자</option>
+                    </select>
+                    
+                    <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
+                    
+                    <button type="submit" class="custom-btn secondary"><i class="bi bi-search"></i> 검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/inquiry/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                </form>
+            </div>
+		</section>
+	</div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script th:src="@{/dist/js/admin-dashboard.js}"></script>
+</th:block>
+</html>

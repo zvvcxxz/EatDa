@@ -223,3 +223,33 @@ dialog::backdrop { background: rgba(37, 29, 21, .42); }
 
 /* 테이블 액션 버튼 그룹 */
 .table-action-btns {display: flex;gap: 4px;justify-content: center;}
+
+/* 1:1 문의 */
+.inquiry-detail-body { padding: 24px; }
+.inquiry-badge-wrap { margin-bottom: 16px; }
+.inquiry-type-badge { background-color: #f0e8dc; color: #857868; }
+.inquiry-title { font-size: 20px; font-weight: 700; color: #2b261f; margin-bottom: 12px; }
+.inquiry-meta { margin-bottom: 24px; font-size: 14px; }
+.inquiry-meta-divider { margin: 0 8px; color: #d4c8b8; }
+.inquiry-content-box { background-color: #fdfaf3; border: 1px solid #f5ebd8; padding: 20px; border-radius: 10px; margin-bottom: 24px; color: #332d25; line-height: 1.6; }
+.inquiry-attach-box { background-color: #f8f9fa; border: 1px solid #f0e8dc; padding: 16px; border-radius: 8px; }
+.inquiry-attach-title { font-size: 14px; font-weight: 700; color: #5a5144; margin-bottom: 10px; }
+.inquiry-attach-list { list-style: none; padding: 0; margin: 0; }
+.inquiry-attach-item { margin-bottom: 6px; }
+.inquiry-attach-link { color: #b57e1b; text-decoration: none; font-size: 14px; }
+.inquiry-answer-textarea { width: 100%; padding: 16px; border: 1px solid #e8decb; border-radius: 8px; margin-bottom: 16px; font-family: inherit; font-size: 15px; resize: vertical; outline: none; }
+.inquiry-form-actions { text-align: right; }
+
+.followup-section-title { margin: 40px 0 16px 0; font-size: 18px; font-weight: 800; color: #b57e1b; }
+.followup-panel { margin-bottom: 24px; border-color: #e8decb; }
+.followup-panel-head { background-color: #faf7f0; border-bottom: 1px solid #f0e8dc; }
+.followup-head-flex { display: flex; align-items: center; }
+.followup-title { margin: 0; font-size: 16px; color: #5a5144; }
+.followup-meta { font-size: 13px; margin-left: 12px; }
+.followup-content { background-color: #ffffff; padding: 0; margin-bottom: 24px; color: #332d25; line-height: 1.6; }
+.followup-answer-form { background-color: #fdfaf3; padding: 20px; border-radius: 8px; border: 1px dashed #e8decb; }
+.followup-answer-title { font-size: 14px; font-weight: 700; color: #b57e1b; margin-bottom: 12px; }
+.followup-answer-textarea { width: 100%; padding: 12px; border: 1px solid #e8decb; border-radius: 6px; margin-bottom: 12px; font-family: inherit; font-size: 14px; resize: vertical; outline: none; }
+.followup-answer-btn { padding: 8px 16px; font-size: 13px; }
+.inquiry-bottom-actions { margin-top: 30px; text-align: center; }
+.btn-return-list { padding: 10px 30px; }

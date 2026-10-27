@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.admin.mapper.AdminInquiryMapper">
+
+    <sql id="where-list">
+        <if test="inquiryType != null and inquiryType != ''">
+            AND i.INQUIRY_TYPE = #{inquiryType}
+        </if>
+        <if test="status != null and status != ''">
+            AND i.STATUS = #{status}
+        </if>
+        <if test="kwd != null and kwd != ''">
+            <choose>
+                <when test="schType == 'all'">
+                    AND (INSTR(i.TITLE, #{kwd}) &gt; 0 OR INSTR(i.CONTENT, #{kwd}) &gt; 0)
+                </when>
+                <when test="schType == 'title'">
+                    AND INSTR(i.TITLE, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'userName'">
+                    AND INSTR(m.NAME, #{kwd}) &gt; 0
+                </when>
+            </choose>
+        </if>
+    </sql>
+
+    <select id="dataCount" parameterType="map" resultType="int">
+        SELECT COUNT(*) 
+        FROM INQUIRY i
+        JOIN MEMBER m ON i.MEMBER_ID = m.MEMBER_ID
+        WHERE i.PARENT_INQUIRY_ID IS NULL
+        <include refid="where-list"/>
+    </select>
+
+    <select id="listInquiry" parameterType="map" resultType="com.sp.app.admin.domain.dto.AdminInquiryDto">
+        SELECT i.INQUIRY_ID AS inquiryId, i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title, 
+               i.STATUS AS status, m.NAME AS userName, m.LOGIN_ID AS loginId,
+               TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt
+        FROM INQUIRY i
+        JOIN MEMBER m ON i.MEMBER_ID = m.MEMBER_ID
+        WHERE i.PARENT_INQUIRY_ID IS NULL
+        <include refid="where-list"/>
+        ORDER BY i.STATUS ASC, i.INQUIRY_ID DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <select id="findById" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminInquiryDto">
+        SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId, m.NAME AS userName, m.LOGIN_ID AS loginId,
+               i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title, i.CONTENT AS content, 
+               i.STATUS AS status, i.ANSWER_CONTENT AS answerContent, 
+               TO_CHAR(i.ANSWERED_AT, 'YYYY-MM-DD HH24:MI') AS answeredAt,
+               TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt,
+               i.PARENT_INQUIRY_ID AS parentInquiryId
+        FROM INQUIRY i
+        JOIN MEMBER m ON i.MEMBER_ID = m.MEMBER_ID
+        WHERE i.INQUIRY_ID = #{inquiryId}
+    </select>
+
+    <select id="listFollowUp" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminInquiryDto">
+        SELECT i.INQUIRY_ID AS inquiryId, i.TITLE AS title, i.CONTENT AS content, 
+               i.STATUS AS status, i.ANSWER_CONTENT AS answerContent,
+               TO_CHAR(i.ANSWERED_AT, 'YYYY-MM-DD HH24:MI') AS answeredAt,
+               TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt
+        FROM INQUIRY i
+        WHERE i.PARENT_INQUIRY_ID = #{parentId}
+        ORDER BY i.CREATED_AT ASC
+    </select>
+
+    <select id="listInquiryFile" parameterType="long" resultType="com.sp.app.domain.dto.MyInquiryDto$InquiryFileDto">
+        SELECT INQUIRY_FILE_ID AS inquiryFileId, INQUIRY_ID AS inquiryId,
+               ORIGINAL_FILE_NAME AS originalFileName, FILE_PATH AS filePath
+        FROM INQUIRY_FILE
+        WHERE INQUIRY_ID = #{inquiryId}
+    </select>
+
+    <update id="updateInquiryAnswer" parameterType="com.sp.app.admin.domain.dto.AdminInquiryDto">
+        UPDATE INQUIRY 
+        SET ANSWER_CONTENT = #{answerContent}, 
+            ANSWER_ADMIN_ID = #{answerAdminId}, 
+            ANSWERED_AT = SYSTIMESTAMP,
+            STATUS = 1
+        WHERE INQUIRY_ID = #{inquiryId}
+    </update>
+</mapper>

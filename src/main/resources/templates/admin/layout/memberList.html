@@ -1,6 +1,7 @@
 <div class="list-header-tools">
     <span class="total-count">
-        총 <strong>[[${dataCount}]]</strong>명 (<strong>[[${page}]]</strong> / [[${total_page}]] 페이지)
+        총 <strong th:text="${dataCount}">0</strong>명 
+        (<strong th:text="${page}">1</strong> / <span th:text="${total_page}">1</span> 페이지)
     </span>
     
     <div class="search-tools">
@@ -13,7 +14,7 @@
             <option value="loginId" th:selected="${schType == 'loginId'}">아이디</option>
             <option value="name" th:selected="${schType == 'name'}">이름</option>
         </select>
-        <input type="text" id="keyword" class="search-input" th:value="${kwd}" placeholder="검색어 입력" onkeypress="if(event.keyCode==13) searchList();">
+        <input type="text" id="keyword" class="search-input" th:value="${kwd}" placeholder="검색어 입력" onkeypress="if(event.key === 'Enter') searchList();">
         <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
         <button type="button" class="custom-btn secondary" onclick="resetList()"><i class="bi bi-arrow-clockwise"></i></button>
     </div>
