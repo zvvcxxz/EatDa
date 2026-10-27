@@ -13,7 +13,7 @@
 	<script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
 	<script src="https://unpkg.com/vue-router@4.6.3/dist/vue-router.global.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/axios@1.12.2/dist/axios.min.js"></script>
-
+	<script src="https://unpkg.com/pinia@3/dist/pinia.iife.prod.js"></script>
     <link rel="stylesheet" th:href="@{/css/mykitchen/myinquiries.css}">
 </head>
 <body>
@@ -35,10 +35,10 @@
                 <router-view></router-view>
             </div>
 
-            <th:block th:replace="~{mykitchen/myinquiryComp_vue_list :: InquiryList}"></th:block>
-            <th:block th:replace="~{mykitchen/myinquiryComp_vue_detail :: InquiryDetail}"></th:block>
-            <th:block th:replace="~{mykitchen/myinquiryComp_vue_form :: InquiryForm}"></th:block>
-            <th:block th:replace="~{mykitchen/myinquiryComp_vue_reply :: InquiryReply}"></th:block>
+            <th:block th:replace="~{mykitchen/myinquiry_list :: InquiryList}"></th:block>
+            <th:block th:replace="~{mykitchen/myinquiry_detail :: InquiryDetail}"></th:block>
+            <th:block th:replace="~{mykitchen/myinquiry_form :: InquiryForm}"></th:block>
+            <th:block th:replace="~{mykitchen/myinquiry_reply :: InquiryReply}"></th:block>
 
         </div>
     </section>
@@ -52,7 +52,7 @@
     <!-- 프로젝트 공통 Vue CDN  -->
    <!--  <th:block th:replace="~{vue/vue_cdn :: VUECDN}"></th:block> -->
     <!-- 프로젝트의 ES Module 진입점 -->
-  <!--  <script type="module" th:src="@{/js/mykitchen/myinquiry.js}"></script>  -->
+  <script type="module" th:src="@{/js/mykitchen/myinquiry.js}"></script>
 </th:block>
 
 </html>

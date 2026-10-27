@@ -10,15 +10,12 @@
             <details @toggle="toggleReply">
                 <summary>
                     <div class="child-inquiry-summary">
-                        <span class="inquiry-status"
-                              :class="reply.status === 1
-                                  ? 'status-answered'
-                                  : 'status-waiting'">
+                        <span class="inquiry-status" 
+                        	:class="reply.status === 1  ? 'status-answered' : 'status-waiting'">
                             {{ reply.status === 1 ? '답변 완료' : '답변 대기' }}
                         </span>
 
                         <strong>{{ reply.title }}</strong>
-
                         <span class="inquiry-date">
                             {{ reply.createdAt }}
                         </span>
@@ -26,7 +23,6 @@
                 </summary>
 
                 <div class="inquiry-body">
-
                     <div v-if="loading">
                         추가 문의를 불러오는 중입니다.
                     </div>
@@ -34,16 +30,13 @@
                     <template v-else-if="detail">
                         <h3>추가 문의 내용</h3>
 
-                        <div class="inquiry-detail-content"
-                             v-html="detail.content">
-                        </div>
+                        <div class="inquiry-detail-content" v-html="detail.content"></div>
 
-                        <section v-if="detail.answerContent"
-                                 class="admin-answer">
+                        <section v-if="detail.answerContent" class="admin-answer">
                             <h3>관리자 답변</h3>
-
                             <div v-html="detail.answerContent"></div>
                         </section>
+                        
                     </template>
 
                 </div>

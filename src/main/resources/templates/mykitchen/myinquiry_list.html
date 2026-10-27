@@ -80,7 +80,7 @@
             <!-- 문의 아코디언 -->
             <div v-else class="inquiry-list">
                 <inquiry-detail v-for="inquiry in inquiries" :key="inquiry.inquiryId"
-                    :inquiry="inquiry" @edit="$emit('edit', $event)" @deleted="$emit('refresh')">
+                    :inquiry="inquiry" @edit="goEdit" @deleted="loadList">
                 </inquiry-detail>
             </div>
 
@@ -93,7 +93,7 @@
 
                 <span> {{ page }} / {{ totalPage }} </span>
 
-                <button type="button":disabled="page >= totalPage" @click="changePage(page + 1)">
+                <button type="button" :disabled="page >= totalPage" @click="changePage(page + 1)">
                     다음
                 </button>
             </nav>
