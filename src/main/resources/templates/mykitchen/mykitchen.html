@@ -341,10 +341,6 @@
                                 <div class="missing-item"
                                      th:each="missing : ${recipe.missingIngredients}">
                                     <span th:text="${missing.name}">대파</span>
-                                    <!-- 구매 연동은 보류: 장보기 화면으로만 이동 -->
-                                    <a th:href="@{/shopping(ingredientId=${missing.id})}">
-                                        장보기
-                                    </a>
                                 </div>
                             </div>
                         </div>

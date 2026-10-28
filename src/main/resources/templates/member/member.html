@@ -388,12 +388,12 @@
         }
 
         // 생년월일 검증
-        str = f.birth.value;
+        /*str = f.birth.value;
         if (!isValidDateString(str)) {
             alert('올바른 생년월일을 선택하세요.');
             f.birth.focus();
             return;
-        }
+        }*/
 
         // 이메일 검증
         p = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;    
@@ -413,11 +413,11 @@
             return;
         }
 
-        // 주소 검증
+        /* 주소 검증
         if (f.zip.value === '' || f.addr1.value === '') {
             alert('우편번호 검색을 통해 주소를 입력해 주세요.');
             return;
-        }
+        }*/
 
         f.submit();
     }

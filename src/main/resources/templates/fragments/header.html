@@ -35,7 +35,6 @@
         <a href="/my/notifications" th:href="@{/my/recipeai}" >냉장고를 부탁해</a>
     </div></details>
 
-    <a href="/shop" th:href="@{/shop}" >장보기</a>
     <a href="/admin" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">관리자</a>
   </nav>
 
@@ -68,16 +67,17 @@
         <a href="/community/cooking" th:href="@{/community/cooking}" >따라 만든 요리</a>
         <a href="/community/questions" th:href="@{/community/questions}" >요리 질문</a>
         <a href="/community/share" th:href="@{/community/share}" >재료 나눔</a>
-        <a href="/community/meet" th:href="@{/community/meet}" >같이 먹어요</a>
+        <a href="/community/meet" th:href="@{/community/meet}" >같이 먹어요</a>        
         <a href="/my/fridge" th:href="@{/my/fridge}" >내 냉장고</a>
         <a href="/my/recipes" th:href="@{/my/recipes}" >내가 쓴 레시피</a>
         <a href="/my/bookmarks" th:href="@{/my/bookmarks}" >찜한 레시피</a>
-        <a href="/my/notifications" th:href="@{/my/notifications}" >알림</a>
-        <a href="/my/preferences" th:href="@{/my/preferences}" >관심사 설정</a>
-        <a href="/member/pwd" th:href="@{/member/pwd}" >회원정보</a>
+        <a href="/my/preferences" th:href="@{/my/preferences}" >관심 설정</a>
         <a href="/my/messages" th:href="@{/my/messages}" >쪽지</a>
-        <a href="/missions" th:href="@{/missions}" >미션/포인트</a>
-        <a href="/shop" th:href="@{/shop}" >장보기</a>
+        <a href="/my/notifications" th:href="@{/my/chat}" >채팅</a>
+        <a href="/my/notifications" th:href="@{/my/inquiries}" >내 문의</a>
+        <a href="/member/pwd" th:href="@{/member/pwd}" >나의정보</a>
+        <a href="/my/notifications" th:href="@{/my/recipeai}" >냉장고를 부탁해</a>
+        
     </nav>
  </details>
 </header>

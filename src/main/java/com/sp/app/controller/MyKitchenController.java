@@ -61,7 +61,7 @@ public class MyKitchenController {
     @GetMapping("/recipes")
     public String myRecipes(Model model,
     		@RequestParam(name="page", defaultValue="1") int page,
-    		@RequestParam(name="size", defaultValue="10") int size,
+    		@RequestParam(name="size", defaultValue="8") int size,
     		@RequestParam(name="sort", defaultValue="latest") String sort) {
         model.addAttribute("tab", "mine");
         model.addAttribute("pageTitle", "내가 작성한 레시피");
@@ -90,7 +90,7 @@ public class MyKitchenController {
     @GetMapping("/bookmarks")
     public String bookmarks(Model model, 
     		@RequestParam(name="page", defaultValue="1") int page,
-    		@RequestParam(name="size", defaultValue="10") int size,
+    		@RequestParam(name="size", defaultValue="8") int size,
     		@RequestParam(name="sort", defaultValue="latest") String sort) {
         model.addAttribute("tab", "favorites");
         model.addAttribute("pageTitle", "찜한 레시피");
@@ -224,7 +224,7 @@ public class MyKitchenController {
         model.addAttribute("tab", "inquiries");
         model.addAttribute("pageTitle", "신고 / 문의");
         
-        return "mykitchen/myinquiries";
+        return "mykitchen/myinquiry";
     }    
 
     // 9. ai추천
