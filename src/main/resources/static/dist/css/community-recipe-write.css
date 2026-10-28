@@ -1,0 +1,42 @@
+/* communityRecipe-write.html 전용 스타일 */
+
+.community-design .recipe-error {
+    padding:12px 16px;
+    margin-bottom:20px;
+    border:1px solid #efb5ad;
+    border-radius:10px;
+    background:#fff3f0;
+    color:#a52b23;
+}
+.community-design .recipe-choice {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border:1px solid #e4ddd5;
+    border-radius:20px;
+    background:#fff;
+    color:#333;
+    cursor:pointer;
+}
+.community-design .recipe-choice:has(input:checked) {
+    border-color:#ed8754;
+    background:#fff0e6;
+}
+.community-design .recipe-remove {
+    border:0;
+    background:transparent;
+    color:#75584b;
+    cursor:pointer;
+    font-size:18px;
+}
+.community-design .recipe-step-image {
+    width:100%;
+    max-height:180px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-top:10px;
+}
+.community-design .recipe-step-image[hidden] {
+    display:none;
+}

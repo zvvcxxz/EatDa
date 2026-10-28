@@ -1,0 +1,54 @@
+/* communityReview-article.html 전용 스타일 */
+
+.community-design .review-detail .ds-question-title {
+            overflow-wrap:anywhere;
+        }
+
+        .community-design .review-detail .ds-review-photo {
+		    display:block;
+		    width:auto;
+		    max-width:100%;
+		    height:auto;
+		    max-height:340px;
+		    object-fit:contain;
+		    background:transparent;
+		    margin:18px auto;
+		}
+
+        .community-design .review-neighbors {
+            margin-top:24px;
+            border-top:1px solid var(--ds-line);
+            border-bottom:1px solid var(--ds-line);
+        }
+
+        .community-design .review-neighbor-row {
+            display:grid;
+            grid-template-columns:90px minmax(0,1fr);
+            gap:12px;
+            padding:12px 0;
+            font-size:13px;
+        }
+
+        .community-design .review-neighbor-row
+        + .review-neighbor-row {
+            border-top:1px solid var(--ds-line);
+        }
+
+        .community-design .review-neighbor-row > span {
+            color:var(--ds-muted);
+        }
+
+        .community-design .review-neighbor-row a {
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            color:var(--ds-ink);
+        }
+
+        .community-design .review-actions {
+            flex-wrap:wrap;
+        }
+
+        .community-design .review-actions form {
+            margin:0;
+        }

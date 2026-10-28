@@ -1,0 +1,35 @@
+/* communityReview-write.html 전용 스타일 */
+
+/* 사진 크기에 맞춰 업로드 영역 표시 */
+.community-design #reviewForm .ds-photo-upload.wide {
+    width:fit-content;
+    max-width:100%;
+    min-height:0;
+    margin:0 auto;
+    border:0;
+    background:transparent;
+}
+
+/* 선택한 사진 전체를 가운데 표시 */
+.community-design #reviewForm .ds-photo-upload.wide img {
+    position:static;
+    inset:auto;
+    width:auto;
+    height:auto;
+    max-width:100%;
+    max-height:340px;
+    object-fit:contain;
+}
+
+/* 사진 선택 전 표시할 영역 */
+.community-design #reviewForm .ds-photo-upload.wide > span {
+    min-width:220px;
+    padding:28px 20px;
+    border:1px dashed #ddb8a4;
+    border-radius:14px;
+    background:#fff9f3;
+}
+
+.community-review-write-inline-1.community-review-write-inline-1.community-review-write-inline-1.community-review-write-inline-1 {
+    color:#b42318; margin-bottom:16px;
+}

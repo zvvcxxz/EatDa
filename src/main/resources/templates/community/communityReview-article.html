@@ -14,60 +14,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 
-    <style>
-        .community-design .review-detail .ds-question-title {
-            overflow-wrap:anywhere;
-        }
-
-        .community-design .review-detail .ds-review-photo {
-		    display:block;
-		    width:auto;
-		    max-width:100%;
-		    height:auto;
-		    max-height:340px;
-		    object-fit:contain;
-		    background:transparent;
-		    margin:18px auto;
-		}
-
-        .community-design .review-neighbors {
-            margin-top:24px;
-            border-top:1px solid var(--ds-line);
-            border-bottom:1px solid var(--ds-line);
-        }
-
-        .community-design .review-neighbor-row {
-            display:grid;
-            grid-template-columns:90px minmax(0,1fr);
-            gap:12px;
-            padding:12px 0;
-            font-size:13px;
-        }
-
-        .community-design .review-neighbor-row
-        + .review-neighbor-row {
-            border-top:1px solid var(--ds-line);
-        }
-
-        .community-design .review-neighbor-row > span {
-            color:var(--ds-muted);
-        }
-
-        .community-design .review-neighbor-row a {
-            overflow:hidden;
-            text-overflow:ellipsis;
-            white-space:nowrap;
-            color:var(--ds-ink);
-        }
-
-        .community-design .review-actions {
-            flex-wrap:wrap;
-        }
-
-        .community-design .review-actions form {
-            margin:0;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/dist/css/community-review-article.css}">
 </th:block>
 
 <div layout:fragment="content"
@@ -265,7 +212,7 @@
                           th:action="@{/community/cooking/{id}/delete(
                                       id=${review.reviewId})}"
                           method="post"
-                          onsubmit="return confirm('이 후기를 삭제할까요?');">
+                          data-community-confirm="이 후기를 삭제할까요?">
 
                         <button type="submit" class="ds-button light">
                             삭제
@@ -277,7 +224,7 @@
                           th:action="@{/community/cooking/{id}/hide(
                                       id=${review.reviewId})}"
                           method="post"
-                          onsubmit="return confirm('이 후기를 숨길까요? 숨기면 일반 목록에서 제외됩니다.');">
+                          data-community-confirm="이 후기를 숨길까요? 숨기면 일반 목록에서 제외됩니다.">
 
                         <button type="submit" class="ds-button light">
                             관리자 숨김
@@ -288,6 +235,10 @@
         </section>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/js/community-review-article.js}"></script>
+</th:block>
 
 </body>
 </html>
