@@ -52,7 +52,7 @@
                     <p class="ds-eyebrow">NOTICE / 상세보기</p>
                     <h2>공지사항</h2>
                 </div>
-                <a class="ds-button light" th:href="@{/notice/list(page=${page}, schType=${schType}, kwd=${kwd})}">← 목록으로</a>
+                <a class="ds-button light" th:href="@{/community/notice/list(page=${page}, schType=${schType}, kwd=${kwd})}">← 목록으로</a>
             </div>
 
             <article class="detail-container">
@@ -77,7 +77,7 @@
                     </h3>
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
                         <li th:each="file : ${listFile}">
-                            <a th:href="@{/notice/download(fileId=${file.noticeFileId})}" style="color: var(--text-main); font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+                            <a th:href="@{/community/notice/download(fileId=${file.noticeFileId})}" style="color: var(--text-main); font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
                                 📄 <span th:text="${file.originalFileName}">파일이름.jpg</span>
                             </a>
                         </li>
@@ -88,7 +88,7 @@
             <div class="post-nav" style="margin-top: 24px;">
                 <div th:if="${prevDto != null}">
                     <strong class="post-nav-label">이전글</strong>
-                    <a class="post-nav-title" th:href="@{/notice/article(noticeId=${prevDto.noticeId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${prevDto.title}"></a>
+                    <a class="post-nav-title"th:href="@{/community/notice/article(noticeId=${prevDto.noticeId},page=${page},schType=${schType},kwd=${kwd})}"th:text="${prevDto.title}"></a>
                 </div>
                 <div th:if="${prevDto == null}">
                     <strong class="post-nav-label">이전글</strong>
@@ -97,7 +97,7 @@
         
                 <div th:if="${nextDto != null}" style="border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px;">
                     <strong class="post-nav-label">다음글</strong>
-                    <a class="post-nav-title" th:href="@{/notice/article(noticeId=${nextDto.noticeId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${nextDto.title}"></a>
+                    <a class="post-nav-title"th:href="@{/community/notice/article(noticeId=${nextDto.noticeId},page=${page},schType=${schType},kwd=${kwd})}"th:text="${nextDto.title}"></a>
                 </div>
                 <div th:if="${nextDto == null}" style="border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px;">
                     <strong class="post-nav-label">다음글</strong>

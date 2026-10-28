@@ -10,11 +10,15 @@
 <th:block layout:fragment="content">
 	<div class="admin-wrap">
 		<section class="page-heading">
-			<div onclick="location.href='/'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/inquiry/list'" style="cursor: pointer;">
 				<p class="eyebrow">INQUIRY MANAGEMENT</p>
-				<h2>1:1 문의 관리</h2>
+				<h2>문의 관리</h2>
 				<p class="subtitle">회원들의 문의에 답변하고 소통하세요.</p>
 			</div>
+			<div class="heading-actions">
+		        <a class="custom-btn secondary"th:href="@{/admin}">관리자 홈</a>
+		        <a class="custom-btn primary"th:href="@{/}">메인으로 돌아가기</a>
+		    </div>
 		</section>
 
 		<section class="panel">

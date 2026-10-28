@@ -64,16 +64,33 @@ public class AdminIngredientController {
     }
 
     @PostMapping("/write")
-    public String writeSubmit(AdminIngredientDto dto, RedirectAttributes reAttr) {
+    public String writeSubmit(
+            AdminIngredientDto dto,
+            RedirectAttributes reAttr) {
+
         try {
-            AdminIngredientDto exist = service.findByName(dto.getIngredientName());
-            if(exist != null) {
+            AdminIngredientDto exist =
+                    service.findByName(dto.getIngredientName());
+
+            if (exist != null) {
+                reAttr.addFlashAttribute(
+                        "message", "이미 등록된 재료입니다.");
+
                 return "redirect:/admin/ingredient/list";
             }
+
             service.insertIngredient(dto);
+
+            reAttr.addFlashAttribute(
+                    "message", "재료가 등록되었습니다.");
+
         } catch (Exception e) {
             e.printStackTrace();
+
+            reAttr.addFlashAttribute(
+                    "message", "재료 등록 중 오류가 발생했습니다.");
         }
+
         return "redirect:/admin/ingredient/list";
     }
 

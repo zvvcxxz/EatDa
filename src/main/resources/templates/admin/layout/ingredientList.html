@@ -9,12 +9,17 @@
   	  
 <th:block layout:fragment="content">
 	<div class="admin-wrap">
+		<div class="alert alert-warning" th:if="${message}" th:text="${message}"></div>
 		<section class="page-heading">
-			<div onclick="location.href='/'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/ingredient'" style="cursor: pointer;">
 				<p class="eyebrow">INGREDIENT MANAGEMENT</p>
 				<h2>재료 관리</h2>
 				<p class="subtitle">레시피에 사용되는 식재료와 양념의 기준 데이터를 관리합니다.</p>
 			</div>
+		    <div class="heading-actions">
+		        <a class="custom-btn secondary"th:href="@{/admin}">관리자 홈</a>
+		        <a class="custom-btn primary"th:href="@{/}">메인으로 돌아가기</a>
+		    </div>			
 		</section>
 
 		<section class="panel">

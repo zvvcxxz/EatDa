@@ -1,10 +1,11 @@
 // 검색 처리
-window.searchList = function() {
-    const f = document.searchForm;
-    if(!f.kwd.value.trim()) return;
-    
-    const params = new URLSearchParams(new FormData(f)).toString();
-    location.href = '/admin/tag/list?' + params;
+window.searchTagList = function() {
+    const f = document.forms['searchForm'];
+
+    if (!f) return;
+
+    const params = new URLSearchParams(new FormData(f));
+    location.href = '/admin/tag/list?' + params.toString();
 };
 
 // 열기 제어

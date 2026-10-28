@@ -3,19 +3,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.mapper.CommunityNoticeMapper">
 	<sql id="where-list">
-		<if test="kwd != null and kwd != ''">
-			<choose>
-				<when test="schType == 'all'">
-					AND (INSTR(n.TITLE, #{kwd}) &gt;  OR INSTR(n.CONTENT, #{kwd}) &gt; 0)
-				</when>
-				<when test="schType == 'all'">
-					AND INSTR(n.TITLE, #{kwd}) &gt; 0
-				</when>
-				<when test="schType == 'content'">
-					AND INSTR(n.CONTENT, #{kwd} &gt; 0)
-				</when>
-			</choose>
-		</if>
+	    <if test="kwd != null and kwd != ''">
+	        <choose>
+	            <when test="schType == 'all'">
+	                AND (
+	                    INSTR(n.TITLE, #{kwd}) &gt; 0
+	                    OR INSTR(n.CONTENT, #{kwd}) &gt; 0
+	                )
+	            </when>
+	            <when test="schType == 'title'">
+	                AND INSTR(n.TITLE, #{kwd}) &gt; 0
+	            </when>
+	            <when test="schType == 'content'">
+	                AND INSTR(n.CONTENT, #{kwd}) &gt; 0
+	            </when>
+	        </choose>
+	    </if>
 	</sql>
 	
 	<select id="dataCount" parameterType="map" resultType="int">

@@ -56,8 +56,14 @@
     </select>
 	
 	<select id="findById" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminIngredientDto">
-		SELECT INGREDIENT_ID AS ingredientId, INGREDIENT_NAME AS ingredientName,
-				INGREDIENT_TYPE AS ingredientType, DEFAULT_UNIT AS defaultUnit, ACTIVE_YN AS activeYn
-		FROM INGREDIENT WHERE INGREDIENT_NAME = #{ingredientName}
+	    SELECT INGREDIENT_ID AS ingredientId, INGREDIENT_NAME AS ingredientName, INGREDIENT_TYPE AS ingredientType, DEFAULT_UNIT AS defaultUnit, ACTIVE_YN AS activeYn
+	    FROM INGREDIENT
+	    WHERE INGREDIENT_ID = #{ingredientId}
+	</select>
+	
+	<select id="findByName" parameterType="string" resultType="com.sp.app.admin.domain.dto.AdminIngredientDto">
+	    SELECT INGREDIENT_ID AS ingredientId, INGREDIENT_NAME AS ingredientName, INGREDIENT_TYPE AS ingredientType, DEFAULT_UNIT AS defaultUnit, ACTIVE_YN AS activeYn
+	    FROM INGREDIENT
+	    WHERE UPPER(TRIM(INGREDIENT_NAME)) = UPPER(TRIM(#{ingredientName}))
 	</select>
 </mapper>

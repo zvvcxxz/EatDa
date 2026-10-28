@@ -10,10 +10,14 @@
 <th:block layout:fragment="content">
 	<div class="admin-wrap">
 		<section class="page-heading">
-		    <div onclick="location.href='/'" style="cursor: pointer;">
+		    <div onclick="location.href='/admin/recipe'" style="cursor: pointer;">
 		        <p class="eyebrow">RECIPE MANAGEMENT</p>
 		        <h2>레시피 관리</h2>
 		        <p class="subtitle">등록된 레시피 데이터와 회원 작성 레시피를 관리해요.</p>
+		    </div>
+		    <div class="heading-actions">
+		        <a class="custom-btn secondary"th:href="@{/admin}">관리자 홈</a>
+		        <a class="custom-btn primary"th:href="@{/}">메인으로 돌아가기</a>
 		    </div>
 		</section>
 

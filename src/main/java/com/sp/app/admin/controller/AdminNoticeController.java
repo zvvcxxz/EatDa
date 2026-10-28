@@ -1,12 +1,11 @@
 package com.sp.app.admin.controller;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import java.io.FileInputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.sp.app.admin.domain.dto.AdminNoticeDto;
 import com.sp.app.admin.service.AdminNoticeService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/admin/notice")
@@ -144,5 +146,55 @@ public class AdminNoticeController {
             e.printStackTrace();
         }
         return "redirect:/admin/notice";
+    }
+    @GetMapping("/download")
+    public void download(
+            @RequestParam("fileId") long fileId,
+            HttpServletRequest req,
+            jakarta.servlet.http.HttpServletResponse resp,
+            HttpSession session) throws Exception {
+
+        AdminNoticeDto dto = service.findByFileId(fileId);
+
+        if (dto == null) {
+            resp.sendError(
+                jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        File file = new File(
+            getPathName(session),
+            dto.getFilePath()
+        );
+
+        if (!file.isFile()) {
+            resp.sendError(
+                jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        String filename = java.net.URLEncoder
+                .encode(dto.getOriginalFileName(),
+                        java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
+
+        resp.setContentType("application/octet-stream");
+        resp.setHeader(
+            "Content-Disposition",
+            "attachment; filename*=UTF-8''" + filename
+        );
+        resp.setContentLengthLong(file.length());
+
+        try (
+        	    InputStream in = new FileInputStream(file);
+        	    jakarta.servlet.ServletOutputStream out = resp.getOutputStream()
+        	) {
+        	    byte[] buffer = new byte[8192];
+        	    int length;
+
+        	    while ((length = in.read(buffer)) != -1) {
+        	        out.write(buffer, 0, length);
+        	    }
+        	}
     }
 }

@@ -9,7 +9,7 @@
 
 <th:block layout:fragment="content">
     <div class="admin-wrap">
-s        <section class="page-heading">
+        <section class="page-heading">
             <div>
                 <p class="eyebrow">NOTICE DETAILS</p>
                 <h2>공지사항 상세</h2>
@@ -39,15 +39,27 @@ s        <section class="page-heading">
                     공지사항 내용
                 </div>
 
-                <div class="article-attachments" th:if="${not #lists.isEmpty(listFile)}">
-                    <h3><i class="bi bi-paperclip"></i> 첨부파일</h3>
-                    <div class="tag-list">
-                        <span class="tag-item" th:each="file : ${listFile}">
-                            <i class="bi bi-file-earmark-text" style="color: var(--orange);"></i>
-                            <span th:text="${file.originalFileName}">첨부파일.jpg</span>
-                        </span>
-                    </div>
-                </div>
+				<div class="article-attachments"
+				     th:if="${not #lists.isEmpty(listFile)}">
+				
+				    <h3>
+				        <i class="bi bi-paperclip"></i> 첨부파일
+				    </h3>
+				
+				    <div class="tag-list">
+				        <a class="tag-item"
+				           th:each="file : ${listFile}"
+				           th:href="@{/admin/notice/download(fileId=${file.noticeFileId})}">
+				
+				            <i class="bi bi-file-earmark-text"
+				               style="color: var(--orange);"></i>
+				
+				            <span th:text="${file.originalFileName}">
+				                첨부파일
+				            </span>
+				        </a>
+				    </div>
+				</div>
 
                 <div class="article-footer">
                     <div>

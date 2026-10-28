@@ -10,13 +10,16 @@
 <th:block layout:fragment="content">
 	<div class="admin-wrap">
 		<section class="page-heading">
-			<div onclick="location.href='/'" style="cursor: pointer;">
-				<p class="eyebrow">NOTICE MANAGEMENT</p>
-				<h2>공지사항 관리</h2>
-				<p class="subtitle">서비스 소식을 회원들에게 전해주세요.</p>
-			</div>
+		    <div onclick="location.href='/admin/notice'" style="cursor: pointer;">
+		        <p class="eyebrow">NOTICE MANAGEMENT</p>
+		        <h2>공지사항 관리</h2>
+		        <p class="subtitle">서비스 소식을 회원들에게 전해주세요.</p>
+		    </div>
+		    <div class="heading-actions">
+		        <a class="custom-btn secondary"th:href="@{/admin}">관리자 홈</a>
+		        <a class="custom-btn primary"th:href="@{/}">메인으로 돌아가기</a>
+		    </div>
 		</section>
-
 		<section class="panel">
 			<div class="panel-head">
 				<div><h2>공지사항 목록</h2></div>
@@ -44,7 +47,7 @@
 						        </span>
 						    </td>
 						    <td>
-						        <span class="custom-badge green" th:text="${dto.status == 1 ? '공개' : '숨김'}">공개</span>
+						        <span class="custom-badge"th:classappend="${dto.status == 1 ? ' green' : ' gray'}"th:text="${dto.status == 1 ? '공개' : '숨김'}">공개</span>
 						    </td>
 						    <td class="muted" th:text="${dto.createdAt}">작성일</td>
 						    <td th:text="${dto.hitCount}">0</td>
