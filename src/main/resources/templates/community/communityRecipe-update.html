@@ -222,10 +222,10 @@
                             </select>
 
                             <input type="number" data-field="amount"
-                                   min="0" max="999999999.999" step="0.001"
+                                   min="0.1" max="999999999.9" step="0.1"
                                    th:value="${item.amount}" placeholder="분량">
 
-                            <input data-field="unit" maxlength="20"
+                            <input data-field="unit" maxlength="20" pattern="[가-힣a-zA-Z]+" title="단위는 한글 또는 영문으로 입력하세요. 예: 개, 큰술, g, ml"
                                    th:value="${item.unit}" placeholder="단위">
 
                             <button type="button" class="recipe-remove"
@@ -372,10 +372,10 @@
                     </select>
 
                     <input type="number" data-field="amount"
-                           min="0" max="999999999.999" step="0.001"
+                           min="0.1" max="999999999.9" step="0.1"
                            placeholder="분량">
 
-                    <input data-field="unit" maxlength="20" placeholder="단위">
+                    <input data-field="unit" maxlength="20" pattern="[가-힣a-zA-Z]+" title="단위는 한글 또는 영문으로 입력하세요. 예: 개, 큰술, g, ml" placeholder="단위">
 
                     <button type="button" class="recipe-remove"
                             data-remove-ingredient
@@ -558,7 +558,29 @@
                 );
             });
 
+            // 단위에는 한글과 영문만 입력
+            function cleanUnit(event) {
+                if (event.isComposing) return;
+                const input = event.target;
+                if (input.matches('input[data-field="unit"]')) {
+                    input.value = input.value.replace(/[^가-힣a-zA-Z]/g, '');
+                }
+            }
+
+            ingredientRows.addEventListener('input', cleanUnit);
+            ingredientRows.addEventListener('compositionend', cleanUnit);
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const submitLabel = submitButton.textContent;
+            let submitting = false;
+
             form.addEventListener('submit', function(event) {
+                // 저장 중에는 다시 제출하지 않음
+                if (submitting) {
+                    event.preventDefault();
+                    return;
+                }
+
                 setInputNames();
 
                 const selectedIds = new Set();
@@ -576,6 +598,19 @@
 
                     selectedIds.add(select.value);
                 }
+
+                if (event.defaultPrevented) return;
+
+                submitting = true;
+                submitButton.disabled = true;
+                submitButton.textContent = '저장 중...';
+            });
+
+            // 뒤로 가기로 돌아오면 버튼 복구
+            window.addEventListener('pageshow', function() {
+                submitting = false;
+                submitButton.disabled = false;
+                submitButton.textContent = submitLabel;
             });
 
             if (ingredientRows.children.length === 0) addIngredient();
