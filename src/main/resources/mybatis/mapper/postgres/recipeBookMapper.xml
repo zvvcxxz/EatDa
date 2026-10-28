@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.postgres.mapper.RecipeBookMapper">
+    <resultMap id="bookItem" type="com.sp.app.domain.dto.RecipeBookItemDto">
+        <id property="id" column="rcp_seq"/>
+        <result property="title" column="rcp_nm"/>
+        <result property="image" column="att_file_no_main"/>
+        <result property="category" column="rcp_pat2"/>
+        <result property="method" column="rcp_way2"/>
+    </resultMap>
+
+    <!-- 같은 레시피 번호가 중복 저장되어도 한 번만 표시 -->
+    <sql id="catalog">
+        FROM (
+            SELECT DISTINCT ON (rcp_seq)
+                rcp_seq, rcp_nm, att_file_no_main, rcp_pat2, rcp_way2, rcp_parts_dtls
+            FROM recipe
+            WHERE NULLIF(TRIM(rcp_seq), '') IS NOT NULL AND NULLIF(TRIM(rcp_nm), '') IS NOT NULL
+            ORDER BY rcp_seq, id DESC
+        ) catalog
+    </sql>
+    <sql id="conditions">
+        <where>
+            <if test="keyword != null and keyword != ''">AND rcp_nm ILIKE #{keyword} ESCAPE '!'</if>
+            <if test="ingredient != null and ingredient != ''">AND COALESCE(rcp_parts_dtls, '') ILIKE #{ingredient} ESCAPE '!'</if>
+            <if test="category != null and category != ''">AND rcp_pat2 = #{category}</if>
+            <if test="method != null and method != ''">AND rcp_way2 = #{method}</if>
+        </where>
+    </sql>
+    <select id="countRecipes" resultType="long">
+        SELECT COUNT(*) <include refid="catalog"/> <include refid="conditions"/>
+    </select>
+    <select id="listRecipes" resultMap="bookItem">
+        SELECT rcp_seq, rcp_nm, att_file_no_main, rcp_pat2, rcp_way2
+        <include refid="catalog"/> <include refid="conditions"/>
+        ORDER BY rcp_nm, rcp_seq LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="listCategories" resultType="String">
+        SELECT DISTINCT rcp_pat2 <include refid="catalog"/>
+        WHERE NULLIF(TRIM(rcp_pat2), '') IS NOT NULL ORDER BY rcp_pat2
+    </select>
+    <select id="listMethods" resultType="String">
+        SELECT DISTINCT rcp_way2 <include refid="catalog"/>
+        WHERE NULLIF(TRIM(rcp_way2), '') IS NOT NULL ORDER BY rcp_way2
+    </select>
+    <select id="findRecipe" resultType="com.sp.app.domain.dto.MyRecipeAiDto">
+        SELECT rcp_seq, rcp_nm, rcp_way2, rcp_pat2, att_file_no_main, rcp_parts_dtls,
+            manual01, manual_img01, manual02, manual_img02, manual03, manual_img03,
+            manual04, manual_img04, manual05, manual_img05, manual06, manual_img06,
+            manual07, manual_img07, manual08, manual_img08, manual09, manual_img09,
+            manual10, manual_img10, manual11, manual_img11, manual12, manual_img12,
+            manual13, manual_img13, manual14, manual_img14, manual15, manual_img15,
+            manual16, manual_img16, manual17, manual_img17, manual18, manual_img18,
+            manual19, manual_img19, manual20, manual_img20
+        FROM recipe WHERE rcp_seq = #{id} ORDER BY id DESC LIMIT 1
+    </select>
+</mapper>

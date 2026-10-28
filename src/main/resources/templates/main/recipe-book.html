@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<head>
+    <title>레시피 서가 · 잇다</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/dist/css/recipe-book.css}">
+        <link rel="stylesheet" th:href="@{/dist/css/recipe-book-detail.css}">
+    </th:block>
+</head>
+<body>
+<main layout:fragment="content" class="recipe-library" id="recipe-library"
+      th:attr="data-mode=${bookMode},data-api=@{/home/recipe-book}">
+    <!-- 레시피 서가 : 탐색 메뉴와 검색 조건 -->
+    <div class="rb-intro">
+        <div><p class="rb-kicker">THE RECIPE LIBRARY</p><h1>오늘은, 어떤 한 페이지?</h1>
+            <p class="rb-intro-copy">장을 넘기며 발견하는 새로운 한 끼.</p></div>
+        <span class="rb-edition">잇다의 요리책 <span aria-hidden="true">―</span> 식품안전나라</span>
+    </div>
+    <nav class="rb-modes" aria-label="레시피 탐색 방법">
+        <button type="button" data-book-mode="all" aria-pressed="true">전체 레시피</button>
+        <button type="button" data-book-mode="type" aria-pressed="false">종류별 요리</button>
+        <button type="button" data-book-mode="method" aria-pressed="false">조리 방법별</button>
+        <button type="button" data-book-mode="ingredient" aria-pressed="false">재료로 찾기</button>
+    </nav>
+    <form class="rb-filters" id="rb-filters">
+        <label class="rb-select-label">종류<select name="category" id="rb-category"><option value="">전체 종류</option></select></label>
+        <label class="rb-select-label">조리 방법<select name="method" id="rb-method"><option value="">전체 방법</option></select></label>
+        <div class="rb-search-wrap">
+            <label for="rb-query" id="rb-query-label" class="rb-sr-only">요리 이름 검색</label>
+            <input id="rb-query" name="query" type="search" maxlength="100" placeholder="요리 이름을 찾아보세요" autocomplete="off">
+            <button type="submit" aria-label="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg></button>
+        </div>
+        <button type="button" id="rb-reset" class="rb-reset">초기화</button>
+    </form>
+    <div class="rb-summary"><p id="rb-summary">책을 준비하고 있어요.</p><span id="rb-filter-note">요리 이름순</span></div>
+
+    <!-- 레시피북 : 펼친 두 페이지에 각각 네 개씩 표시 -->
+    <section class="rb-cover" id="rb-cover" aria-label="레시피 사진 목록">
+        <div class="rb-book" id="rb-book" aria-busy="true">
+            <div class="rb-spread" id="rb-spread"></div>
+            <div class="rb-empty" id="rb-empty" role="status" hidden></div>
+        </div>
+        <div class="rb-cover-caption"><span>RECIPES FOR YOUR EVERYDAY</span><span>잇다.</span></div>
+    </section>
+    <div class="rb-navigation">
+        <button type="button" id="rb-prev" class="rb-page-button" disabled aria-label="이전 8개 레시피"><span aria-hidden="true">←</span> 이전 장</button>
+        <div class="rb-location"><span id="rb-page-number">01 / 01</span><small id="rb-range"></small></div>
+        <button type="button" id="rb-next" class="rb-page-button" disabled aria-label="다음 8개 레시피">다음 장 <span aria-hidden="true">→</span></button>
+    </div>
+    <p class="rb-status" id="rb-status" role="status" aria-live="polite"></p>
+    <div class="rb-footnote"><p>레시피와 사진은 식품안전나라 제공 데이터를 사용합니다.</p><p>재료 검색은 설명에 포함된 단어를 기준으로 해요.</p></div>
+</main>
+<th:block layout:fragment="script">
+    <script type="module" th:src="@{/dist/js/recipe-book.js}"></script>
+</th:block>
+</body>
+</html>

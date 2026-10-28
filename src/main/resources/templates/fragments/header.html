@@ -7,13 +7,10 @@
     <a href="/" th:href="@{/}" >홈</a>
 
     <details><summary>레시피 찾기</summary><div class="dropdown">
-        <a href="/" th:href="@{/}" data-recipe-category="">전체 레시피</a>
-        <a href="/?category=자취" th:href="@{/?category=자취}" data-recipe-category="자취">자취 요리</a>
-        <a href="/?category=건강" th:href="@{/?category=건강}" data-recipe-category="건강">건강 요리</a>
-        <a href="/?category=제철" th:href="@{/?category=제철}" data-recipe-category="제철">제철 요리</a>
-        <a href="/?category=재료" th:href="@{/?category=재료}" data-recipe-category="재료">재료별 레시피</a>
-        <a href="/?category=태그" th:href="@{/?category=태그}" data-recipe-category="태그">태그별 레시피</a>
-        <a href="/?category=인기" th:href="@{/?category=인기}" data-recipe-category="인기">인기 레시피</a>
+        <a href="/home/recipe-book?mode=all" th:href="@{/home/recipe-book(mode='all')}">전체 레시피</a>
+        <a href="/home/recipe-book?mode=type" th:href="@{/home/recipe-book(mode='type')}">종류별 요리</a>
+        <a href="/home/recipe-book?mode=method" th:href="@{/home/recipe-book(mode='method')}">조리 방법별</a>
+        <a href="/home/recipe-book?mode=ingredient" th:href="@{/home/recipe-book(mode='ingredient')}">재료로 찾기</a>
     </div></details>
 
     <details><summary>함께하는 주방</summary><div class="dropdown">
@@ -61,13 +58,10 @@
 
  <details class="wrap mobile-menu"><summary>메뉴</summary>
     <nav class="mobile-links">
-        <a href="/" th:href="@{/}" >전체 레시피</a>
-        <a href="/?category=자취" th:href="@{/?category=자취}" >자취 요리</a>
-        <a href="/?category=건강" th:href="@{/?category=건강}" >건강 요리</a>
-        <a href="/?category=제철" th:href="@{/?category=제철}" >제철 요리</a>
-        <a href="/?category=재료" th:href="@{/?category=재료}" >재료별 레시피</a>
-        <a href="/?category=태그" th:href="@{/?category=태그}" >태그별 레시피</a>
-        <a href="/?category=인기" th:href="@{/?category=인기}" >인기 레시피</a>
+        <a href="/home/recipe-book?mode=all" th:href="@{/home/recipe-book(mode='all')}">전체 레시피</a>
+        <a href="/home/recipe-book?mode=type" th:href="@{/home/recipe-book(mode='type')}">종류별 요리</a>
+        <a href="/home/recipe-book?mode=method" th:href="@{/home/recipe-book(mode='method')}">조리 방법별</a>
+        <a href="/home/recipe-book?mode=ingredient" th:href="@{/home/recipe-book(mode='ingredient')}">재료로 찾기</a>
         <a href="/community/notice" th:href="@{/community/notice}" >공지사항</a>
         <a href="/community/free" th:href="@{/community/free}" >자유 이야기</a>
         <a href="/community/recipes" th:href="@{/community/recipes}" >모두의 레시피</a>
