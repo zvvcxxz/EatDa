@@ -14,162 +14,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 
-    <style>
-
-        /* 질문 상세 */
-        .community-design .question-article { padding: 24px; }
-        .community-design .question-article [hidden] { display: none !important; }
-        .community-design #questionDetail { padding: 0; }
-        .community-design .question-header {
-            padding-bottom: 16px;
-            border-bottom: 1px solid #eee5dd;
-        }
-        .community-design #questionDetail .ds-question-title {
-            margin: 0 0 10px;
-            color: #252525;
-            font-size: 26px;
-            font-weight: 700;
-            line-height: 1.45;
-            overflow-wrap: anywhere;
-        }
-        .community-design #questionDetail .ds-author-line {
-            margin: 0;
-            color: #7b7169;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .community-design #questionDetail .ds-question-text {
-            margin: 20px 0 0;
-            padding: 0;
-            min-height: 72px;
-            color: #333;
-            font-size: 15px;
-            line-height: 1.9;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-        .community-design .question-actions {
-            margin: 14px 0 0;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .community-design .question-actions form { margin: 0; }
-        .community-design .question-actions .ds-button,
-        .community-design .answer-buttons .ds-button {
-            min-height: 32px;
-            padding: 6px 11px;
-            border-radius: 7px;
-            box-shadow: none;
-            font-size: 12px;
-        }
-
-        /* 답변 목록과 작성란 */
-        .community-design #communityAnswer {
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid #eee5dd;
-        }
-        .community-design #communityAnswer > .ds-section-title {
-            margin: 0 0 8px;
-            padding: 0;
-            border: 0;
-        }
-        .community-design #communityAnswer .ds-section-title h3 {
-            font-size: 19px;
-            color: #292724;
-        }
-        .community-design #answerCount { color: #ed592b; }
-        .community-design .answer-item { padding: 16px 0; }
-        .community-design .answer-item + .answer-item { border-top: 1px solid #f0eae5; }
-        .community-design .answer-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            font-size: 13px;
-        }
-        .community-design .answer-date { margin-left: 8px; color: #877c73; font-size: 12px; }
-        .community-design .answer-content {
-            margin: 9px 0 0;
-            color: #3d3833;
-            font-size: 14px;
-            line-height: 1.8;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-        .community-design .answer-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-        .community-design .answer-empty { padding: 18px 0; color: #81766c; font-size: 14px; }
-        .community-design .answer-paging { margin: 8px 0 14px; text-align: center; }
-        .community-design .answer-paging a,
-        .community-design .answer-paging span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 30px;
-            margin: 2px;
-            padding: 4px 8px;
-            border: 1px solid #eee5dd;
-            border-radius: 6px;
-            color: #6d6157;
-            font-size: 12px;
-        }
-        .community-design .answer-paging .active { background: #fff3eb; color: #b64d2c; font-weight: 700; }
-        .community-design #communityAnswer .ds-answer-form {
-            margin-top: 16px;
-            padding: 16px;
-            border: 1px solid #f1e5dc;
-            border-radius: 12px;
-            background: #fffcf9;
-        }
-        .community-design .ds-answer-form label { display: block; margin-bottom: 10px; color: #4d423a; font-size: 14px; font-weight: 700; }
-        .community-design .ds-answer-form textarea,
-        .community-design .answer-edit-content {
-            box-sizing: border-box;
-            display: block;
-            width: 100%;
-            min-height: 78px;
-            padding: 10px 12px;
-            border: 1px solid #e5dcd5;
-            border-radius: 8px;
-            background: #fff;
-            color: #333;
-            font: inherit;
-            font-size: 14px;
-            line-height: 1.7;
-            resize: vertical;
-        }
-        .community-design .answer-edit-content { margin: 10px 0; }
-        .community-design #communityAnswer .ds-bottom-actions { margin-top: 10px; }
-        .community-design #answerSubmit { min-height: 35px; padding: 8px 14px; border-radius: 8px; box-shadow: none; }
-        .community-design .answer-message { margin-top: 8px; color: #b42318; font-size: 13px; }
-        .community-design .answer-message:empty { display: none; }
-
-        /* 이전글·다음글은 맨 아래에서 표시 */
-        .community-design .question-neighbors {
-            margin-top: 22px;
-            padding: 3px 14px;
-            border: 1px solid #eee7e1;
-            border-radius: 10px;
-            background: #fcfaf8;
-        }
-        .community-design .question-neighbor-row {
-            display: grid;
-            grid-template-columns: 65px minmax(0, 1fr);
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            font-size: 13px;
-        }
-        .community-design .question-neighbor-row + .question-neighbor-row { border-top: 1px solid #eee7e1; }
-        .community-design .question-neighbor-row > span:first-child { color: #b15c3c; font-weight: 700; }
-        .community-design .question-neighbor-row a { color: #51463d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .community-design .question-neighbor-row > span:not(:first-child) { color: #8b8077; }
-        @media (max-width: 600px) {
-            .community-design .question-article { padding: 18px; }
-            .community-design #questionDetail .ds-question-title { font-size: 21px; }
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/dist/css/community-question-article.css}">
 </th:block>
 
 <div layout:fragment="content"
@@ -265,7 +110,7 @@
                           th:action="@{/community/questions/{id}/delete(
                                       id=${question.postId})}"
                           method="post"
-                          onsubmit="return confirm('이 질문을 삭제할까요?');">
+                          data-community-confirm="이 질문을 삭제할까요?">
                         <button type="submit" class="ds-button light">
                             삭제
                         </button>
@@ -275,7 +120,7 @@
                           th:action="@{/community/questions/{id}/hide(
                                       id=${question.postId})}"
                           method="post"
-                          onsubmit="return confirm('이 질문을 숨길까요?');">
+                          data-community-confirm="이 질문을 숨길까요?">
                         <button type="submit" class="ds-button light">
                             관리자 숨김
                         </button>
@@ -365,6 +210,8 @@
 
 <th:block layout:fragment="script">
     <script th:src="@{/dist/js/community-answer.js}"></script>
+
+    <script th:src="@{/dist/js/community-question-article.js}"></script>
 </th:block>
 
 </body>

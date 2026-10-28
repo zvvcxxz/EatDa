@@ -12,86 +12,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
 
-    <style>
-        .community-design .recipe-actions {
-            display:flex;
-            flex-wrap:wrap;
-            gap:8px;
-            margin-top:16px;
-        }
-        .community-design .recipe-photo-empty {
-            width:230px;
-            aspect-ratio:1;
-            display:grid;
-            place-items:center;
-            border-radius:50%;
-            background:#fff2e8;
-            color:#815441;
-            font-size:18px;
-        }
-        .community-design .recipe-extra {
-            margin-top:14px;
-            color:#50483f;
-            font-size:14px;
-            white-space:pre-wrap;
-            overflow-wrap:anywhere;
-        }
-        .community-design .ds-step p {
-            overflow-wrap:anywhere;
-        }
-        .community-design .recipe-step-time {
-            margin-top:8px;
-            font-size:12px;
-            color:#765b4b;
-        }
-        .community-design .recipe-delete-form {
-            margin:0;
-        }
-        @media(max-width:550px) {
-            .community-design .recipe-photo-empty {
-                width:190px;
-                margin:auto;
-            }
-        }
-        
-        .community-design .recipe-neighbors {
-		    border-top:1px solid #eadfd5;
-		    border-bottom:1px solid #eadfd5;
-		    margin-top:24px;
-		}
-		
-		.community-design .recipe-neighbor-row {
-		    display:grid;
-		    grid-template-columns:90px minmax(0,1fr);
-		    gap:12px;
-		    align-items:center;
-		    padding:13px 0;
-		    font-size:14px;
-		}
-		
-		.community-design .recipe-neighbor-row + .recipe-neighbor-row {
-		    border-top:1px solid #f1e9e1;
-		}
-		
-		.community-design .recipe-neighbor-label {
-		    color:#79513b;
-		    font-weight:600;
-		}
-		
-		.community-design .recipe-neighbor-row a {
-		    color:#292522;
-		    overflow-wrap:anywhere;
-		}
-		
-		.community-design .recipe-neighbor-row a:hover {
-		    color:#a54d28;
-		    text-decoration:underline;
-		}
-		
-		.community-design .recipe-neighbor-empty {
-		    color:#6f655d;
-		}
-    </style>
+    <link rel="stylesheet" th:href="@{/dist/css/community-recipe-article.css}">
 </th:block>
 
 <div layout:fragment="content"
@@ -361,7 +282,7 @@
 				          th:if="${owner}"
 				          th:action="@{/community/recipes/{id}/delete(id=${recipe.recipeId})}"
 				          method="post"
-				          onsubmit="return confirm('이 레시피를 삭제할까요?');">
+				          data-community-confirm="이 레시피를 삭제할까요?">
 				        <button class="ds-button light" type="submit">
 				            삭제
 				        </button>
@@ -372,7 +293,7 @@
 				          th:if="${admin}"
 				          th:action="@{/community/recipes/{id}/hide(id=${recipe.recipeId})}"
 				          method="post"
-				          onsubmit="return confirm('이 레시피를 숨길까요? 숨기면 일반 목록에서 제외됩니다.');">
+				          data-community-confirm="이 레시피를 숨길까요? 숨기면 일반 목록에서 제외됩니다.">
 				        <button class="ds-button light" type="submit">
 				            관리자 숨김
 				        </button>
@@ -395,6 +316,8 @@
 <th:block layout:fragment="script">
     <script th:src="@{/dist/js/util-async.js}"></script>
     <script th:src="@{/dist/js/community-recipe.js}"></script>
+
+    <script th:src="@{/dist/js/community-recipe-article.js}"></script>
 </th:block>
 
 </body>

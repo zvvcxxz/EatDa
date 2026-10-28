@@ -16,6 +16,8 @@
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/community-free.css}">
     <link rel="stylesheet" th:href="@{/dist/css/community-board.css}">
+
+    <link rel="stylesheet" th:href="@{/dist/css/community-question-write.css}">
 </th:block>
 
 <div layout:fragment="content"
@@ -86,8 +88,8 @@
                 </div>
             </div>
 
-            <p class="ds-help"
-               style="color:#b42318; margin-bottom:16px;"
+            <p class="ds-help community-question-write-inline-1"
+               
                th:if="${error != null}"
                th:text="${error}"
                role="alert"></p>
