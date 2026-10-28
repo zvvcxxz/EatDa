@@ -1,49 +1,85 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<footer th:fragment="footer" class="site-footer eatda-footer">
-    <div class="wrap">
-        <div class="ef-top">
-            <div class="ef-intro">
-                <a class="ef-brand" href="/" th:href="@{/}">잇다 <span>EAT-DA</span></a>
-                <p class="ef-tagline">맛을 잇고, 사람을 잇다.</p>
-                <p class="ef-description">재료를 찾고, 요리를 나누고,<br>이웃과 한 끼를 이어가는 공간입니다.</p>
-                <div class="ef-github" aria-label="팀원 GitHub, 주소 연결 예정">
-                    <button type="button" disabled aria-label="팀원 1 GitHub, 연결 예정" title="팀원 1 · GitHub 연결 예정"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ef-github-mark"></use></svg><span>01</span></button>
-                    <button type="button" disabled aria-label="팀원 2 GitHub, 연결 예정" title="팀원 2 · GitHub 연결 예정"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ef-github-mark"></use></svg><span>02</span></button>
-                    <button type="button" disabled aria-label="팀원 3 GitHub, 연결 예정" title="팀원 3 · GitHub 연결 예정"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ef-github-mark"></use></svg><span>03</span></button>
-                    <button type="button" disabled aria-label="팀원 4 GitHub, 연결 예정" title="팀원 4 · GitHub 연결 예정"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ef-github-mark"></use></svg><span>04</span></button>
-                </div>
-                <p class="ef-github-note">팀원 GitHub · 연결 예정</p>
-            </div>
-            <nav class="ef-links" aria-label="푸터 요리 메뉴">
-                <h2>요리의 시작</h2>
-                <a href="/" th:href="@{/}">레시피 찾기 <span aria-hidden="true">↗</span></a>
-                <a href="/my/fridge" th:href="@{/my/fridge}">내 냉장고 <span aria-hidden="true">↗</span></a>
-                <a href="/my/recipes" th:href="@{/my/recipes}">내가 쓴 레시피 <span aria-hidden="true">↗</span></a>
-                <a href="/my/bookmarks" th:href="@{/my/bookmarks}">찜한 레시피 <span aria-hidden="true">↗</span></a>
-            </nav>
-            <nav class="ef-links" aria-label="푸터 커뮤니티 메뉴">
-                <h2>함께하는 주방</h2>
-                <a href="/community/share" th:href="@{/community/share}">재료 나눔 <span aria-hidden="true">↗</span></a>
-                <a href="/community/meet" th:href="@{/community/meet}">같이 먹어요 <span aria-hidden="true">↗</span></a>
-                <a href="/community/recipes" th:href="@{/community/recipes}">모두의 레시피 <span aria-hidden="true">↗</span></a>
-                <a href="/community/questions" th:href="@{/community/questions}">요리 질문 <span aria-hidden="true">↗</span></a>
-            </nav>
-            <section class="ef-project" aria-labelledby="ef-project-title">
-                <h2 id="ef-project-title">프로젝트 잇다</h2>
-                <p>쌍용강북교육센터</p>
-                <p>파이널 프로젝트 · 팀 잇다</p>
-                <p>지도 강사 한장희</p>
-                <a class="ef-repository" href="https://github.com/zvvcxxz/EatDa" target="_blank" rel="noopener noreferrer">프로젝트 GitHub <span aria-hidden="true">↗</span></a>
-            </section>
-        </div>
-        <div class="ef-bottom">
-            <p>© 잇다 EAT-DA. Final Project.</p>
-            <p>본 사이트는 교육과 포트폴리오 목적으로 제작한 프로젝트입니다.</p>
-        </div>
-    </div>
-    <svg class="ef-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="0" height="0"><defs><symbol id="ef-github-mark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .6a11.7 11.7 0 0 0-3.7 22.8c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.4-1.3-5.4-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17 5.1 18 5.4 18 5.4c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.8 5.5-5.4 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.7 11.7 0 0 0 12 .6Z"/></symbol></defs></svg>
-</footer>
+	<footer th:fragment="footer" class="site-footer eatda-footer">
+		<div class="wrap">
+			<div class="ef-top">
+				<div class="ef-intro">
+					<a class="ef-brand" href="/" th:href="@{/}">잇다 <span>EAT-DA</span></a>
+					<p class="ef-tagline">맛을 잇고, 사람을 잇다.</p>
+					<p class="ef-description">
+						재료를 찾고, 요리를 나누고,<br>이웃과 한 끼를 이어가는 공간입니다.
+					</p>
+					<div class="ef-github" aria-label="팀원 GitHub, 주소 연결 예정">
+						<a href="https://github.com/ovouov" target="_blank"
+							rel="noopener noreferrer" aria-label="내 GitHub 새 창으로 열기"
+							title="김승호 GitHub"> <svg viewBox="0 0 24 24" aria-hidden="true">
+        				<use href="#ef-github-mark"></use>
+					    </svg> <span>김승호</span>
+						</a>
+						<button type="button" disabled aria-label="팀원 2 GitHub, 연결 예정"
+							title="팀원 2 · GitHub 연결 예정">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<use href="#ef-github-mark"></use></svg>
+							<span>02</span>
+						</button>
+						<button type="button" disabled aria-label="팀원 3 GitHub, 연결 예정"
+							title="팀원 3 · GitHub 연결 예정">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<use href="#ef-github-mark"></use></svg>
+							<span>03</span>
+						</button>
+						<button type="button" disabled aria-label="팀원 4 GitHub, 연결 예정"
+							title="팀원 4 · GitHub 연결 예정">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<use href="#ef-github-mark"></use></svg>
+							<span>04</span>
+						</button>
+					</div>
+					<p class="ef-github-note">팀원 GitHub</p>
+				</div>
+				<nav class="ef-links" aria-label="푸터 요리 메뉴">
+					<h2>요리의 시작</h2>
+					<a href="/" th:href="@{/}">레시피 찾기 <span aria-hidden="true">↗</span></a>
+					<a href="/my/fridge" th:href="@{/my/fridge}">내 냉장고 <span
+						aria-hidden="true">↗</span></a> <a href="/my/recipes"
+						th:href="@{/my/recipes}">내가 쓴 레시피 <span aria-hidden="true">↗</span></a>
+					<a href="/my/bookmarks" th:href="@{/my/bookmarks}">찜한 레시피 <span
+						aria-hidden="true">↗</span></a>
+				</nav>
+				<nav class="ef-links" aria-label="푸터 커뮤니티 메뉴">
+					<h2>함께하는 주방</h2>
+					<a href="/community/share" th:href="@{/community/share}">재료 나눔
+						<span aria-hidden="true">↗</span>
+					</a> <a href="/community/meet" th:href="@{/community/meet}">같이 먹어요
+						<span aria-hidden="true">↗</span>
+					</a> <a href="/community/recipes" th:href="@{/community/recipes}">모두의
+						레시피 <span aria-hidden="true">↗</span>
+					</a> <a href="/community/questions" th:href="@{/community/questions}">요리
+						질문 <span aria-hidden="true">↗</span>
+					</a>
+				</nav>
+				<section class="ef-project" aria-labelledby="ef-project-title">
+					<h2 id="ef-project-title">프로젝트 잇다</h2>
+					<p>쌍용강북교육센터</p>
+					<p>파이널 프로젝트 · 팀 잇다</p>
+					<p>지도 강사 한장희</p>
+					<a class="ef-repository" href="https://github.com/zvvcxxz/EatDa"
+						target="_blank" rel="noopener noreferrer">프로젝트 GitHub <span
+						aria-hidden="true">↗</span></a>
+				</section>
+			</div>
+			<div class="ef-bottom">
+				<p>© 잇다 EAT-DA. Final Project.</p>
+				<p>본 사이트는 교육과 포트폴리오 목적으로 제작한 프로젝트입니다.</p>
+			</div>
+		</div>
+		<svg class="ef-symbols" xmlns="http://www.w3.org/2000/svg"
+			aria-hidden="true" width="0" height="0">
+			<defs>
+			<symbol id="ef-github-mark" viewBox="0 0 24 24">
+			<path fill="currentColor"
+				d="M12 .6a11.7 11.7 0 0 0-3.7 22.8c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.4-1.3-5.4-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17 5.1 18 5.4 18 5.4c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.8 5.5-5.4 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.7 11.7 0 0 0 12 .6Z" /></symbol></defs></svg>
+	</footer>
 </body>
 </html>
