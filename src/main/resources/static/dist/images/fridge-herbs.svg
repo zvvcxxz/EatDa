@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 76" fill="none">
+<defs><filter id="sticker" x="-30%" y="-30%" width="160%" height="170%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="2.2" result="rim"/><feFlood flood-color="#fffdf3"/><feComposite in2="rim" operator="in" result="paper"/><feDropShadow in="paper" dx="0.7" dy="1.4" stdDeviation="0.8" flood-color="#786347" flood-opacity="0.22"/><feComposite in="SourceGraphic" operator="over"/></filter></defs>
+<g stroke-linecap="round" stroke-linejoin="round">
+<g filter="url(#sticker)" transform="rotate(-10 42 41)" stroke="#a28a68" stroke-width="1.8">
+<path d="M29 31c-3 13-5 27 0 32 6 7 18 4 20-3 2-9-5-23-5-30" fill="#fffcef"/>
+<path d="M20 30c3-13 20-19 31-12 6 4 9 11 5 14-8 5-30 8-36-2Z" fill="#a27a50"/>
+<path d="m34 39-2 19m9-20 2 17" stroke="#d9c8aa"/>
+</g>
+<g filter="url(#sticker)" transform="rotate(12 65 27)" stroke="#aa9170" stroke-width="1.6">
+<path d="M63 21c-3 10-5 22-1 26 4 4 12 3 14-2 2-6-1-15-2-24" fill="#fffdf0"/>
+<path d="M55 22c0-11 11-17 20-13 6 2 10 8 9 12-6 4-22 5-29 1Z" fill="#936e48"/>
+</g>
+<g filter="url(#sticker)" transform="rotate(36 128 37)" stroke-width="1.8">
+<path d="M123 31c1 12 0 25 0 33 0 5 8 5 9 0 2-13 1-25 0-35" fill="#f4f1d9" stroke="#a9b68b"/>
+<path d="m123 34-4-27c-1-4 4-6 6-2l4 26 2-27c0-4 6-4 6 0l-3 28 8-22c2-4 7-2 5 3l-12 25" fill="#608e4e" stroke="#5b8050"/>
+<path d="m127 37 1 24" stroke="#c0caa4"/>
+</g>
+</g></svg>

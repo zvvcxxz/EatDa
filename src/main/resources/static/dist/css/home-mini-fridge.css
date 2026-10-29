@@ -1,43 +1,95 @@
-.home-main .home-bottom > .mf-fridge { --mf-edge:#969d9f; padding:0; border:1px solid var(--mf-edge); border-radius:12px 12px 8px 8px; background:linear-gradient(90deg,#aab1b3 0%,#edf0ef 3%,#c5cbcd 7%,#dce0df 50%,#b1b8bb 96%,#8b9497 100%); box-shadow:inset 1px 0 0 #fff, inset -3px 0 3px #56606466, 3px 9px 17px #29333324; overflow:visible; min-width:0; align-self:start; position:relative; margin-bottom:12px; }
-.home-main .mf-freezer { position:relative; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:25px 22px 26px 45px; border-bottom:5px solid #505b5f; border-radius:12px 12px 0 0; background:repeating-linear-gradient(0deg,#ffffff08 0px,#ffffff08 1px,#59636605 1px,#59636605 3px),linear-gradient(105deg,#b8c0c3,#edf0ef 38%,#c0c7ca 80%,#a8b0b4); box-shadow:inset 0 2px 2px #fff,0 2px 0 #e9eded; }
-.home-main .mf-freezer::before, .home-main .mf-door::before { content:''; position:absolute; left:16px; width:9px; border:1px solid #7b878d; background:linear-gradient(90deg,#6f7d83,#f5f8f7 40%,#d0d7d9 65%,#8c999f); border-radius:4px; box-shadow:3px 2px 3px #3540455c,inset 0 1px 0 #fff; }
-.home-main .mf-freezer::before { height:32px; top:50%; transform:translateY(-50%); }
-.home-main .mf-label { display:block; color:#556367; font-size:10px; font-weight:700; margin-bottom:7px; letter-spacing:.06em; }
-.home-main .home-bottom .mf-fridge h2 { font-size:17px; line-height:1.5; letter-spacing:-.04em; margin:0; }
+/* 메인 냉장고 : 크림색 본체와 주황색 손잡이 */
+.home-main .home-bottom > .mf-fridge {
+    --mf-cream:#f2ead2;
+    padding:0;border:1px solid #e4d8b9;border-radius:25px 25px 22px 22px;
+    background:linear-gradient(90deg,#e7dec2,#fff8e5 5%,#f7efda 50%,#eae0c5 98%);
+    box-shadow:inset 2px 2px 4px #fffdf2,inset -3px -5px 8px #bdab7b38,0 8px 14px #8d774225;
+    overflow:visible;min-width:0;align-self:start;position:relative;margin:0 0 14px;
+}
+.home-main .mf-freezer {
+    position:relative;display:flex;align-items:center;justify-content:space-between;gap:9px;
+    padding:22px 22px 20px 43px;min-height:87px;border-radius:25px 25px 0 0;
+    border-bottom:3px solid #c7b894;
+    background:linear-gradient(112deg,#fff9e9,#f4ecd5 73%,#e9ddbe);
+    box-shadow:inset 0 3px 4px #fffef4,0 2px 0 #fff9e8;
+}
+.home-main .mf-freezer::before,.home-main .mf-door::before {
+    content:'';position:absolute;left:13px;width:12px;border:1px solid #c58757;
+    background:linear-gradient(90deg,#b46736,#e99a60 42%,#d5844c 78%,#b26b3f);
+    border-radius:9px;box-shadow:inset 2px 1px 2px #ffd6a466,2px 3px 4px #87613d35;
+}
+.home-main .mf-freezer::before { height:43px;top:50%;transform:translateY(-50%); }
+.home-main .mf-label { display:block;font-size:10px;color:#a19272;font-weight:600;margin-bottom:5px;letter-spacing:0; }
+.home-main .home-bottom .mf-fridge h2 { font-size:16px;font-weight:750;line-height:1.5;letter-spacing:-.65px;margin:0;color:#4f4432; }
 .home-main .home-bottom .mf-fridge h2::before { display:none; }
-.home-main .mf-brand { font-size:9px; letter-spacing:.1em; font-weight:700; color:#5f6f75; writing-mode:vertical-rl; text-shadow:0 1px 0 #fff; }
-.home-main .mf-door { position:relative; padding:22px 18px 18px 42px; border-top:1px solid #faffff; }
-.home-main .mf-door::before { height:72px; top:40px; }
-.home-main .mf-window { position:relative; padding:19px 14px 12px; background:linear-gradient(90deg,#d6e1e4,#f3f8f8 13%,#edf3f4 86%,#c5d2d7); border:7px solid #57666e; outline:1px solid #8b999f; border-radius:8px; box-shadow:0 1px 1px #fff,inset 0 8px 12px #3e505830,inset 4px 0 5px #526b7018; }
-.home-main .mf-window::before { content:''; position:absolute; left:19%; right:19%; top:5px; height:3px; background:#f5ffff; border-radius:3px; box-shadow:0 2px 9px 2px #f5ffff; pointer-events:none; }
-.home-main .mf-caption { color:#697b83; font-size:10px; margin-bottom:8px; }
-.home-main .mf-fridge #fridge-items { min-height:110px; }
-.home-main .mf-fridge #fridge-items .empty { display:grid; place-items:center; min-height:100px; margin:0; padding:16px 8px; background:transparent; border:0; border-radius:0; color:#7a8273; font-size:12px; line-height:1.7; }
-.home-main .mf-fridge #fridge-items .list-row { border-bottom:3px solid #c0caba; box-shadow:0 1px 0 #fff; padding:12px 0; font-size:12px; gap:8px; }
-.home-main .mf-fridge #fridge-items .list-row > span { overflow-wrap:anywhere; }
-.home-main .mf-shelf { height:6px; border-top:1px solid #fbffff; border-bottom:2px solid #8ca7ae; background:#c9e4e7; box-shadow:0 4px 4px #48646b30; margin:12px -5px 18px; }
-.home-main .mf-drawer { height:46px; border:1px solid #a7c1c7; border-top:3px solid #efffff; border-radius:2px 2px 7px 7px; background:linear-gradient(110deg,#ffffffa6,#c8dfe54d 45%,#faffff99); box-shadow:inset 1px 0 0 #fff,0 3px 4px #657c8020; position:relative; }
-.home-main .mf-drawer span { position:absolute; width:46px; height:5px; border-radius:3px; background:#9eb9c0; box-shadow:0 1px 0 #fff,inset 0 1px 1px #6c8890; top:8px; left:50%; transform:translateX(-50%); }
-.home-main .mf-fridge .mf-actions { margin:16px 0 0; }
-.home-main .mf-fridge .mf-actions .button { width:100%; display:flex; align-items:center; justify-content:space-between; padding:11px 14px; font-size:12px; border-radius:9px; }
-.home-main .mf-actions .button span { transition:transform .24s ease; }
-.home-main .mf-actions .button:hover span { transform:translateX(4px); }
-.home-main .mf-plinth { height:18px; border-top:1px solid #79888e; border-radius:0 0 7px 7px; position:relative; background:repeating-linear-gradient(90deg,#3a464a 0,#3a464a 2px,#647277 2px,#647277 5px); box-shadow:inset 0 4px 0 #acb6ba; margin:0 8px 5px; }
-.home-main .mf-plinth::before,.home-main .mf-plinth::after { content:''; width:26px; height:10px; background:#465258; position:absolute; bottom:-14px; border-radius:0 0 4px 4px; }
-.home-main .mf-plinth::before { left:24px; } .home-main .mf-plinth::after { right:24px; }
-@media(max-width:600px) { .home-main .home-bottom .mf-fridge h2 { font-size:16px; } }
-@media(prefers-reduced-motion:reduce) { .home-main .mf-actions .button span { transition:none; } }
+.home-main .mf-brand { font-size:9px;line-height:1.35;letter-spacing:.2px;font-weight:650;color:#b8aa87;writing-mode:horizontal-tb;text-align:center;flex:0 0 auto; }
+.home-main .mf-brand::after { content:'MY KITCHEN';display:block;font-size:5px;letter-spacing:.4px;font-weight:500; }
+.home-main .mf-door { position:relative;padding:21px 17px 18px 40px;border-top:0; }
+.home-main .mf-door::before { height:94px;top:29px; }
+.home-main .mf-window {
+    position:relative;padding:17px 13px 5px;background:#fffdf3;border:1px solid #e9dfbf;
+    outline:none;border-radius:13px;box-shadow:0 3px 6px #b9a77524,inset 0 1px 2px #ffffff;
+}
+.home-main .mf-window::before {
+    content:'';position:absolute;top:-16px;right:8px;width:126px;height:55px;
+    background:url('../images/fridge-herbs.svg') center/contain no-repeat;pointer-events:none;z-index:1;
+}
+.home-main .mf-caption { color:#8b8066;font-size:10px;font-weight:650;margin:0 0 7px; }
+.home-main .mf-fridge #fridge-items,.home-main .mf-door-front .mf-items-copy { min-height:132px; }
+.home-main .mf-fridge #fridge-items .empty { display:grid;place-items:center;min-height:132px;margin:0;padding:18px 6px;background:transparent;border:0;border-radius:0;color:#a99a7b;font-size:11px;line-height:1.8; }
+.home-main .mf-fridge #fridge-items .list-row,.home-main .mf-door-front .mf-items-copy .list-row {
+    display:flex;justify-content:space-between;align-items:center;min-height:39px;padding:9px 0;
+    border:0;border-bottom:1px solid #eee5cc;box-shadow:none;font-size:11px;line-height:1.6;gap:8px;color:#64583f;
+}
+.home-main .mf-fridge #fridge-items .list-row > span:first-child,.home-main .mf-items-copy .list-row > span:first-child { min-width:0;overflow-wrap:anywhere; }
+.home-main .mf-fridge #fridge-items .list-row > span:last-child,.home-main .mf-items-copy .list-row > span:last-child {
+    flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;min-width:35px;padding:1px 7px;
+    border-radius:20px;background:#eeaa39;color:#fffaf0;font-size:9px;font-weight:650;box-shadow:inset 0 1px 1px #ffd87d;
+}
+.home-main .mf-shelf { display:none; }
+.home-main .mf-drawer { position:relative;height:77px;margin:0 -1px;border:0;border-radius:0;background:url('../images/fridge-harvest.svg') center/100% 100% no-repeat;box-shadow:none; }
+.home-main .mf-drawer span { display:none; }
+.home-main .mf-fridge .mf-actions { margin:15px 0 0; }
+.home-main .mf-fridge .mf-actions .button {
+    width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 14px;
+    min-height:43px;font-size:12px;font-weight:700;border:1px solid #d56b45;border-radius:11px;
+    color:#fff9e9;background:linear-gradient(#ea8255,#df6744);box-shadow:inset 0 1px 1px #ffb184,0 3px 0 #c47c5630;
+}
+.home-main .mf-actions .button span { transition:transform .22s ease; }
+.home-main .mf-actions .button:hover { background:linear-gradient(#e77a4b,#d85e3a); }
+.home-main .mf-actions .button:hover span { transform:translateX(3px); }
+.home-main .mf-plinth { height:6px;margin:0 15px 4px;border:0;background:transparent;box-shadow:none;position:relative; }
+.home-main .mf-plinth::before,.home-main .mf-plinth::after { content:'';width:24px;height:7px;background:#877452;position:absolute;bottom:-10px;border-radius:0 0 4px 4px;box-shadow:inset 0 2px 1px #63523633; }
+.home-main .mf-plinth::before { left:12px; }.home-main .mf-plinth::after { right:12px; }
 
-
-/* 메인 냉장고 : 두께가 있는 냉장실 문 */
+/* 냉장고 문 : 기존 3D 동작은 유지하고 안쪽도 크림색으로 표시 */
 .home-main .mf-fridge.mf-opening { z-index:5; }
-.home-main .mf-opening > .mf-door { box-shadow:inset 0 0 28px #c9f3ff; }
+.home-main .mf-opening > .mf-door { box-shadow:inset 0 0 25px #fff6d8; }
 .home-main .mf-opening > .mf-door::before,.home-main .mf-opening > .mf-door .mf-actions { visibility:hidden; }
 .home-main .mf-door-scene { position:absolute;left:0;right:0;z-index:2;perspective:1050px;perspective-origin:65% 45%;pointer-events:none; }
 .home-main .mf-door-pivot { position:absolute;inset:0;transform-origin:right center;transform-style:preserve-3d; }
-.home-main .mf-door-pivot > .mf-door-front { position:absolute;inset:0;margin:0;box-sizing:border-box;background:linear-gradient(100deg,#b5bdc0,#edf0ef 32%,#cbd1d2 78%,#9ca8ad);border-radius:0 0 6px 6px;backface-visibility:hidden;transform:translateZ(14px);box-shadow:-5px 8px 18px #31444b30; }
-.home-main .mf-door-front .mf-items-copy { min-height:110px; }
-.home-main .mf-door-front .mf-items-copy .list-row { border-bottom:3px solid #c0caba;box-shadow:0 1px 0 #fff;padding:12px 0;font-size:12px;gap:8px; }
-.home-main .mf-door-back { position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:35px 20px;border:10px solid #7f9297;border-radius:8px;background:linear-gradient(110deg,#d1e3e8,#f5fcfc 40%,#c4d8df);box-shadow:inset 0 0 0 4px #edf7f9,inset 0 6px 25px #506a7540;backface-visibility:hidden;transform:rotateY(180deg) translateZ(14px); }
-.home-main .mf-door-back > span { height:48px;border:2px solid #b2cbd2;border-top:4px solid #f3ffff;border-radius:4px 4px 10px 10px;background:linear-gradient(#e4f4f67a,#b0ceda80);box-shadow:0 8px 12px #4a6c7926; }
-.home-main .mf-door-edge { position:absolute;top:0;bottom:0;left:0;width:28px;background:linear-gradient(90deg,#84959c,#e6edef 45%,#b4c4cb);transform-origin:left center;transform:translateZ(14px) rotateY(90deg); }
+.home-main .mf-door-pivot > .mf-door-front { position:absolute;inset:0;margin:0;box-sizing:border-box;background:linear-gradient(110deg,#fff7df,#f7efd9 50%,#e5d8b8);border-radius:0 0 19px 19px;backface-visibility:hidden;transform:translateZ(14px);box-shadow:-5px 8px 18px #8f744630; }
+.home-main .mf-door-back { position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:35px 20px;border:9px solid #d7c8a6;border-radius:14px;background:linear-gradient(110deg,#e6d9bb,#fffbee 40%,#eee2c8);box-shadow:inset 0 0 0 4px #fff8e5,inset 0 6px 25px #ad946b25;backface-visibility:hidden;transform:rotateY(180deg) translateZ(14px); }
+.home-main .mf-door-back > span { height:48px;border:2px solid #dfd1ad;border-top:4px solid #fffaf0;border-radius:4px 4px 10px 10px;background:linear-gradient(#fff9e9a0,#e7d9b380);box-shadow:0 8px 12px #9a825326; }
+.home-main .mf-door-edge { position:absolute;top:0;bottom:0;left:0;width:28px;background:linear-gradient(90deg,#c8b794,#f9f0d9 45%,#decda9);transform-origin:left center;transform:translateZ(14px) rotateY(90deg); }
+/* PC 화면 : 옆 게시글 박스와 높이를 맞추고 재료 칸을 고르게 늘림 */
+@media(min-width:1001px) {
+    .home-main .home-bottom > .mf-fridge,
+    .home-main .home-bottom > .hc-panel { align-self:stretch; }
+    .home-main .home-bottom > .mf-fridge { display:flex;flex-direction:column;margin-bottom:0; }
+    .home-main .mf-fridge > .mf-freezer,
+    .home-main .mf-fridge > .mf-plinth { flex-shrink:0; }
+    .home-main .mf-fridge > .mf-door,
+    .home-main .mf-door-pivot > .mf-door-front { display:flex;flex-direction:column;flex:1;min-height:0; }
+    .home-main .mf-fridge .mf-window { display:flex;flex-direction:column;flex:1; }
+    .home-main .mf-fridge #fridge-items,
+    .home-main .mf-door-front .mf-items-copy { display:flex;flex-direction:column;flex:1; }
+    .home-main .mf-fridge #fridge-items .list-row,
+    .home-main .mf-door-front .mf-items-copy .list-row,
+    .home-main .mf-fridge #fridge-items .empty { flex:1; }
+    .home-main .mf-fridge .mf-caption,
+    .home-main .mf-fridge .mf-drawer,
+    .home-main .mf-fridge .mf-actions { flex-shrink:0; }
+}
+@media(max-width:600px) { .home-main .home-bottom .mf-fridge h2 { font-size:16px; } }
+@media(prefers-reduced-motion:reduce) { .home-main .mf-actions .button span { transition:none; } }

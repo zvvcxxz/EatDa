@@ -114,6 +114,8 @@
     // 새 게시글 카드 만들기
     function createCard(post) {
         const card = template.cloneNode(true);
+        card.querySelectorAll('[data-meet-menu]').forEach((node) => node.remove());
+        card.dataset.authorId = String(post.author_id);
 
         const setText = (selector, value) => {
             const element = card.querySelector(selector);

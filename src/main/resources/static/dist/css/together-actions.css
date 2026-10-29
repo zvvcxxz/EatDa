@@ -1,0 +1,42 @@
+/* 목록 버튼 : 상세보기, 작성자 메뉴, 좋아요 */
+.together-page .tg-meet-menu { display:flex;gap:18px;align-items:center;justify-content:flex-end;flex-wrap:wrap;padding:12px 0; }
+.together-page .tg-meet-menu form { margin:0;display:inline; }
+.together-page .tg-card-action { cursor:pointer;transition:color .2s,background .2s,transform .2s; }
+.together-page .tg-card-action:hover { transform:translateY(-2px); }
+.together-page .is-like[aria-pressed='true'],.sd-detail [aria-pressed='true'],.together-detail .btn-like[aria-pressed='true'] { color:#b94d52;background:#f9e8e5; }
+.tg-action-status { color:#a4462e;line-height:1.7;font-size:13px; }
+.tg-action-status:empty { display:none; }
+/* 상세 안내 : 본문과 같은 차분한 크림색 */
+.together-detail .md-plan,.sd-detail .sdd-handover { background:#f4f1e8;border:1px solid #ded8c9;box-shadow:none; }
+.together-detail .md-plan .btn-like { color:#9d5659;background:#f9ece8;border:1px solid #dfb9b3; }
+.together-detail .md-plan .btn-secondary,.sd-detail .sdd-owner-actions a { background:#eaf0e6;color:#4f6c46;border-color:#bccab4; }
+.together-detail .md-plan .btn-danger,.sd-detail .sdd-delete { background:#f4e2db;color:#a14835;border-color:#d9b4a7; }
+.together-detail .md-plan .btn,.sd-detail .sdd-text-action { transition:background .2s,box-shadow .2s,transform .2s; }
+.together-detail .md-plan .btn:hover,.sd-detail .sdd-text-action:hover { transform:translateY(-2px);box-shadow:0 4px 10px #5b493018; }
+.together-detail .reply-submit-row .btn[type='submit'] { color:#fff;background:#b95732; }
+/* 나눔 신청 : 본문과 같은 구분선과 작은 상태 표시 */
+.sd-detail #share-application-panel { margin-top:27px;padding:24px 0 0;border:0;border-top:1px solid #d9d4c6;background:transparent; }
+.sd-detail .tg-application-eyebrow { display:block;color:#8d927f;font-size:10px;letter-spacing:.08em;margin-bottom:9px; }
+.sd-detail #share-application-panel h2 { font-family:'Noto Serif KR',serif;font-size:21px;line-height:1.5;font-weight:600;margin:0;color:#344b3b; }
+.sd-detail .tg-application-capacity { display:flex;justify-content:space-between;align-items:center;padding:16px 0;margin-top:9px;border-bottom:1px solid #ded9cb;font-size:12px;color:#7d8473; }
+.sd-detail .tg-application-capacity strong { font-size:14px;font-weight:600;color:#435b46; }
+.sd-detail .tg-my-application { padding-top:19px; }
+.sd-detail .tg-application-badge { display:inline-block;padding:4px 9px;border-radius:3px;background:#e8ecdf;color:#5d7251;font-size:11px;font-weight:600; }
+.sd-detail #share-application-panel p { color:#858a7a;font-size:12px;line-height:1.9;margin:10px 0 0; }
+.sd-detail #share-application-panel .tg-apply-button { display:block;width:100%;margin-top:18px;padding:12px 16px;border:1px solid #657e55;background:#657e55;color:#fffdf3;font:500 13px/1.5 'Noto Sans KR',sans-serif;cursor:pointer;transition:background .2s; }
+.sd-detail #share-application-panel .tg-apply-button:hover { background:#526d43; }
+.sd-detail #share-application-panel .tg-apply-button:disabled { cursor:wait;opacity:.7; }
+.sd-detail .tg-applicant { display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:15px 0;border-bottom:1px solid #e2ded1;font-size:12px;color:#7d8473; }
+.sd-detail .tg-applicant strong { margin-right:auto;color:#43543e;font-weight:500; }
+.sd-detail #share-application-panel .tg-decision { padding:5px 9px;border:1px solid #c5cfb9;background:transparent;color:#5a7548;font:inherit;cursor:pointer; }
+.sd-detail #share-application-panel .tg-decision.is-reject { color:#99735d;border-color:#d9c9b9; }
+.sd-detail #share-application-panel .tg-decision:hover { background:#e9eddf; }
+.sd-detail #share-application-panel .tg-decision:disabled { opacity:.5;cursor:default; }
+.sd-detail .tg-message-link { display:inline-block;margin-top:12px;padding:3px 0;border-bottom:1px solid #a8b99b;color:#5a7548;font-size:12px;text-decoration:none; }
+.together-page button:focus-visible,.sd-detail button:focus-visible { outline:2px solid #a46a43;outline-offset:3px; }
+@media(prefers-reduced-motion:reduce) { .together-page .tg-card-action,.together-detail .md-plan .btn,.sd-detail .sdd-text-action { transition:none;transform:none; } }
+
+.together-detail .md-plan .btn-like:hover { background:#f1d9d3;color:#a33d46; }
+.together-detail .md-plan .btn-secondary:hover,.sd-detail .sdd-owner-actions a:hover { background:#dce8d4;color:#38572e; }
+.together-detail .md-plan .btn-danger:hover,.sd-detail .sdd-delete:hover { background:#edd0c4;color:#8d3326; }
+.sd-detail .reply-submit-row button[type='submit'],.sd-detail .comment-submit { color:#fff;background:#b95732; }

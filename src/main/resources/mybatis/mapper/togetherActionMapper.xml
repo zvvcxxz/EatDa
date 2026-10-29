@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sp.app.mapper.TogetherActionMapper">
+    <sql id="postQuery">
+        <choose>
+            <when test="type == 'meet'">
+                SELECT author_id, max_participants AS capacity, meet_status AS closed
+                FROM meal_meeting WHERE meet_id = #{id} AND status = 0 AND deleted_at IS NULL
+            </when>
+            <otherwise>
+                SELECT author_id, max_recipients AS capacity,
+                    CASE WHEN share_status != 0 OR available_until &lt; SYSTIMESTAMP THEN 1 ELSE 0 END AS closed
+                FROM ingredient_share WHERE share_id = #{id} AND status = 0 AND deleted_at IS NULL
+            </otherwise>
+        </choose>
+    </sql>
+    <select id="findPost" resultType="map"><include refid="postQuery"/></select>
+    <select id="lockPost" resultType="map"><include refid="postQuery"/> FOR UPDATE</select>
+    <!-- 기존 ERD의 좋아요 테이블 사용 -->
+    <sql id="likeTable">
+        <choose><when test="type == 'meet'">meet_like</when><otherwise>share_like</otherwise></choose>
+    </sql>
+    <sql id="likeKey">
+        <choose><when test="type == 'meet'">meet_id</when><otherwise>share_id</otherwise></choose>
+    </sql>
+    <select id="countLikes" resultType="int">
+        SELECT COUNT(*) FROM <include refid="likeTable"/>
+        WHERE <include refid="likeKey"/> = #{id}
+    </select>
+    <select id="liked" resultType="int">
+        SELECT COUNT(*) FROM <include refid="likeTable"/>
+        WHERE <include refid="likeKey"/> = #{id} AND member_id = #{member}
+    </select>
+    <insert id="addLike">
+        INSERT INTO <include refid="likeTable"/> (<include refid="likeKey"/>, member_id, created_at)
+        VALUES (#{id}, #{member}, SYSTIMESTAMP)
+    </insert>
+    <delete id="removeLike">
+        DELETE FROM <include refid="likeTable"/>
+        WHERE <include refid="likeKey"/> = #{id} AND member_id = #{member}
+    </delete>
+    <update id="increaseShareViews">
+        UPDATE ingredient_share SET view_count = NVL(view_count, 0) + 1
+        WHERE share_id = #{id} AND status = 0 AND deleted_at IS NULL
+    </update>
+    <select id="applicationStatus" resultType="java.lang.Integer">
+        SELECT NVL(status, 0) FROM
+        <choose><when test="type == 'meet'">meet_participant WHERE meet_id</when>
+            <otherwise>share_participant WHERE share_id</otherwise></choose>
+        = #{id} AND member_id = #{member}
+    </select>
+    <insert id="applyShare">
+        INSERT INTO share_participant (share_id, member_id, status, created_at, updated_at)
+        VALUES (#{id}, #{member}, 0, SYSTIMESTAMP, SYSTIMESTAMP)
+    </insert>
+    <select id="acceptedCount" resultType="int">
+        SELECT COUNT(*) FROM share_participant WHERE share_id = #{id} AND status = 1
+    </select>
+    <update id="decideShare">
+        UPDATE share_participant SET status = #{status}, updated_at = SYSTIMESTAMP
+        WHERE share_id = #{id} AND member_id = #{member} AND NVL(status, 0) = 0
+    </update>
+    <select id="shareApplicants" resultType="map">
+        SELECT a.member_id AS "memberId", m.name AS "name", NVL(a.status, 0) AS "status",
+            TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI') AS "createdAt"
+        FROM share_participant a JOIN member m ON m.member_id = a.member_id
+        WHERE a.share_id = #{id}
+        <if test="!owner">AND a.member_id = #{member}</if>
+        ORDER BY a.created_at, a.member_id
+    </select>
+</mapper>

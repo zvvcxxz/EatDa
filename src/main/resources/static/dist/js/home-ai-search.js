@@ -46,6 +46,7 @@
     let open = false,
         panelAnimation,
         contentAnimation,
+        launcherAnimation,
         panelTimer,
         panelVersion = 0;
     let savedOverflow = '',
@@ -55,6 +56,7 @@
         const before = (island.classList.contains('is-open') ? panel : launcher).getBoundingClientRect();
         panelAnimation?.cancel();
         contentAnimation?.cancel();
+        launcherAnimation?.cancel();
         clearTimeout(panelTimer);
         if (value) {
             const wasFloating = island.classList.contains('is-open');
@@ -79,14 +81,20 @@
             panel.focus({ preventScroll: true });
             $('ai-recipe-submit').setAttribute('aria-expanded', 'true');
             const after = panel.getBoundingClientRect();
+            const launcherRadius = getComputedStyle(launcher).borderTopLeftRadius;
+            const panelRadius = getComputedStyle(panel).borderTopLeftRadius;
             if (!reduced()) {
-                panelAnimation = panel.animate([box(before), box(after)], {
+                panelAnimation = panel.animate([
+                    { ...box(before), borderRadius: launcherRadius },
+                    { ...box(after), borderRadius: panelRadius }
+                ], {
                     duration: 520,
                     easing: 'cubic-bezier(.22,1,.36,1)'
                 });
                 contentAnimation = body.animate([{ opacity: 0 }, { opacity: 1 }], {
                     duration: 300,
                     delay: 100,
+                    fill: 'both',
                     easing: 'ease-out'
                 });
             }
@@ -107,6 +115,7 @@
                 island.classList.remove('is-open', 'is-closing');
                 panelAnimation?.cancel();
                 contentAnimation?.cancel();
+                launcherAnimation?.cancel();
                 document.documentElement.style.overflow = savedOverflow;
                 launcher.inert = false;
                 input.focus({ preventScroll: true });
@@ -117,7 +126,17 @@
                     duration: 170,
                     fill: 'forwards'
                 });
-                panelAnimation = panel.animate([box(before), box(anchor)], {
+                // 닫기 : 원래 입력창을 겹쳐 보여주며 결과창을 접음
+                launcherAnimation = launcher.animate([{ opacity: 0 }, { opacity: 1 }], {
+                    duration: 200,
+                    delay: 260,
+                    fill: 'both',
+                    easing: 'ease-out'
+                });
+                panelAnimation = panel.animate([
+                    { ...box(before), opacity: 1, borderRadius: getComputedStyle(panel).borderTopLeftRadius },
+                    { ...box(anchor), opacity: 0, borderRadius: getComputedStyle(launcher).borderTopLeftRadius }
+                ], {
                     duration: 460,
                     easing: 'cubic-bezier(.4,0,.2,1)',
                     fill: 'forwards'
@@ -285,7 +304,7 @@
         results = [];
         shown = 0;
         $('ai-availability').value = 'all';
-        $('ai-availability').disabled = searchMode === 'text';
+        $('ai-availability').disabled = true;
         resultsSection.hidden = false;
         list.setAttribute('aria-busy', 'true');
         list.replaceChildren(el('p', 'ai-empty-state', '어울리는 레시피를 찾고 있어요.'));
@@ -297,7 +316,7 @@
         if (!open) setOpen(true);
         try {
             const data = await requestJson(
-                names.length ? '/recipes/recommend' : '/recipes/search',
+                names.length ? '/recipes/recommend' : '/home/recipe-search',
                 names.length ? { ingredients: names } : { keyword },
                 searchRequest.signal
             );
@@ -309,6 +328,14 @@
                 ids.add(recipe.id);
                 return true;
             });
+            const compared = results.some((recipe) => recipe.compared);
+            $('ai-availability').disabled = !compared;
+            $('ai-availability').options[1].textContent = '비교 재료 모두 있음';
+            $('ai-availability').options[2].textContent = '추가 재료 필요';
+            const note = island.querySelector('.ai-match-note');
+            if (note) note.textContent = compared
+                ? '재료 설명에 적힌 이름 기준 비교입니다. 양념을 포함하며 분량과 세부 손질 상태는 비교하지 않습니다.'
+                : '로그인한 냉장고와 비교할 재료 정보가 있어야 재료 상태 필터를 사용할 수 있습니다.';
             renderResults();
         } catch (error) {
             if (error.name === 'AbortError' || version !== requestVersion) return;
@@ -325,7 +352,6 @@
         const filter = $('ai-availability').value;
         return results.filter(
             (recipe) =>
-                searchMode !== 'fridge' ||
                 filter === 'all' ||
                 (recipe.compared &&
                     (filter === 'complete' ? !recipe.missing.length : recipe.missing.length > 0))
@@ -355,7 +381,7 @@
                 el('p', 'ai-recipe-description', recipe.description),
                 el('div', 'ai-recipe-facts')
             );
-            if (searchMode === 'fridge' && recipe.compared) {
+            if (recipe.compared) {
                 const match = el('div', 'ai-recipe-match');
                 match.append(
                     el('span', 'ai-match-number', '일치 재료 ' + recipe.have.length + '개'),

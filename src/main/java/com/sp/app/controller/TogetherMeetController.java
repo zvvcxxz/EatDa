@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TogetherMeetController {
 
     private final TogetherMeetService service;
+    private final com.sp.app.mapper.TogetherActionMapper actions;
 
     // 게시글
 
@@ -41,6 +42,8 @@ public class TogetherMeetController {
         var rows = service.listMeet(0, 11);
         var posts = rows.subList(0, Math.min(rows.size(), 10));
 
+        var login = LoginMemberUtil.getSessionInfo();
+        model.addAttribute("loginMemberId", login == null ? null : login.getMember_id());
         model.addAttribute("posts", posts);
         model.addAttribute("hasMore", rows.size() > 10);
         model.addAttribute("nextOffset", posts.size());
@@ -81,6 +84,9 @@ public class TogetherMeetController {
         // 로그인 정보
 
         SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+        Integer applicationStatus = info == null ? null : actions.applicationStatus("meet", meet_id, info.getMember_id());
+        model.addAttribute("myApplicationStatus", applicationStatus);
 
         // 로그인 회원이 작성자인지 확인
         boolean isAuthor = info != null && Objects.equals(dto.getAuthor_id(), info.getMember_id());

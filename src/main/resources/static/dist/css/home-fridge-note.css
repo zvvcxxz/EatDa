@@ -1,0 +1,95 @@
+/* 임박 재료 : 냉장고에 붙여 둔 손글씨 메모 */
+.home-main .hero .basket-panel {
+    --note-ink:#695039;
+    margin-top:8px;padding:29px 25px 24px;border:1px solid #e7d49b;border-radius:3px 5px 8px 3px;
+    background:linear-gradient(108deg,#fff0b9,#fff5ce 65%,#f9e9b1);
+    color:var(--note-ink);box-shadow:0 3px 5px -3px #75502430,3px 15px 22px -15px #70482665;
+    font-family:'Gaegu','Apple SD Gothic Neo',cursive;
+}
+.home-main .hero .basket-panel::before {
+    content:'';position:absolute;top:-13px;left:50%;width:105px;height:27px;
+    transform:translateX(-50%) rotate(-5deg);pointer-events:none;
+    background:#edce6899;
+    border:1px solid #ddbf6740;box-shadow:0 1px 2px #9b77551c;
+    clip-path:polygon(2% 0,98% 0,100% 15%,98% 30%,100% 45%,98% 60%,100% 80%,98% 100%,1% 100%,2% 83%,0 67%,2% 48%,0 30%,2% 13%);
+}
+.home-main .hero .basket-panel::after {
+    content:'';position:absolute;right:0;bottom:0;width:24px;height:24px;pointer-events:none;
+    background:linear-gradient(135deg,transparent 48%,#e7d28f 50%,#fff7d9 57%);border-radius:0 0 7px 0;
+}
+.home-main .basket-panel .basket-heading { gap:10px;align-items:center; }
+.home-main .basket-panel .basket-heading h2 { font-family:inherit;font-size:29px;line-height:1.15;font-weight:400;color:#60482e; }
+.home-main .basket-panel .basket-heading h2 i { display:none; }
+.home-main .basket-panel .fridge-note-message { margin:10px 0 0;font-size:22px;line-height:1.3;color:#a15d3f; }
+.home-main .basket-panel .basket-heading #basket-clear { color:#85654b;background:transparent;border-color:#b99a6959;width:31px;height:31px;flex-basis:31px; }
+.home-main .basket-panel .basket-heading #basket-clear:hover { background:#e7ca843b; }
+.home-main .basket-panel #quick-ingredients { gap:6px 16px;margin:16px 0 21px; }
+.home-main .basket-panel #quick-ingredients .tag,
+.home-main .basket-panel #quick-ingredients .tag:nth-child(n) {
+    position:relative;border:0;border-bottom:1px solid #b59a6157;border-radius:0;padding:5px 3px 3px;
+    background:transparent;color:#6b5138;box-shadow:none;font:400 24px/1.1 'Gaegu','Apple SD Gothic Neo',cursive;
+}
+.home-main .basket-panel #quick-ingredients .tag:hover { color:#b95c38;background:#f5d98d42;transform:none; }
+.home-main .basket-panel #quick-ingredients .tag[aria-pressed='true'] {
+    color:#aa4e30;background:linear-gradient(transparent 55%,#eec76d70 55% 91%,transparent 91%);border-bottom-color:#bb7750;box-shadow:none;
+}
+.home-main .basket-panel .basket-summary { border:0;border-top:1px dashed #c7ad76;border-radius:0;padding:17px 0 0;background:transparent;box-shadow:none; }
+.home-main .basket-panel .basket-summary > p { color:#796044;font:400 22px/1.3 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .basket-panel #basket-selected em { color:#a39370;font:400 21px/1.4 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .basket-panel #basket-selected .tag { background:#f2d58c55;border:0;border-radius:3px;padding:4px 8px;color:#8d5938;font:400 22px/1.2 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .basket-panel .basket-summary .button {
+    position:relative;display:flex;align-items:center;justify-content:center;gap:12px;
+    width:100%;min-height:49px;margin-top:15px;padding:10px 9px 14px;
+    border:0;border-radius:0;background:transparent;color:#995132;box-shadow:none;
+    font:400 24px/1.2 'Gaegu','Apple SD Gothic Neo',cursive;
+    transition:color .2s ease;
+}
+.home-main .basket-panel .basket-summary .button::before {
+    content:'';position:absolute;left:8%;right:8%;bottom:6px;height:2px;
+    background:#b17a4d9c;border-radius:50%;transform:rotate(-.8deg);pointer-events:none;
+}
+.home-main .basket-panel .basket-summary .button::after {
+    content:'↗';position:static;display:inline-block;font-size:28px;line-height:1;
+    background:none;transform:none;transition:transform .2s ease;
+}
+.home-main .basket-panel .basket-summary .button:hover { background:transparent;color:#733c27;transform:none;box-shadow:none; }
+.home-main .basket-panel .basket-summary .button:hover::after { transform:translate(2px,-2px); }
+.home-main .basket-panel .basket-summary .button:focus-visible { outline:2px solid #a36d40;outline-offset:3px; }
+@media(prefers-reduced-motion:reduce) { .home-main .basket-panel .basket-summary .button::after { transition:none; } }
+.home-main .basket-panel #quick-status { color:#8f7956; }
+.home-main .basket-panel #quick-ingredients .tag:focus-visible,
+.home-main .basket-panel .basket-heading #basket-clear:focus-visible { outline:2px solid #a36d40;outline-offset:3px; }
+@media(max-width:600px) { .home-main .hero .basket-panel { padding:27px 20px 22px;border-radius:3px 5px 8px 3px; }.home-main .basket-panel .basket-heading h2{font-size:27px} }
+
+/* 선택 재료 : 글자 위에 취소선만 표시 */
+.home-main .basket-panel #quick-ingredients .tag[aria-pressed='true'] {
+    color:#995b3d;background:transparent;border-bottom-color:#b59a6157;
+    text-decoration-line:line-through;text-decoration-color:#995b3d;
+    text-decoration-thickness:1.5px;text-decoration-skip-ink:none;
+}
+.home-main .basket-panel #quick-ingredients .tag[aria-pressed='true']::after {
+    content:none;display:none;
+}
+
+/* 포스트잇 : 또렷한 손글씨와 간격 정리 */
+.home-main .hero.hero-layout > .basket-panel { padding:23px 23px 20px;font-family:'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .hero.hero-layout .basket-panel .basket-heading h2 { font-family:inherit;font-size:27px;line-height:1.3;font-weight:700; }
+.home-main .hero.hero-layout .basket-panel .fridge-note-message { margin:6px 0 0;font-size:20px;font-weight:700;line-height:1.4; }
+.home-main .hero.hero-layout .basket-panel #quick-ingredients { gap:5px 13px;margin:13px 0 16px; }
+.home-main .hero.hero-layout .basket-panel #quick-ingredients .tag,
+.home-main .hero.hero-layout .basket-panel #quick-ingredients .tag:nth-child(n) {
+    font:700 21px/1.35 'Gaegu','Apple SD Gothic Neo',cursive;
+    padding:3px 2px;background:transparent;border:0;border-bottom:1px solid #b59a6157;border-radius:0;box-shadow:none;
+}
+.home-main .hero.hero-layout .basket-panel #quick-ingredients .tag[aria-pressed='true'] { color:#995b3d;text-decoration:line-through;text-decoration-thickness:1.5px; }
+.home-main .hero.hero-layout .basket-panel #quick-status:empty { display:none; }
+.home-main .hero.hero-layout .basket-panel .basket-summary { padding:13px 0 0;border:0;border-top:1px dashed #c7ad76;border-radius:0;background:transparent;box-shadow:none; }
+.home-main .hero.hero-layout .basket-panel .basket-summary > p { font:700 20px/1.4 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .hero.hero-layout .basket-panel #basket-selected { min-height:30px;margin-top:9px;gap:6px; }
+.home-main .hero.hero-layout .basket-panel #basket-selected em { font:400 19px/1.4 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .hero.hero-layout .basket-panel #basket-selected .tag { padding:3px 7px;font:700 20px/1.3 'Gaegu','Apple SD Gothic Neo',cursive; }
+.home-main .hero.hero-layout .basket-panel .basket-summary .button { margin-top:10px;min-height:43px;padding:8px 5px 13px;font:700 21px/1.3 'Gaegu','Apple SD Gothic Neo',cursive; }
+@media(max-width:600px) {
+    .home-main .hero.hero-layout { padding:27px 21px;row-gap:28px; }
+    .home-main .hero.hero-layout > .basket-panel { padding:23px 18px 19px; }
+}

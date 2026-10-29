@@ -15,6 +15,9 @@
 	<link rel="stylesheet" th:href="@{/dist/css/home-lunch-modal.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/home-recipe-slide.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/home-hero-rotation.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/home-kitchen-paper.css}">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap">
+	<link rel="stylesheet" th:href="@{/dist/css/home-fridge-note.css}">
 </th:block>
     </head>
     <body>
@@ -50,11 +53,11 @@
                     <section class="basket-panel">
                         <div class="basket-heading">
                             <h2>
-                                <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> 빠른 재료
-                                조합기
+                                <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>소비기한 임박재료
                             </h2>
-                            <button id="basket-clear">초기화</button>
+                            <button id="basket-clear" type="button" aria-label="선택한 재료 초기화" title="선택한 재료 초기화"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1.8 8M4 4v6h6"/></svg></button>
                         </div>
+                        <p class="fridge-note-message">얼마 안 남았어, 빨리 먹어!</p>
                         <div id="quick-ingredients" class="tags"></div>
                         <p id="quick-status" class="status">재료 목록을 불러오는 중입니다.</p>
                         <div class="basket-summary">
@@ -63,7 +66,7 @@
                                 <em>위의 재료를 선택해보세요!</em>
                             </div>
                             <button id="basket-search" class="button yellow">
-                                이 재료로 만들 수 있는 레시피 찾기 ✨
+                                이 재료로 뭐 해 먹을까?
                             </button>
                         </div>
                     </section>
@@ -341,6 +344,7 @@
 
 		<script defer th:src="@{/dist/js/home-lunch-modal.js}"></script>
 		<script defer th:src="@{/dist/js/home-hero-rotation.js}"></script>
+		<script defer th:src="@{/dist/js/home-hero-motion.js}"></script>
 	</th:block>
     </body>
 </html>

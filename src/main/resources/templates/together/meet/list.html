@@ -18,10 +18,12 @@
             />
             <link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}" />
             <link rel="stylesheet" th:href="@{/dist/css/together-meet-editorial.css}" />
+            <link rel="stylesheet" th:href="@{/dist/css/together-actions.css}" />
         </th:block>
     </head>
     <body>
-        <main layout:fragment="content" class="together-page ml-page">
+        <main layout:fragment="content" class="together-page ml-page" th:attr="data-login-member-id=${loginMemberId}">
+<template id="meet-delete-form-template"><form method="post" th:action="@{/together/meet/0/delete}"><button class="tg-card-action is-delete" type="submit">삭제</button></form></template>
             <!-- 등록 / 수정 결과 알림 -->
             <div
                 class="tg-result-toast"
@@ -65,7 +67,7 @@
                     등록된 게시글이 없습니다. 첫 글을 작성해 보세요.
                 </p>
                 <!-- 게시글 반복 출력 -->
-                <article class="tg-card" th:each="post : ${posts}">
+                <article class="tg-card" th:each="post : ${posts}" th:attr="data-author-id=${post.author_id}">
                     <div>
                         <div class="tg-card-top">
                             <span class="tg-badge">같이 먹어요</span>
@@ -178,6 +180,7 @@
         </main>
         <!-- 같이 먹어요 : 화면 기능 스크립트 연결 -->
         <th:block layout:fragment="script">
+            <script defer th:src="@{/dist/js/together-actions.js}"></script>
             <script defer th:src="@{/dist/js/together.js}"></script>
             <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
         </th:block>

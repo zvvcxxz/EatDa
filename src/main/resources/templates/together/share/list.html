@@ -17,6 +17,7 @@
             />
             <link rel="stylesheet" th:href="@{/dist/css/together-share.css}" />
             <link rel="stylesheet" th:href="@{/dist/css/together-list-toast.css}" />
+            <link rel="stylesheet" th:href="@{/dist/css/together-actions.css}" />
         </th:block>
     </head>
     <body>
@@ -413,6 +414,7 @@
         </main>
         <!-- 재료 나눔 : 화면 기능 스크립트 연결 -->
         <th:block layout:fragment="script">
+            <script defer th:src="@{/dist/js/together-actions.js}"></script>
             <script defer th:src="@{/dist/js/together-share.js}"></script>
             <script defer th:src="@{/dist/js/together-list-toast.js}"></script>
             <script defer th:src="@{/dist/js/together-share-more.js}"></script>

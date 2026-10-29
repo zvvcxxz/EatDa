@@ -24,6 +24,10 @@ function renderSelection() {
         )
         .join('');
     $('basket-selected').innerHTML = markup || '<em>위의 재료를 선택해보세요!</em>';
+    // 선택 재료 : 위쪽 재료 버튼의 체크 상태도 같이 갱신
+    document.querySelectorAll('#quick-ingredients [data-fridge-ingredient]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(selected.has(button.dataset.fridgeIngredient)));
+    });
 }
 
 // 빠른 재료 조합기 : AI 검색창 연결 / 선택 초기화
@@ -158,23 +162,44 @@ async function loadFridgeIngredients() {
         if (data.state !== 'login' || !Array.isArray(data.list)) {
             throw new Error('냉장고 응답 형식 오류');
         }
+        // 임박 재료만 선택하고 소비기한 빠른 순으로 정렬
+        const urgentItems = data.list
+            .filter(item => {
+                return item.expiring === true &&
+                item.expired !== true &&
+                item.expiresOn
+            })
+            .sort((a,b) => {
+                return a.expiresOn.localeCompare(b.expiresOn)
+            });
 
-        // 같은 재료를 여러 번 등록했어도 선택 버튼은 하나만 표시
+        // 같은 재료는 소비기한이 가장 빠른 것만 남김
         const ingredients = new Map();
 
-        data.list.forEach((item) => {
-            ingredients.set(String(item.ingredientId), {
-                id: item.ingredientId,
-                name: item.ingredientName
-            });
+        urgentItems.forEach((item) => {
+              if(item.ingredientId == null) return;
+
+            const id = String(item.ingredientId);
+
+            if(!ingredients.has(id)) {
+                ingredients.set(id, {
+                    id: item.ingredientId,
+                    name : item.ingredientName
+                });
+            }
         });
 
-        ingredients.forEach((item) => {
-            const button = document.createElement('button');
+        // 중복 제거 후 최대 10개 표시
+        const visibleItems = [...ingredients.values()].slice(0 , 10);
 
-            button.type = 'button';
-            button.className = 'tag';
+        visibleItems.forEach(item => {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "tag";
             button.textContent = item.name;
+            button.dataset.fridgeIngredient = String(item.id);
+            button.setAttribute('aria-pressed', String(selected.has(String(item.id))));
 
             button.onclick = () => {
                 selected.set(String(item.id), item);
@@ -184,7 +209,10 @@ async function loadFridgeIngredients() {
             target.append(button);
         });
 
-        status.textContent = ingredients.size ? '' : '냉장고에 등록된 재료가 없습니다.';
+        status.textContent = visibleItems.length
+            ? ''
+            : '소비기한이 임박한 재료가 없습니다.';
+
     } catch (error) {
         console.error('빠른 재료 조합기 조회 실패', error);
         status.textContent = '냉장고 재료를 불러오지 못했습니다.';

@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TogetherShareServiceImpl implements TogetherShareService {
 
     private final TogetherShareMapper mapper;
+    private final com.sp.app.mapper.TogetherActionMapper actions;
 
     // 재료나눔 글 등록
     @Override
@@ -46,6 +47,15 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             if (dto.getLocation_text() == null || dto.getLocation_text().isBlank()) {
                 throw new IllegalArgumentException("나눔 장소를 입력해주세요.");
             }
+
+            // 나눔 유형과 교환 조건 확인
+            if (dto.getShare_type() == null || (dto.getShare_type() != 0 && dto.getShare_type() != 1)) {
+                throw new IllegalArgumentException("나눔 유형을 선택해주세요.");
+            }
+            if (dto.getShare_type() == 1 && (dto.getExchange_note() == null || dto.getExchange_note().isBlank())) {
+                throw new IllegalArgumentException("교환 조건을 입력해주세요.");
+            }
+            if (dto.getShare_type() == 0) dto.setExchange_note(null);
 
             // 수령 인원 확인
             if (dto.getMax_recipients() == null || dto.getMax_recipients() < 1) {
@@ -191,6 +201,9 @@ public class TogetherShareServiceImpl implements TogetherShareService {
                 throw new IllegalArgumentException("로그인이 필요합니다.");
             }
 
+            // 승인 처리와 동시에 인원을 바꾸지 않도록 글 잠금
+            actions.lockPost("share", dto.getShare_id());
+
             // 수정할 글이 있는지 확인
             TogetherShareDto share = mapper.findShareById(dto.getShare_id());
 
@@ -231,6 +244,10 @@ public class TogetherShareServiceImpl implements TogetherShareService {
             // 최대 수령인원 확인
             if (dto.getMax_recipients() == null || dto.getMax_recipients() < 1) {
                 throw new IllegalArgumentException("최대 수령인원은 1명 이상이어야 합니다.");
+            }
+
+            if (actions.acceptedCount(dto.getShare_id()) > dto.getMax_recipients()) {
+                throw new IllegalArgumentException("이미 승인한 수령 인원보다 정원을 줄일 수 없습니다.");
             }
 
             // 시작일과 종료일 입력 확인

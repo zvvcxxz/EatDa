@@ -16,6 +16,7 @@
                 href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;display=swap"
             />
             <link rel="stylesheet" th:href="@{/dist/css/together-share-detail.css}" />
+            <link rel="stylesheet" th:href="@{/dist/css/together-actions.css}" />
         </th:block>
     </head>
     <body>
@@ -186,6 +187,7 @@
                             더 맛있어집니다.
                         </p>
                     </section>
+                    <section id="share-application-panel" aria-live="polite"></section>
                     <p class="sdd-aside-note">
                         <strong>작은 재료가 새로운 한 끼로.</strong><br />식재료를 나누는 일은 이웃의 식탁을
                         조금 더 풍성하게 만드는 일이니까요.
@@ -196,5 +198,6 @@
                 <span>잇다 · 이웃의 식탁을 잇는 재료 나눔</span><a href="#post-title">맨 위로 ↑</a>
             </div>
         </main>
+    <th:block layout:fragment="script"><script defer th:src="@{/dist/js/together-actions.js}"></script></th:block>
     </body>
 </html>

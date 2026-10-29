@@ -17,6 +17,7 @@
             />
             <link rel="stylesheet" th:href="@{/dist/css/together-message.css}" />
             <link rel="stylesheet" th:href="@{/dist/css/together-meet-editorial.css}" />
+            <link rel="stylesheet" th:href="@{/dist/css/together-actions.css}" />
         </th:block>
     </head>
     <body>
@@ -149,10 +150,12 @@
                                         th:action="@{/together/meet/{id}/apply(id=${meet.meet_id})}"
                                         method="post"
                                     >
-                                        <button type="submit" class="btn btn-join">함께하기 신청</button>
+                                        <button type="submit" class="btn btn-join"
+                                            th:disabled="${myApplicationStatus != null}"
+                                            th:text="${myApplicationStatus == null ? '함께하기 신청' : (myApplicationStatus == 0 ? '신청됨' : (myApplicationStatus == 1 ? '참여 승인됨' : '신청 거절됨'))}">함께하기 신청</button>
                                     </form>
 
-                                    <button type="button" class="btn btn-like" data-pending="좋아요">
+                                    <button type="button" class="btn btn-like" data-together-like>
                                         좋아요
                                     </button>
                                 </div>
@@ -355,6 +358,7 @@
         </main>
         <!-- 같이 먹어요 : 화면 기능 스크립트 연결 -->
         <th:block layout:fragment="script">
+            <script defer th:src="@{/dist/js/together-actions.js}"></script>
             <script defer th:src="@{/dist/js/together-detail.js}"></script>
             <script defer th:src="@{/dist/js/together-applications.js}"></script>
             <script defer th:src="@{/dist/js/together-message.js}"></script>

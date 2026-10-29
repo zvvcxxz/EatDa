@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TogetherShareController {
 
     private final TogetherShareService service;
+    private final com.sp.app.service.TogetherActionService actions;
 
     // 재료나눔 화면
     @GetMapping({"/together/share", "/together/share/", "/community/share"})
@@ -128,6 +129,9 @@ public class TogetherShareController {
         if (dto == null) {
             return "redirect:/together/share";
         }
+
+        actions.view(share_id);
+        dto.setView_count((dto.getView_count() == null ? 0L : dto.getView_count()) + 1L);
 
         // 로그인한 회원이 작성자인지 확인
         SessionInfo info = LoginMemberUtil.getSessionInfo();
