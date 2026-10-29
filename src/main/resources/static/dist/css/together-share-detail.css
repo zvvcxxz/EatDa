@@ -315,7 +315,8 @@ body:has(.sd-detail) {
 }
 
 .sd-detail .sdd-text-action.sdd-delete {
-    color: var(--rust)
+    color: var(--rust);
+    padding:5px;
 }
 
 .sd-detail .sdd-handover {

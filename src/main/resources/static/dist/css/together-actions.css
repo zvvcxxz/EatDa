@@ -3,13 +3,17 @@
 .together-page .tg-meet-menu form { margin:0;display:inline; }
 .together-page .tg-card-action { cursor:pointer;transition:color .2s,background .2s,transform .2s; }
 .together-page .tg-card-action:hover { transform:translateY(-2px); }
-.together-page .is-like[aria-pressed='true'],.sd-detail [aria-pressed='true'],.together-detail .btn-like[aria-pressed='true'] { color:#b94d52;background:#f9e8e5; }
+/* 목록 좋아요 : 하트와 글자만 강조하고 배경은 그대로 유지 */
+.together-page .is-like[aria-pressed='true'],
+.together-page .is-like[aria-pressed='true']:hover,
+.together-page .is-like[aria-pressed='true']:focus { color:#b94d52;background:transparent; }
+.sd-detail [aria-pressed='true'],.together-detail .btn-like[aria-pressed='true'] { color:#b94d52;background:#f9e8e5; }
 .tg-action-status { color:#a4462e;line-height:1.7;font-size:13px; }
 .tg-action-status:empty { display:none; }
 /* 상세 안내 : 본문과 같은 차분한 크림색 */
 .together-detail .md-plan,.sd-detail .sdd-handover { background:#f4f1e8;border:1px solid #ded8c9;box-shadow:none; }
 .together-detail .md-plan .btn-like { color:#9d5659;background:#f9ece8;border:1px solid #dfb9b3; }
-.together-detail .md-plan .btn-secondary,.sd-detail .sdd-owner-actions a { background:#eaf0e6;color:#4f6c46;border-color:#bccab4; }
+.together-detail .md-plan .btn-secondary,.sd-detail .sdd-owner-actions a { padding:5px;background:#eaf0e6;color:#4f6c46;border-color:#bccab4; }
 .together-detail .md-plan .btn-danger,.sd-detail .sdd-delete { background:#f4e2db;color:#a14835;border-color:#d9b4a7; }
 .together-detail .md-plan .btn,.sd-detail .sdd-text-action { transition:background .2s,box-shadow .2s,transform .2s; }
 .together-detail .md-plan .btn:hover,.sd-detail .sdd-text-action:hover { transform:translateY(-2px);box-shadow:0 4px 10px #5b493018; }

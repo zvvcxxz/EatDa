@@ -316,7 +316,7 @@
         if (!open) setOpen(true);
         try {
             const data = await requestJson(
-                names.length ? '/recipes/recommend' : '/home/recipe-search',
+                names.length ? '/home/recipe-ingredients' : '/home/recipe-search',
                 names.length ? { ingredients: names } : { keyword },
                 searchRequest.signal
             );
@@ -334,8 +334,8 @@
             $('ai-availability').options[2].textContent = '추가 재료 필요';
             const note = island.querySelector('.ai-match-note');
             if (note) note.textContent = compared
-                ? '재료 설명에 적힌 이름 기준 비교입니다. 양념을 포함하며 분량과 세부 손질 상태는 비교하지 않습니다.'
-                : '로그인한 냉장고와 비교할 재료 정보가 있어야 재료 상태 필터를 사용할 수 있습니다.';
+                ? 'AI 검색은 입력한 문장의 재료와 비교합니다. 소비기한 임박재료 검색은 선택한 냉장고 재료와 비교합니다. 양념도 포함하며 분량과 대체 가능 여부는 판단하지 않습니다.'
+                : '레시피에 비교할 재료 정보가 있어야 재료 상태 필터를 사용할 수 있습니다.';
             renderResults();
         } catch (error) {
             if (error.name === 'AbortError' || version !== requestVersion) return;
