@@ -23,12 +23,12 @@
 	<!-- 회원 탈퇴 처리 (개인정보 파기 및 상태 변경) -->
 	<update id="withdrawMember" parameterType="Long">
 	    UPDATE MEMBER
-	    SET STATUS = 3, -- 3: 탈퇴
+	    SET STATUS = 3,
 	        PASSWORD_HASH = 'WITHDRAWN_USER',
-	        NAME = NULL,
-	        EMAIL = NULL,
-	        PHONE = NULL,
-	        PROFILE_URL = NULL,
+	        NAME = 'WITHDRAWN_USER',
+	        EMAIL = 'WITHDRAWN_USER',
+	        PHONE = 'WITHDRAWN_USER',
+	        PROFILE_URL = 'WITHDRAWN_USER',
 	        UPDATED_AT = SYSTIMESTAMP
 	    WHERE MEMBER_ID = #{member_id}
 	</update>
@@ -116,6 +116,12 @@
 		INNER JOIN APP_ROLE r ON m.ROLE_ID = r.ROLE_ID
 		WHERE m.LOGIN_ID = #{login_id}
 	</select>	
+	
+	<!-- 아이디 찾기 -->
+	<select id="findIdByNameAndEmail" parameterType="map" resultType="String">
+	    SELECT LOGIN_ID FROM MEMBER
+	    WHERE NAME = #{name} AND EMAIL = #{email} AND STATUS != 3 -- 탈퇴 회원이 아닌 경우
+	</select>
 	
 	
 	<!-- 1. 소셜 회원 로그인 조회 (loginSnsMember) -->

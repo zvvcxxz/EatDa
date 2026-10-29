@@ -111,18 +111,6 @@
                         <input type="tel" id="tel" name="tel" th:value="${dto?.tel}" placeholder="01012345678 ('-' 제외)">
                     </div>
 
-                    <!-- 메일 수신 동의 -->
-					<div class="input-group full-width" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 0;">
-					    <!-- 좌측 라벨 -->
-					    <label style="margin-bottom: 0; white-space: nowrap;">이메일 수신 여부</label>
-					    
-					    <!-- 우측 체크박스 + 동의 문구 -->
-					    <label class="checkbox-label" for="receive_email" style="cursor: pointer; margin-bottom: 0;">
-					        <input type="checkbox" id="receive_email" name="receive_email" value="1"
-					               th:checked="${dto == null or dto.receive_email == 1}">
-					        <span>이동통신사/서비스 이벤트 및 혜택 알림 수신 동의</span>
-					    </label>
-					</div>
                 </div>
             </div>
 
@@ -177,12 +165,23 @@
             <!-- 아이디 중복 검사 여부 확인용 플래그 -->
             <input type="hidden" name="loginIdValid" id="loginIdValid" value="false">
         </form>
+    <form th:if="${mode=='update'}" method="post" id="withdrawForm" action="/member/delete">
+    	<button type="button" id="withdrawBtn" class="btn-withdraw-link">회원탈퇴</button>
+    </form>
     </div>
 </th:block>
 
 <th:block layout:fragment="script">
     <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', () => {
+    	const withdrawForm = document.getElementById('withdrawForm');
+    	function withdraw () {
+	   		if(! confirm ("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+	   		withdrawForm.submit();
+    	};
+    	document.getElementById('withdrawBtn').addEventListener('click', withdraw);
+    	
+    	
         const defaultImg = /*[[@{/dist/images/user.png}]]*/ '/dist/images/user.png';
         const uploadImgPath = /*[[@{/uploads/member/}]]*/ '/uploads/member/';
         const existingImg = /*[[${dto?.profile_photo}]]*/ null;

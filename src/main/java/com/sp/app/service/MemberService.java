@@ -19,14 +19,15 @@ public interface MemberService {
 	public void updateLastLogin(String login_id) throws Exception;
 	
 	public MemberDto findById(Long member_id);
-	public MemberDto findById(String login_id);
+	public MemberDto findByLoginId(String login_id);
+	public String findIdByNameAndEmail(Map<String, Object> map);
 	public Long getMemberId(String login_id);
 	
 	public int checkFailureCount(String login_id);
 	public void updateFailureCountReset(String login_id) throws Exception;
 	public void updateFailureCount(String login_id) throws Exception;
 	
-	public void deleteMember(Map<String, Object> map) throws Exception;
+	public void deleteMember(Long member_id) throws Exception;
 	public void deleteProfilePhoto(Map<String, Object> map) throws Exception;
 	
 	public void generatePwd(MemberDto dto) throws Exception;

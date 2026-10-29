@@ -35,6 +35,7 @@ public interface MemberMapper {
 		public MemberDto findByLoginId(String login_id);
 		public Long getMemberId(String login_id);
 		public List<MemberDto> listFindMember(Map<String, Object> map);
+		public String findIdByNameAndEmail(Map<String, Object> map);
 
 		//권한 조회
 		public String findAuthorityByLoginId(String login_id);

@@ -138,6 +138,7 @@ public class MemberServiceImpl implements MemberService {
 			}
 			
 			mapper.updateMember(dto);
+			mapper.updateMemberPassword(dto);
 			
 		} catch (Exception e) {
 			log.info("updateMember : ", e);
@@ -180,7 +181,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public MemberDto findById(String login_id) {
+	public MemberDto findByLoginId(String login_id) {
 		MemberDto dto = null;
 
 		try {
@@ -240,12 +241,11 @@ public class MemberServiceImpl implements MemberService {
 
 	@Transactional(rollbackFor = {Exception.class})
 	@Override
-	public void deleteMember(Map<String, Object> map) throws Exception {
+	public void deleteMember(Long member_id) throws Exception {
 		try {
-			map.put("status", 3);
-			mapper.updateMemberStatus(map);			
-			
-			String filename = (String)map.get("filename");
+			MemberDto dto = mapper.findById(member_id);
+			String filename = dto.getProfile_photo();
+			mapper.withdrawMember(member_id);			
 			if(filename != null && !filename.isBlank()) {
 				storageService.deleteFile(uploadPath, filename);
 			}
@@ -355,7 +355,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public boolean isPasswordCheck(String login_id, String rawPassword) {
-		MemberDto dto = Objects.requireNonNull(findById(login_id));
+		MemberDto dto = Objects.requireNonNull(findByLoginId(login_id));
 	    
 	    if (dto == null || dto.getPassword() == null) {
 	        log.error("DB에서 회원 정보 또는 비밀번호를 불러오지 못함");
@@ -369,6 +369,12 @@ public class MemberServiceImpl implements MemberService {
 	    log.info("비밀번호 일치 여부: {}", isMatch);
 
 	    return isMatch;
+	}
+
+	@Override
+	public String findIdByNameAndEmail(Map<String, Object> map) {
+		
+		return mapper.findIdByNameAndEmail(map);
 	}
 
 }

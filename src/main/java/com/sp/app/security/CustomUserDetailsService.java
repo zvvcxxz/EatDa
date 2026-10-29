@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		MemberDto member = memberService.findById(username);
+		MemberDto member = memberService.findByLoginId(username);
 		
 		if (member == null) {
 			throw new UsernameNotFoundException("아이디가 존재하지 않습니다.");

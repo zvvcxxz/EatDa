@@ -55,7 +55,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 				}
 				
 				if(cnt >= 4) {
-					MemberDto member = memberService.findById(login_id);
+					MemberDto member = memberService.findByLoginId(login_id);
 	                
 	                if (member != null) {
 	                    Map<String, Object> map = new HashMap<>();

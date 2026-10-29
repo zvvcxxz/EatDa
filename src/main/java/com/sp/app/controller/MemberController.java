@@ -129,10 +129,10 @@ public class MemberController {
 	
 	@PostMapping("userIdCheck")
 	@ResponseBody
-	public ResponseEntity<?> handleUserIdCheck(@RequestParam(name = "login_id") String login_id) throws Exception {
+	public ResponseEntity<?> handleUserIdCheck(@RequestParam(name = "login_id") String login_id) {
 		String p = "false";
 		try {
-			MemberDto dto = service.findById(login_id);
+			MemberDto dto = service.findByLoginId(login_id);
 			if (dto == null) {
 				p = "true";
 			}
@@ -141,6 +141,36 @@ public class MemberController {
 		}
 		
 		return ResponseEntity.ok(Map.of("passed", p));
+	}
+	
+	@GetMapping("idFind")
+	public String idFind() {
+		return "member/idFind";
+	}
+	
+	@ResponseBody
+	@PostMapping("idFind")
+	public String idFind(@RequestParam(name = "name") String name,
+			@RequestParam(name = "email") String email) {
+		try {
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", name);
+			map.put("email", email);
+			String userId = service.findIdByNameAndEmail(map);
+			if(userId == null) {
+				return "일치하는 아이디가 존재하지 않습니다.";
+			}
+			String maskedId = (userId != null && userId.length() >= 2) 
+					? userId.substring(0, 2) + "****" 
+							: (userId != null ? userId : "") + "****"; 
+			
+			return maskedId;
+			
+		} catch (Exception e) {
+			log.error("idFind error : ", e);
+			return "정보를 찾을 수 없습니다.";
+		}
+
 	}
 	
 	@GetMapping("pwd")
@@ -175,28 +205,6 @@ public class MemberController {
 				return "member/pwd";
 			}
 
-			// 회원 탈퇴 처리
-			if (mode.equals("dropout")) {
-				Map<String, Object> map = new HashMap<>();
-				map.put("member_id", info.getMember_id());
-				map.put("filename", info.getAvatar());
-
-				// DB 탈퇴 처리 (개인정보 파기 및 STATUS = 3)
-				service.deleteMember(map);
-
-				// 세션 인증 정보 삭제 (로그아웃)
-				LoginMemberUtil.logout();
-
-				StringBuilder sb = new StringBuilder();
-				sb.append(dto.getName()).append("님의 회원 탈퇴 처리가 정상적으로 처리되었습니다.<br>");
-				sb.append("메인화면으로 이동 하시기 바랍니다.<br>");
-
-				rAttr.addFlashAttribute("title", "회원 탈퇴");
-				rAttr.addFlashAttribute("message", sb.toString());
-
-				return "redirect:/member/complete";
-			}
-
 			// 회원 정보 수정 폼 이동
 			model.addAttribute("dto", dto);
 			model.addAttribute("mode", "update");
@@ -210,6 +218,30 @@ public class MemberController {
 		}
 		
 		return "redirect:/";
+	}
+	
+	@PostMapping("delete") //회원탈퇴
+	public String withdraw(final RedirectAttributes rAttr, Model model) {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			MemberDto dto = Objects.requireNonNull(service.findById(info.getMember_id()));
+			Long member_id = info.getMember_id();
+				
+			service.deleteMember(member_id);// DB 탈퇴 처리 (개인정보 파기 및 STATUS = 3)		
+			LoginMemberUtil.logout();// 세션 인증 정보 삭제 (로그아웃)
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(dto.getName()).append("님의 회원 탈퇴 처리가 정상적으로 처리되었습니다.<br>");
+			sb.append("메인화면으로 이동 하시기 바랍니다.<br>");
+			
+			rAttr.addFlashAttribute("title", "회원 탈퇴");
+			rAttr.addFlashAttribute("message", sb.toString());
+					
+		} catch (Exception e) {
+			log.error("pwdFindSubmit error : ", e);
+			model.addAttribute("message", "회원 탈퇴에 실패하였습니다.");
+		}
+		return "redirect:/member/complete";
 	}
 
 	@PostMapping("update")
@@ -264,11 +296,10 @@ public class MemberController {
 	@PostMapping("pwdFind")
 	public String pwdFindSubmit(@RequestParam(name = "login_id") String login_id,
 			@RequestParam(name = "name") String name,
-			final RedirectAttributes rAttr,
-			Model model) throws Exception {
+			final RedirectAttributes rAttr, Model model) throws Exception {
 		
 		try {
-			MemberDto dto = service.findById(login_id);
+			MemberDto dto = service.findByLoginId(login_id);
 			
 			// 계정이 존재하지 않거나, 이메일이 없거나, 정지/탈퇴(STATUS != 1)된 계정이거나, 이름 불일치 시
 			if (dto == null || dto.getEmail() == null || dto.getEnabled() != 1 || !dto.getName().equals(name)) {
