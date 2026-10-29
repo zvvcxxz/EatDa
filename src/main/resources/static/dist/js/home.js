@@ -223,3 +223,21 @@ preview();
 
 // 메인 냉장고 : 관리 페이지 이동 효과
 import './home-fridge-door.js';
+
+// AI 챗봇 버튼
+const chatButton = document.getElementById('open-eatda-chat');
+
+if (chatButton) {
+    chatButton.addEventListener('click', () => {
+        const isLoggedIn = chatButton.dataset.loggedIn === 'true';
+        const loginUrl = chatButton.dataset.loginUrl;
+        const chatUrl = chatButton.dataset.chatUrl;
+
+        if (!isLoggedIn) {
+            location.href = loginUrl;
+            return;
+        }
+
+        location.href = chatUrl;
+    });
+}

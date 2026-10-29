@@ -77,7 +77,6 @@
                                     <strong>AI 레시피 검색</strong
                                     ><span>남은 재료로, 오늘의 한식 한 끼.</span>
                                 </div>
-                                <!-- AI 검색 : 입력 문장으로 레시피 검색 -->
                                 <form id="ai-island-form" novalidate>
                                     <label class="ai-field-label" for="ai-ingredient-input"
                                         >어떤 재료가 남아 있나요?</label
@@ -303,8 +302,13 @@
             </main>
 		<aside class="mini-rail" aria-label="미니게임">
 			<small><i class="fa-solid fa-gamepad" aria-hidden="true"></i><br />미니게임</small>
-			<button data-unlinked aria-label="메뉴 추천 챗봇">
-				<i class="fa-solid fa-robot" aria-hidden="true"></i>
+			<button type="button"
+			        id="open-eatda-chat"
+			        aria-label="EatDa AI 챗봇"
+			        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
+			                 data-login-url=@{/member/login},
+			                 data-chat-url=@{/aichatbot/chatbot}">
+			    <i class="fa-solid fa-robot" aria-hidden="true"></i>
 			</button>
 			<button type="button" id="open-lunch-chat" aria-label="점심 추천 챗봇"
 				th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
@@ -319,7 +323,6 @@
 			</button>
 		</aside>
 
-		<!-- 점심 추천 챗봇 모달 -->
 		<dialog id="lunch-chat-dialog" class="lunch-chat-dialog"
 			aria-labelledby="lunch-modal-title">
 		<div class="lunch-modal-header">
@@ -328,10 +331,9 @@
 				✕</button>
 		</div>
 
-		<!-- 작성한 챗봇 화면을 모달 안에 표시 --> <iframe id="lunch-chat-frame"
+		 <iframe id="lunch-chat-frame"
 			title="점심 추천 챗봇" th:attr="data-src=@{/ai/aichatbot}"> </iframe> </dialog>
 
-            <!-- 레시피 검색 결과는 AI 검색창에서 표시 -->
         </th:block>
 	<th:block layout:fragment="script">
 		<script type="module" src="../../static/dist/js/intro.js"

@@ -20,8 +20,8 @@ public class ChatBotRestController {
     	return chatBotService.generateAnswer(question);
 	}
     
-    @GetMapping("/admin/chatbot")
+    @GetMapping("/aichatbot/chatbot")
     public ModelAndView chatView() {
-    	return new ModelAndView("/admin/layout/chatbot");
+    	return new ModelAndView("/aichatbot/chatbot");
     }
 }

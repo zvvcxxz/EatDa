@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EatDa AI 챗봇</title>
+
+    <link rel="stylesheet" th:href="@{/dist/css/chat.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <script th:src="@{/dist/js/chat.js}" defer></script>
+</head>
+<body>
+
+<main class="chat-page">
+
+    <a class="back-link" th:href="@{/}">
+        <i class="fa-solid fa-arrow-left"></i>
+        EatDa 홈
+    </a>
+
+    <section class="chat-container">
+
+        <header class="chat-header">
+            <div class="header-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+
+            <div>
+                <span class="sub-title">EATDA AI ASSISTANT</span>
+                <h1>무엇을 도와드릴까요?</h1>
+            </div>
+        </header>
+
+        <section class="chat-main">
+
+            <div class="welcome-card">
+                <div class="welcome-icon">
+                    <i class="fa-solid fa-bowl-food"></i>
+                </div>
+
+                <h2>안녕하세요!</h2>
+                <p>
+                    EatDa AI에게 물어보세요.
+                </p>
+            </div>
+
+            <section class="conversation">
+                <div class="conversation-title">
+                    <div class="bot-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <strong>EatDa AI</strong>
+                        <span>메뉴 상담 도우미</span>
+                    </div>
+                </div>
+
+                <div id="chatBox" class="chat-box"
+                     role="log" aria-live="polite">
+                    <div class="message assistant">
+                        <div class="message-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            안녕하세요! EatDa AI입니다. 😊
+                            궁금한 내용을 입력해 주세요.
+                        </div>
+                    </div>
+                </div>
+
+                <form id="chatForm" class="chat-form">
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="질문을 입력해 주세요..."
+                        autocomplete="off"
+                        aria-label="질문 입력"
+                        required>
+
+                    <button type="submit" id="sendButton">
+                        보내기
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+
+                <p class="notice">
+                    <i class="fa-solid fa-circle-info"></i>
+                    AI 답변은 참고용으로 활용해 주세요.
+                </p>
+            </section>
+
+        </section>
+    </section>
+
+</main>
+
+</body>
+</html>
