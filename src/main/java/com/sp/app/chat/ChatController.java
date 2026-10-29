@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ChatController {
 
-    private final UserSessionRegistry sessionRegistry;
+    private final ChatRoomRegistry chatRoomRegistry;
     private final SimpMessagingTemplate messagingTemplate;
+    private final SimpUserRegistry simpUserRegistry;
     private final MemberService memberService;
 
     private SessionInfo getLoginMember() {
@@ -48,7 +49,7 @@ public class ChatController {
         try {
             getLoginMember();
             Map<String, Object> map = new HashMap<>();
-            map.put("kwd", keyword); // ★ "keyword" -> "kwd"로 수정 (MyBatis Mapper의 kwd와 일치시킴)
+            map.put("kwd", keyword);
             List<MemberDto> list = memberService.listFindMember(map);
             return ResponseEntity.ok(list);
         } catch (IllegalStateException e) {
@@ -56,7 +57,6 @@ public class ChatController {
         }
     }
 
-    // 1:1 채팅방 생성 및 실시간 대화 요청
     @PostMapping("/mychat/room")
     @ResponseBody
     public ResponseEntity<?> getOrCreateRoom(@RequestBody Map<String, Object> body) {
@@ -71,21 +71,24 @@ public class ChatController {
             }
             Long targetMemberId = Long.parseLong(targetObj.toString());
 
-            // 1. 상대방 온라인 접속 여부 확인
-            boolean isOnline = sessionRegistry.isOnline(targetMemberId);
-            if (!isOnline) {
+            String roomId = chatRoomRegistry.generateRoomId(currentMemberId, targetMemberId);
+
+            if (chatRoomRegistry.isRoomActive(roomId)) {
                 return ResponseEntity.ok(Map.of(
-                    "isOnline", false,
-                    "message", "상대방이 현재 오프라인 상태입니다."
+                    "exists", true,
+                    "message", "이미 대화하고 있는 대화방이 존재합니다."
                 ));
             }
 
-            // 2. 채팅방 ID 생성 (실제 구현시 DB 조회/생성 로직으로 대체)
-            Long roomId = currentMemberId < targetMemberId 
-                ? currentMemberId * 10000 + targetMemberId 
-                : targetMemberId * 10000 + currentMemberId;
+            boolean isTargetConnected = simpUserRegistry.getUser(String.valueOf(targetMemberId)) != null;
+            if (!isTargetConnected) {
+                return ResponseEntity.ok(Map.of(
+                    "exists", false,
+                    "isOnline", false,
+                    "message", "상대방이 현재 로그인되어 있지 않거나 접속 중이 아닙니다."
+                ));
+            }
 
-            // 3. 온라인인 상대방에게 실시간 초대 메시지 발송 (/user/{targetMemberId}/queue/invite)
             Map<String, Object> invitePayload = new HashMap<>();
             invitePayload.put("type", "CHAT_INVITE");
             invitePayload.put("roomId", roomId);
@@ -99,8 +102,10 @@ public class ChatController {
             );
 
             return ResponseEntity.ok(Map.of(
+                "exists", false,
                 "isOnline", true,
-                "roomId", roomId
+                "status", "PENDING",
+                "message", "상대방에게 대화 요청을 보냈습니다. 응답을 기다리는 중입니다."
             ));
 
         } catch (IllegalStateException e) {
@@ -111,15 +116,74 @@ public class ChatController {
         }
     }
 
-    @MessageMapping("/chat.sendMessage/{roomId}")
-    @SendTo("/topic/chat/{roomId}")
-    public ChatMessage sendRoomMessage(@DestinationVariable("roomId") String roomId, ChatMessage message) {
-        return message;
+    @PostMapping("/mychat/respondInvite")
+    @ResponseBody
+    public ResponseEntity<?> respondInvite(@RequestBody Map<String, Object> body) {
+        try {
+            SessionInfo currentMember = getLoginMember();
+            Long currentMemberId = currentMember.getMember_id();
+
+            String roomId = body.get("roomId").toString();
+            Long targetUserId = Long.parseLong(body.get("targetUserId").toString());
+            boolean accept = Boolean.parseBoolean(body.get("accept").toString());
+
+            Map<String, Object> responsePayload = new HashMap<>();
+
+            if (accept) {
+                chatRoomRegistry.activateRoom(roomId, currentMemberId, targetUserId);
+                
+                responsePayload.put("type", "INVITE_ACCEPTED");
+                responsePayload.put("roomId", roomId);
+                responsePayload.put("message", currentMember.getName() + "님이 대화 요청을 수락했습니다.");
+            } else {
+                responsePayload.put("type", "INVITE_REJECTED");
+                responsePayload.put("message", "상대방이 채팅 요청을 거절했습니다.");
+            }
+
+            messagingTemplate.convertAndSendToUser(
+                String.valueOf(targetUserId),
+                "/queue/inviteResponse",
+                responsePayload
+            );
+
+            return ResponseEntity.ok(Map.of("success", true, "accept", accept, "roomId", roomId));
+        } catch (Exception e) {
+            log.error("초대 응답 처리 중 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/mychat/onlineUsers")
-    @ResponseBody
-    public ResponseEntity<?> getUserList() {
-        return ResponseEntity.ok(sessionRegistry.getAllOnlineusers());
+    @MessageMapping("/chat.sendMessage/{roomId}")
+    public void sendRoomMessage(@DestinationVariable("roomId") String roomId, ChatMessage message) {
+        if ("LEAVE".equals(message.getType())) {
+            chatRoomRegistry.closeRoom(roomId);
+            messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
+            return;
+        }
+
+        if (!chatRoomRegistry.isRoomActive(roomId)) {
+            ChatMessage errorMsg = ChatMessage.builder()
+                .type("ERROR")
+                .content("메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요.")
+                .build();
+
+            messagingTemplate.convertAndSendToUser(
+                String.valueOf(message.getSenderId()),
+                "/queue/private",
+                errorMsg
+            );
+            return;
+        }
+
+        chatRoomRegistry.saveMessage(roomId, message);
+        messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
+
+        if (message.getReceiver() != null && !message.getReceiver().isEmpty()) {
+            messagingTemplate.convertAndSendToUser(
+                message.getReceiver(),
+                "/queue/private",
+                message
+            );
+        }
     }
 }

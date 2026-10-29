@@ -1,5 +1,3 @@
-const contextPath = "";
-
 function idFind() {
     const nameInput = document.querySelector("#name");
     const emailInput = document.querySelector("#email");
@@ -15,7 +13,7 @@ function idFind() {
         return;
     }
 
-    fetch(contextPath + "/member/idFind", {
+    fetch("/member/idFind", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
@@ -31,12 +29,12 @@ function idFind() {
         const result = document.querySelector("#findIdResult");
         if (!result) return;
 
-        result.innerHTML = "";
+        result.textContent = "";
 
         if (text.includes("존재하지 않거나") || text.includes("찾을 수 없습니다") || text.includes("일치하는")) {
-            result.innerHTML = `<p style="color: #e03131; font-weight: bold; margin-top: 10px;">${text}</p>`;
+            result.textContent = text;
         } else {
-            result.innerHTML = `<p style="color: #2b8a3e; font-weight: bold; margin-top: 10px;">찾으시는 아이디는 <span style="font-size: 1.1em; text-decoration: underline;">${text}</span> 입니다.</p>`;
+            result.textContent = text;
         }
     })
     .catch(error => {

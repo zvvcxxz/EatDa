@@ -164,7 +164,7 @@ public class MemberController {
 					? userId.substring(0, 2) + "****" 
 							: (userId != null ? userId : "") + "****"; 
 			
-			return maskedId;
+			return "찾으시는 아이디는 "+maskedId+" 입니다.";
 			
 		} catch (Exception e) {
 			log.error("idFind error : ", e);

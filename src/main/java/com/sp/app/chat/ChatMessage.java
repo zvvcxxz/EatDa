@@ -1,10 +1,20 @@
 package com.sp.app.chat;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
 public class ChatMessage {
-	private String type;// TALK, LEAVE 등 메시지 타입
+    private String type;        // TALK, LEAVE, ERROR 등
     private String roomId;
     private Long senderId;
     private String senderName;

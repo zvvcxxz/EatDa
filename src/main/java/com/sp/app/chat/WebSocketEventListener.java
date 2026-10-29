@@ -1,7 +1,12 @@
 package com.sp.app.chat;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,72 +26,77 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketEventListener {
-	
-	private final UserSessionRegistry sessionRegistry;
-	private final SimpMessagingTemplate messagingTemplate;
-	
-	@EventListener
-	public void handleConnect(SessionConnectEvent event) {
-		StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
-		Map<String, Object> sessionAttributes = sha.getSessionAttributes();
-		
-		SessionInfo info = extractSessionInfo(sessionAttributes, sha);
-		
-		if (info != null && info.getMember_id() != null) {
-			sessionRegistry.add(info.getMember_id(), info.getName());
-			log.info("[WebSocket] 온라인 등록 완료 - 회원ID: {}, 이름: {}", info.getMember_id(), info.getName());
-			
-			Map<String, Object> payload = new HashMap<>();
-			payload.put("uid", info.getMember_id());
-			payload.put("name", info.getName());
-			
-			messagingTemplate.convertAndSend("/topic/online", (Object)payload);		
-		} else {
-			log.warn("[WebSocket] 연결되었으나 SessionInfo를 찾을 수 없음");
-		}
-	}
-	
-	@EventListener
-	public void handleDisconnect(SessionDisconnectEvent event) {
-		StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
-		Map<String, Object> sessionAttributes = sha.getSessionAttributes();
-		
-		SessionInfo info = extractSessionInfo(sessionAttributes, sha);
-		
-		if (info != null && info.getMember_id() != null) {
-			sessionRegistry.remove(info.getMember_id());
-			log.info("[WebSocket] 오프라인 처리 완료 - 회원ID: {}", info.getMember_id());
-			
-			Map<String, Object> payload = Map.of(
-					"uid", info.getMember_id(),
-					"name", info.getName());
-			
-			messagingTemplate.convertAndSend("/topic/offline", (Object)payload);
-		}
-	}
 
-	private SessionInfo extractSessionInfo(Map<String, Object> sessionAttributes, StompHeaderAccessor sha) {
-		if (sessionAttributes != null) {
-			// 1. 세션에 "member" 키로 직접 들어있는 경우
-			if (sessionAttributes.get("member") instanceof SessionInfo info) {
-				return info;
-			}
+    private final ChatRoomRegistry chatRoomRegistry;
+    private final SimpMessagingTemplate messagingTemplate;
 
-			// 2. Spring Security Context에서 추출 (Principal = CustomUserDetails)
-			if (sessionAttributes.get("SPRING_SECURITY_CONTEXT") instanceof SecurityContext context) {
-				if (context.getAuthentication() != null && context.getAuthentication().getPrincipal() instanceof CustomUserDetails userDetails) {
-					return userDetails.getMember();
-				}
-			}
-		}
+    // 3초 유예 시간용 스케줄러
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final Map<Long, ScheduledFuture<?>> pendingTasks = new ConcurrentHashMap<>();
 
-		// 3. StompHeaderAccessor User(Authentication)에서 추출
-		if (sha.getUser() instanceof org.springframework.security.core.Authentication auth) {
-			if (auth.getPrincipal() instanceof CustomUserDetails userDetails) {
-				return userDetails.getMember();
-			}
-		}
+    // 페이지 이동 후 재접속 시 예약 취소
+    @EventListener
+    public void handleConnect(SessionConnectEvent event) {
+        StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
+        SessionInfo info = extractSessionInfo(sha);
 
-		return null;
-	}
+        if (info != null && info.getMember_id() != null) {
+            ScheduledFuture<?> task = pendingTasks.remove(info.getMember_id());
+            if (task != null) {
+                task.cancel(false); // 페이지 이동이었으므로 퇴장 알림 취소
+            }
+        }
+    }
+
+    // 소켓 끊김 감지 (브라우저 종료 또는 페이지 이동)
+    @EventListener
+    public void handleDisconnect(SessionDisconnectEvent event) {
+        StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
+        SessionInfo info = extractSessionInfo(sha);
+
+        if (info != null && info.getMember_id() != null) {
+            Long memberId = info.getMember_id();
+            String memberName = info.getName();
+
+            // 2.5초 후에도 다시 연결되지 않으면 실제 브라우저 종료로 간주
+            ScheduledFuture<?> task = scheduler.schedule(() -> {
+                pendingTasks.remove(memberId);
+
+                List<ChatRoomRegistry.RoomInfo> activeRooms = chatRoomRegistry.getActiveRoomsForUser(memberId);
+                for (ChatRoomRegistry.RoomInfo room : activeRooms) {
+                    String roomId = room.getRoomId();
+
+                    // 대화방으로 종료 알림 전송
+                    ChatMessage leaveMsg = ChatMessage.builder()
+                            .type("LEAVE")
+                            .roomId(roomId)
+                            .senderId(memberId)
+                            .senderName(memberName)
+                            .content(memberName + "님이 접속을 종료하셨습니다.")
+                            .build();
+
+                    messagingTemplate.convertAndSend("/topic/chat/" + roomId, leaveMsg);
+                    chatRoomRegistry.closeRoom(roomId);
+                }
+            }, 2500, TimeUnit.MILLISECONDS);
+
+            pendingTasks.put(memberId, task);
+        }
+    }
+
+    private SessionInfo extractSessionInfo(StompHeaderAccessor sha) {
+        if (sha.getSessionAttributes() != null) {
+            if (sha.getSessionAttributes().get("SPRING_SECURITY_CONTEXT") instanceof SecurityContext context) {
+                if (context.getAuthentication() != null && context.getAuthentication().getPrincipal() instanceof CustomUserDetails userDetails) {
+                    return userDetails.getMember();
+                }
+            }
+        }
+        if (sha.getUser() instanceof org.springframework.security.core.Authentication auth) {
+            if (auth.getPrincipal() instanceof CustomUserDetails userDetails) {
+                return userDetails.getMember();
+            }
+        }
+        return null;
+    }
 }

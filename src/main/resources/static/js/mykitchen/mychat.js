@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessageArea = document.getElementById('chatMessageArea');
     const chatInput = document.getElementById('chatInput');
     const btnSend = document.getElementById('btnSend');
-    const leaveRoomBtn = document.getElementById('leaveRoomBtn'); // 나가기 버튼
+    const leaveRoomBtn = document.getElementById('leaveRoomBtn');
 
     const searchModal = document.getElementById('memberSearchModal');
     const openSearchModalBtn = document.getElementById('openSearchModalBtn');
@@ -22,81 +22,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSearchMember = document.getElementById('btnSearchMember');
     const searchResultList = document.getElementById('searchResultList');
 
-    // global-websocket.js 연결 완료 시 호출되는 콜백 함수
+    let isRoomDisabled = false;
+
     window.onWebSocketConnected = function(stompClient) {
         if (!stompClient || !stompClient.connected) return;
 
-        // 1. 현재 대화방 메시지 구독
-		if (currentRoomId) {
-		    stompClient.subscribe(`/topic/chat/${currentRoomId}`, (messageOutput) => {
-		        const message = JSON.parse(messageOutput.body);
+        // 현재 방 메시지 구독
+        if (currentRoomId) {
+            stompClient.subscribe(`/topic/chat/${currentRoomId}`, (messageOutput) => {
+                const message = JSON.parse(messageOutput.body);
 
-		        // 퇴장 메시지 처리
-		        if (message.type === 'LEAVE') {
-		            appendSystemNotice(message.content || `${message.senderName}님이 대화방을 나갔습니다.`);
-		            
-		            // 나간 사람이 상대방일 경우 내 입력창 비활성화
-		            if (String(message.senderId) !== String(currentMemberId)) {
-		                setChatInputEnabled(false);
-		            }
-		        } else {
-		            // 일반 대화 메시지 처리
-		            appendMessage(message);
-		            scrollToBottom();
-		        }
-		    });
-		}
-
-        // 2. 상대방 오프라인 감지 (/topic/offline)
-        stompClient.subscribe('/topic/offline', (messageOutput) => {
-            const data = JSON.parse(messageOutput.body);
-            if (targetMemberId && String(data.uid) === String(targetMemberId)) {
-                appendSystemNotice(`${data.name || '상대방'}님이 오프라인 상태가 되었습니다.`);
-                setChatInputEnabled(false);
-            }
-        });
-
-        // 3. 상대방 온라인 감지 (/topic/online)
-        stompClient.subscribe('/topic/online', (messageOutput) => {
-            const data = JSON.parse(messageOutput.body);
-            if (targetMemberId && String(data.uid) === String(targetMemberId)) {
-                appendSystemNotice(`${data.name || '상대방'}님이 온라인으로 복귀했습니다.`);
-                setChatInputEnabled(true);
-            }
-        });
+                // [요구사항 2] 상대방 방 나감 처리
+                if (message.type === 'LEAVE') {
+                    appendSystemNotice("상대가 방을 나갔습니다.");
+                    if (String(message.senderId) !== String(currentMemberId)) {
+                        window.setChatInputEnabled(false);
+                    }
+                } else if (message.type === 'TALK') {
+                    appendMessage(message);
+                    scrollToBottom();
+                }
+            });
+        }
     };
 
-    // 웹소켓 이미 연결되어 있는 상태라면 즉시 구독 함수 실행
     if (window.globalStompClient && window.globalStompClient.connected) {
         window.onWebSocketConnected(window.globalStompClient);
     }
 
-	// 나가기 버튼 클릭 이벤트
-	if (leaveRoomBtn) {
-	    leaveRoomBtn.addEventListener('click', () => {
-	        if (!confirm('대화방을 나가시겠습니까?')) return;
+    // [요구사항 2] 대화방 나가기 버튼 클릭
+    if (leaveRoomBtn) {
+        leaveRoomBtn.addEventListener('click', () => {
+            if (!confirm('대화방을 나가시겠습니까?')) return;
 
-	        // 1. 소켓이 연결되어 있다면 상대방에게 퇴장 알림 전송
-	        if (window.globalStompClient && window.globalStompClient.connected && currentRoomId) {
-	            const leaveMessage = {
-	                type: 'LEAVE',
-	                roomId: String(currentRoomId),
-	                senderId: Number(currentMemberId),
-	                senderName: currentMemberName,
-	                content: `${currentMemberName}님이 대화방을 나갔습니다.`
-	            };
+            if (window.globalStompClient && window.globalStompClient.connected && currentRoomId) {
+                const leaveMessage = {
+                    type: 'LEAVE',
+                    roomId: String(currentRoomId),
+                    senderId: Number(currentMemberId),
+                    senderName: currentMemberName,
+                    content: `${currentMemberName}님이 대화방을 나갔습니다.`
+                };
 
-	            window.globalStompClient.send(
-	                `/app/chat.sendMessage/${currentRoomId}`, 
-	                {}, 
-	                JSON.stringify(leaveMessage)
-	            );
-	        }
+                window.globalStompClient.send(
+                    `/app/chat.sendMessage/${currentRoomId}`, 
+                    {}, 
+                    JSON.stringify(leaveMessage)
+                );
+            }
 
-	        // 2. 메시지 전송 후 메인 채팅 페이지로 이동
-	        window.location.href = '/my/chat';
-	    });
-	}
+            window.location.href = '/my/chat';
+        });
+    }
 
     function appendSystemNotice(text) {
         if (!chatMessageArea) return;
@@ -108,30 +85,39 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollToBottom();
     }
 
-    function setChatInputEnabled(enabled) {
+    // [요구사항 2] 입력창 및 전송 버튼 비활성화
+    window.setChatInputEnabled = function(enabled) {
+        isRoomDisabled = !enabled;
         if (chatInput) {
             chatInput.disabled = !enabled;
-            chatInput.placeholder = enabled ? "메시지를 입력하세요..." : "상대방이 오프라인 상태입니다.";
+            chatInput.placeholder = enabled ? "메시지를 입력하세요..." : "메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요";
         }
         if (btnSend) {
             btnSend.disabled = !enabled;
         }
-    }
+    };
 
+    // [요구사항 2] 메시지 전송 로직 (JS 조작 방어)
     function sendMessage() {
-        if (!chatInput || chatInput.disabled) return;
-        const content = chatInput.value.trim();
+        if (isRoomDisabled || (chatInput && chatInput.disabled)) {
+            alert('메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요');
+            return;
+        }
 
+        const content = chatInput.value.trim();
         if (!content) return;
+
         if (!window.globalStompClient || !window.globalStompClient.connected) {
             alert('채팅 서버에 연결되어 있지 않습니다.');
             return;
         }
 
         const chatMessage = {
+            type: 'TALK',
             roomId: String(currentRoomId),
             senderId: Number(currentMemberId),
             senderName: currentMemberName,
+            receiver: String(targetMemberId), // 수신자 ID (토스트용)
             content: content,
             createdAtText: formatCurrentTime()
         };
@@ -236,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // [요구사항 1, 3] 채팅 초대 신청
     async function startChat(targetMemberId) {
         try {
             const headers = { 'Content-Type': 'application/json' };
@@ -255,16 +242,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
+            // [요구사항 3] 이미 대화 중인 방이 있는 경우
+            if (data.exists) {
+                alert(data.message || '이미 대화하고 있는 대화방이 존재합니다.');
+                return;
+            }
+
+            // 상대방 로그인 안 된 경우
             if (data.isOnline === false) {
                 alert(data.message || '상대방이 현재 오프라인 상태입니다.');
                 return;
             }
 
-            if (data.isOnline && data.roomId) {
-                alert('상대방에게 대화 요청을 보냈습니다.');
-                window.location.href = `/my/chat?roomId=${data.roomId}`;
-            } else {
-                alert('채팅방 정보를 불러오지 못했습니다.');
+            // [요구사항 1] 수락 전 안내 메시지 (화면 이동 금지)
+            if (data.status === 'PENDING') {
+                alert(data.message || '상대방에게 대화 요청을 보냈습니다.');
             }
         } catch (error) {
             console.error('1:1 채팅 시작 오류:', error);

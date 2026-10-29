@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sp.app.chat.ChatMessage;
+import com.sp.app.chat.ChatRoomRegistry;
 import com.sp.app.domain.dto.MemberDto;
 import com.sp.app.domain.dto.MyMessagesDto;
 import com.sp.app.domain.dto.MyPreferencesDto;
@@ -38,6 +40,7 @@ public class MyKitchenController {
     private final MyPreferencesService myPreferencesService;
     private final MyMessagesService myMessagesService;
     private final MemberService memberService;
+    private final ChatRoomRegistry chatRoomRegistry;
 	
 	private Long getLoginMemberId() { //데이터 주인 확인용
         SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -171,7 +174,7 @@ public class MyKitchenController {
 
     //7.채팅
     @GetMapping("/chat")
-    public String chatPage(@RequestParam(name = "roomId", required = false) Long roomId, Model model) {
+    public String chatPage(@RequestParam(name = "roomId", required = false) String roomId, Model model) {
         try {
             Long currentMemberId = getLoginMemberId();
             MemberDto currentMember = memberService.findById(currentMemberId);
@@ -181,36 +184,44 @@ public class MyKitchenController {
 
             List<Map<String, Object>> chatRooms = new ArrayList<>();
 
-            // 1. 현재 선택된 roomId가 있으면 해당 방 정보를 목록에 추가 (DB 연동 전 임시 구성)
-            if (roomId != null) {
+            List<ChatRoomRegistry.RoomInfo> activeRooms = chatRoomRegistry.getActiveRoomsForUser(currentMemberId);
+            for (ChatRoomRegistry.RoomInfo roomInfo : activeRooms) {
+                Long targetMemberId = roomInfo.getTargetUserId(currentMemberId);
+                MemberDto targetMember = memberService.findById(targetMemberId);
+                String targetNickname = (targetMember != null) ? targetMember.getName() : "알 수 없는 사용자";
+
+                Map<String, Object> roomItem = new HashMap<>();
+                roomItem.put("roomId", roomInfo.getRoomId());
+                roomItem.put("targetMemberId", targetMemberId);
+                roomItem.put("targetNickname", targetNickname);
+                roomItem.put("lastMessage", "대화를 진행 중입니다.");
+                roomItem.put("lastMessageTime", "방금 전");
+                roomItem.put("unreadCount", 0);
+                chatRooms.add(roomItem);
+            }
+
+            model.addAttribute("chatRooms", chatRooms);
+
+            if (roomId != null && !roomId.isBlank() && chatRoomRegistry.isRoomActive(roomId)) {
                 model.addAttribute("selectedRoomId", roomId);
                 
-                // 상대방 ID 계산
-                long val1 = roomId / 10000;
-                long val2 = roomId % 10000;
-                Long targetMemberId = (val1 == currentMemberId) ? val2 : val1;
+                String[] parts = roomId.split("_");
+                Long u1 = Long.parseLong(parts[0]);
+                Long u2 = Long.parseLong(parts[1]);
+                Long targetMemberId = u1.equals(currentMemberId) ? u2 : u1;
 
                 MemberDto targetMember = memberService.findById(targetMemberId);
                 String targetNickname = (targetMember != null) ? targetMember.getName() : "알 수 없는 사용자";
 
                 Map<String, Object> currentRoom = new HashMap<>();
                 currentRoom.put("roomId", roomId);
-                currentRoom.put("targetMemberId", targetMemberId); // 상대방 ID 추가
+                currentRoom.put("targetMemberId", targetMemberId);
                 currentRoom.put("targetNickname", targetNickname);
                 model.addAttribute("currentRoom", currentRoom);
 
-                // 좌측 목록용 데이터 객체 추가
-                Map<String, Object> roomItem = new HashMap<>();
-                roomItem.put("roomId", roomId);
-                roomItem.put("targetNickname", targetNickname);
-                roomItem.put("lastMessage", "대화를 시작하세요.");
-                roomItem.put("lastMessageTime", "방금 전");
-                roomItem.put("unreadCount", 0);
-                chatRooms.add(roomItem);
+                List<ChatMessage> messages = chatRoomRegistry.getMessages(roomId);
+                model.addAttribute("messages", messages);
             }
-
-            // TODO: 실제 DB 구현 시 chatService.listChatRooms(currentMemberId) 결과를 넣으시면 됩니다.
-            model.addAttribute("chatRooms", chatRooms);
 
             return "mykitchen/mychat";
         } catch (IllegalStateException e) {
