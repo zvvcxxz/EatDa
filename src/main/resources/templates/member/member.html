@@ -142,18 +142,6 @@
                 </div>
             </div>
 
-            <!-- 약관 동의 (가입 모드일 때만 노출) -->
-            <div class="form-section" th:if="${mode == 'account'}">
-                <div class="input-group full-width">
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="checkbox" id="agree" name="agree" checked onchange="document.getElementById('sendBtn').disabled = !this.checked">
-                            <label for="agree">서비스 <a href="#" style="color: #2b6cb0; text-decoration: underline;">이용약관</a> 및 개인정보 처리방침에 동의합니다.</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- 버튼 영역 -->
             <div style="margin-top: 30px; display: flex; gap: 10px;">
                 <button type="button" id="sendBtn" class="btn-submit" onclick="memberOk()" 
@@ -174,13 +162,7 @@
 <th:block layout:fragment="script">
     <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', () => {
-    	const withdrawForm = document.getElementById('withdrawForm');
-    	function withdraw () {
-	   		if(! confirm ("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
-	   		withdrawForm.submit();
-    	};
-    	document.getElementById('withdrawBtn').addEventListener('click', withdraw);
-    	
+    	  	
     	
         const defaultImg = /*[[@{/dist/images/user.png}]]*/ '/dist/images/user.png';
         const uploadImgPath = /*[[@{/uploads/member/}]]*/ '/uploads/member/';
@@ -277,6 +259,13 @@
                 document.querySelector('#loginIdValid').value = 'false';
             });
         }
+        
+        const withdrawForm = document.getElementById('withdrawForm');
+    	function withdraw () {
+	   		if(! confirm ("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+	   		withdrawForm.submit();
+    	};
+    	document.getElementById('withdrawBtn').addEventListener('click', withdraw);
     });
 
 

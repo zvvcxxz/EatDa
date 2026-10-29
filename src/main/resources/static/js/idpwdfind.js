@@ -1,7 +1,5 @@
-// Spring Boot 환경에 맞게 contextPath 설정
 const contextPath = "";
 
-// 1. 아이디 찾기 (AJAX 처리)
 function idFind() {
     const nameInput = document.querySelector("#name");
     const emailInput = document.querySelector("#email");
@@ -27,7 +25,7 @@ function idFind() {
     })
     .then(response => {
         if (!response.ok) throw new Error("HTTP 오류 : " + response.status);
-        return response.text(); // Controller가 String을 반환하므로 text() 사용
+        return response.text(); 
     })
     .then(text => {
         const result = document.querySelector("#findIdResult");
@@ -47,7 +45,6 @@ function idFind() {
     });
 }
 
-// 2. 패스워드 찾기 (유효성 검사 후 Form Submit)
 function sendOk() {
     const f = document.pwdForm;
 
@@ -63,6 +60,5 @@ function sendOk() {
         return;
     }
 
-    // Controller의 pwdFindSubmit이 리다이렉트 방식이므로 폼을 전송함
     f.submit();
 }
