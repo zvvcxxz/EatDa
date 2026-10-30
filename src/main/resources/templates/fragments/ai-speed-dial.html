@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="aiSpeedDial" class="eatda-ai-widget-wrap">
+        <aside class="eatda-ai-widget" aria-label="EatDa AI 메뉴">
+            <!-- 메인 트리거 버튼 (EatDa AI) -->
+            <button type="button" 
+                    class="eatda-ai-main-btn" 
+                    id="eatda-ai-toggle" 
+                    aria-expanded="false" 
+                    aria-controls="eatda-ai-menu"
+                    aria-label="EatDa AI 메뉴 열기">
+                <div class="eatda-ai-btn-content">
+                    <span class="brand-text-top">EatDa</span>
+                    <span class="brand-text-bottom">AI</span>
+                </div>
+                <span class="eatda-ai-close-icon" aria-hidden="true">✕</span>
+            </button>
+
+            <!-- X 버튼으로부터 왼쪽 방향으로 펼쳐지는 메뉴들 -->
+            <div class="eatda-ai-menu" id="eatda-ai-menu" aria-hidden="true">
+                <!-- 4. AI 괴식 추천 (가장 왼쪽) -->
+                <button type="button" 
+                        class="eatda-ai-item item-weird" 
+                        id="open-weird-food" 
+                        aria-label="AI 괴식 추천">
+                    <span class="eatda-ai-icon"><i class="fa-solid fa-flask" aria-hidden="true"></i></span>
+                    <span class="eatda-ai-label">AI 괴식 추천</span>
+                </button>
+                <!-- 3. 냉장고를 부탁해 -->
+                <button type="button" 
+                        class="eatda-ai-item item-fridge" 
+                        id="open-fridge-recipe" 
+                        aria-label="냉장고를 부탁해"
+                        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
+                                 data-login-url=@{/member/login},
+                                 data-recipeai-url=@{/my/recipeai}">
+                    <span class="eatda-ai-icon"><i class="fa-solid fa-carrot" aria-hidden="true"></i></span>
+                    <span class="eatda-ai-label">냉장고를 부탁해</span>
+                </button>
+                
+                <!-- 2. 점심 추천 -->
+                <button type="button" 
+                        class="eatda-ai-item item-lunch" 
+                        id="open-lunch-chat" 
+                        aria-label="점심 추천"
+                        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
+                                 data-login-url=@{/member/login}">
+                    <span class="eatda-ai-icon"><i class="fa-solid fa-utensils" aria-hidden="true"></i></span>
+                    <span class="eatda-ai-label">점심 추천</span>
+                </button>
+                
+                <!-- 1. 상담 챗봇 (X 바로 옆) -->
+                <button type="button" 
+                        class="eatda-ai-item item-counsel" 
+                        id="open-eatda-chat" 
+                        aria-label="상담 챗봇"
+                        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
+                                 data-login-url=@{/member/login},
+                                 data-chat-url=@{/aichatbot/chatbot}">
+                    <span class="eatda-ai-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></span>
+                    <span class="eatda-ai-label">상담 챗봇</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 점심 추천 챗봇 모달 다이얼로그 -->
+        <dialog id="lunch-chat-dialog" class="lunch-chat-dialog" aria-labelledby="lunch-modal-title">
+            <div class="lunch-modal-header">
+                <h2 id="lunch-modal-title">점심메이트</h2>
+                <button type="button" id="close-lunch-chat" aria-label="점심 추천 챗봇 닫기">✕</button>
+            </div>
+            <iframe id="lunch-chat-frame" title="점심 추천 챗봇" th:attr="data-src=@{/ai/aichatbot}"></iframe>
+        </dialog>
+    </div>
+</body>
+</html>

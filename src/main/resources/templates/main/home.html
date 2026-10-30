@@ -300,40 +300,6 @@
                     </article>
                 </section>
             </main>
-		<aside class="mini-rail" aria-label="미니게임">
-			<small><i class="fa-solid fa-gamepad" aria-hidden="true"></i><br />미니게임</small>
-			<button type="button"
-			        id="open-eatda-chat"
-			        aria-label="EatDa AI 챗봇"
-			        th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
-			                 data-login-url=@{/member/login},
-			                 data-chat-url=@{/aichatbot/chatbot}">
-			    <i class="fa-solid fa-robot" aria-hidden="true"></i>
-			</button>
-			<button type="button" id="open-lunch-chat" aria-label="점심 추천 챗봇"
-				th:attr="data-logged-in=${#authorization.expression('isAuthenticated()')},
-                 data-login-url=@{/member/login}">
-				<i class="fa-solid fa-dice" aria-hidden="true"></i>
-			</button>
-			<button data-unlinked aria-label="메뉴 추천 미니게임">
-				<i class="fa-solid fa-trophy" aria-hidden="true"></i>
-			</button>
-			<button data-unlinked aria-label="오늘의 괴식">
-				<i class="fa-solid fa-flask" aria-hidden="true"></i>
-			</button>
-		</aside>
-
-		<dialog id="lunch-chat-dialog" class="lunch-chat-dialog"
-			aria-labelledby="lunch-modal-title">
-		<div class="lunch-modal-header">
-			<h2 id="lunch-modal-title">점심메이트</h2>
-			<button type="button" id="close-lunch-chat" aria-label="점심 추천 챗봇 닫기">
-				✕</button>
-		</div>
-
-		 <iframe id="lunch-chat-frame"
-			title="점심 추천 챗봇" th:attr="data-src=@{/ai/aichatbot}"> </iframe> </dialog>
-
         </th:block>
 	<th:block layout:fragment="script">
 		<script type="module" src="../../static/dist/js/intro.js"

@@ -9,15 +9,17 @@
  <link rel="stylesheet" th:href="@{/dist/css/login-modal.css}">
  <th:block layout:fragment="css"></th:block>
  <link rel="stylesheet" th:href="@{/dist/css/site-polish.css}">
+ <link rel="stylesheet" th:href="@{/css/eatda-ai-widget.css}">
 <!-- mykitchenLayout.html 의 <head> 태그 내부에 추가 -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script defer th:src="@{/js/global-websocket.js}"></script>
+<script defer th:src="@{/js/eatda-ai-widget.js}"></script>
 </head>
 <body class="eatda-layout">
  <header th:replace="~{fragments/header :: header}"></header>
  <th:block layout:fragment="content"></th:block>
  <footer th:replace="~{fragments/footer :: footer}"></footer>
+ <div th:replace="~{fragments/ai-speed-dial :: aiSpeedDial}"></div>
  <!-- 로그인 UI는 독립 프래그먼트에서 한 번만 조립 -->
  <th:block th:replace="~{fragments/loginModal :: loginModal}"></th:block>
  <div id="site-toast" class="toast" role="status" hidden></div>
