@@ -22,19 +22,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSearchMember = document.getElementById('btnSearchMember');
     const searchResultList = document.getElementById('searchResultList');
 
+    let stompClient = null;
     let isRoomDisabled = false;
 
-    window.onWebSocketConnected = function(stompClient) {
-        if (!stompClient || !stompClient.connected) return;
+    // 채팅 전용 독립 WebSocket 연결
+    function connectChatWebSocket() {
+        if (!currentRoomId) return;
 
-        // 현재 방 메시지 구독
-        if (currentRoomId) {
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, () => {
             stompClient.subscribe(`/topic/chat/${currentRoomId}`, (messageOutput) => {
                 const message = JSON.parse(messageOutput.body);
 
-                // [요구사항 2] 상대방 방 나감 처리
+                // 대화방을 연 채로 동일 상대에게 다시 초대를 받은 경우
+                if (message.type === 'CHAT_INVITE') {
+                    const accept = confirm(`${message.senderName}님이 다시 대화를 요청했습니다.\n수락하시겠습니까?`);
+                    if (accept) {
+                        fetch('/mychat/respondInvite', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                roomId: String(message.roomId),
+                                targetUserId: String(message.senderId),
+                                accept: true
+                            })
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                    return;
+                }
+
+                // 상대방이 나가기/로그아웃/종료 시 대화창 비활성화
                 if (message.type === 'LEAVE') {
-                    appendSystemNotice("상대가 방을 나갔습니다.");
+                    appendSystemNotice(message.content || "상대가 방을 나갔습니다.");
                     if (String(message.senderId) !== String(currentMemberId)) {
                         window.setChatInputEnabled(false);
                     }
@@ -43,19 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     scrollToBottom();
                 }
             });
-        }
-    };
-
-    if (window.globalStompClient && window.globalStompClient.connected) {
-        window.onWebSocketConnected(window.globalStompClient);
+        }, (error) => {
+            console.error('채팅 웹소켓 연결 에러:', error);
+            setTimeout(connectChatWebSocket, 5000);
+        });
     }
 
-    // [요구사항 2] 대화방 나가기 버튼 클릭
+    // 진짜 '나가기' 버튼 클릭
     if (leaveRoomBtn) {
         leaveRoomBtn.addEventListener('click', () => {
             if (!confirm('대화방을 나가시겠습니까?')) return;
 
-            if (window.globalStompClient && window.globalStompClient.connected && currentRoomId) {
+            if (stompClient && stompClient.connected && currentRoomId) {
                 const leaveMessage = {
                     type: 'LEAVE',
                     roomId: String(currentRoomId),
@@ -64,11 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     content: `${currentMemberName}님이 대화방을 나갔습니다.`
                 };
 
-                window.globalStompClient.send(
-                    `/app/chat.sendMessage/${currentRoomId}`, 
-                    {}, 
-                    JSON.stringify(leaveMessage)
-                );
+                stompClient.send(`/app/chat.sendMessage/${currentRoomId}`, {}, JSON.stringify(leaveMessage));
             }
 
             window.location.href = '/my/chat';
@@ -85,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollToBottom();
     }
 
-    // [요구사항 2] 입력창 및 전송 버튼 비활성화
     window.setChatInputEnabled = function(enabled) {
         isRoomDisabled = !enabled;
         if (chatInput) {
@@ -97,18 +115,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // [요구사항 2] 메시지 전송 로직 (JS 조작 방어)
     function sendMessage() {
         if (isRoomDisabled || (chatInput && chatInput.disabled)) {
-            alert('메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요');
+            if (window.showGlobalToast) {
+                window.showGlobalToast('메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요');
+            } else {
+                alert('메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요');
+            }
             return;
         }
 
         const content = chatInput.value.trim();
         if (!content) return;
 
-        if (!window.globalStompClient || !window.globalStompClient.connected) {
-            alert('채팅 서버에 연결되어 있지 않습니다.');
+        if (!stompClient || !stompClient.connected) {
+            if (window.showGlobalToast) {
+                window.showGlobalToast('채팅 서버에 연결되어 있지 않습니다.');
+            }
             return;
         }
 
@@ -117,12 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
             roomId: String(currentRoomId),
             senderId: Number(currentMemberId),
             senderName: currentMemberName,
-            receiver: String(targetMemberId), // 수신자 ID (토스트용)
+            receiver: String(targetMemberId),
             content: content,
             createdAtText: formatCurrentTime()
         };
 
-        window.globalStompClient.send(`/app/chat.sendMessage/${currentRoomId}`, {}, JSON.stringify(chatMessage));
+        stompClient.send(`/app/chat.sendMessage/${currentRoomId}`, {}, JSON.stringify(chatMessage));
         chatInput.value = '';
         chatInput.focus();
     }
@@ -157,7 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scrollToBottom() {
         if (chatMessageArea) {
-            chatMessageArea.scrollTop = chatMessageArea.scrollHeight;
+            requestAnimationFrame(() => {
+                chatMessageArea.scrollTop = chatMessageArea.scrollHeight;
+            });
         }
     }
 
@@ -173,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchMembers() {
         const keyword = searchKeywordInput.value.trim();
         if (!keyword) {
-            alert('검색어를 입력해 주세요.');
+            if (window.showGlobalToast) window.showGlobalToast('검색어를 입력해 주세요.');
             return;
         }
 
@@ -222,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // [요구사항 1, 3] 채팅 초대 신청
+    // ★ 대화 신청 (alert 대신 토스트 사용으로 스레드 차단 방지)
     async function startChat(targetMemberId) {
         try {
             const headers = { 'Content-Type': 'application/json' };
@@ -242,25 +267,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // [요구사항 3] 이미 대화 중인 방이 있는 경우
+            // 모달 닫기
+            if (searchModal) searchModal.style.display = 'none';
+
             if (data.exists) {
-                alert(data.message || '이미 대화하고 있는 대화방이 존재합니다.');
+                if (window.showGlobalToast) window.showGlobalToast(data.message || '이미 대화하고 있는 대화방이 존재합니다.');
                 return;
             }
 
-            // 상대방 로그인 안 된 경우
             if (data.isOnline === false) {
-                alert(data.message || '상대방이 현재 오프라인 상태입니다.');
+                if (window.showGlobalToast) window.showGlobalToast(data.message || '상대방이 현재 오프라인 상태입니다.');
                 return;
             }
 
-            // [요구사항 1] 수락 전 안내 메시지 (화면 이동 금지)
+            // ★ 알림창(alert) 대신 부드러운 토스트 메시지 출력
             if (data.status === 'PENDING') {
-                alert(data.message || '상대방에게 대화 요청을 보냈습니다.');
+                if (window.showGlobalToast) {
+                    window.showGlobalToast(data.message || '상대방에게 대화 요청을 보냈습니다. 응답을 기다리는 중입니다.');
+                }
             }
         } catch (error) {
             console.error('1:1 채팅 시작 오류:', error);
-            alert('채팅방 생성 중 오류가 발생했습니다.');
+            if (window.showGlobalToast) window.showGlobalToast('채팅방 생성 중 오류가 발생했습니다.');
         }
     }
 
@@ -326,5 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (currentRoomId) scrollToBottom();
+    if (currentRoomId) {
+        scrollToBottom();
+        connectChatWebSocket();
+    }
 });

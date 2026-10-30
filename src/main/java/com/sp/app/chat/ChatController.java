@@ -32,6 +32,7 @@ public class ChatController {
 
     private final ChatRoomRegistry chatRoomRegistry;
     private final SimpMessagingTemplate messagingTemplate;
+    private final SseNotificationService sseNotificationService;
     private final SimpUserRegistry simpUserRegistry;
     private final MemberService memberService;
 
@@ -80,7 +81,10 @@ public class ChatController {
                 ));
             }
 
-            boolean isTargetConnected = simpUserRegistry.getUser(String.valueOf(targetMemberId)) != null;
+            boolean isSseConnected = sseNotificationService.isConnected(targetMemberId);
+            boolean isWsConnected = simpUserRegistry.getUser(String.valueOf(targetMemberId)) != null;
+            boolean isTargetConnected = isSseConnected || isWsConnected;
+
             if (!isTargetConnected) {
                 return ResponseEntity.ok(Map.of(
                     "exists", false,
@@ -95,11 +99,13 @@ public class ChatController {
             invitePayload.put("senderId", currentMemberId);
             invitePayload.put("senderName", currentMemberName);
 
-            messagingTemplate.convertAndSendToUser(
-                String.valueOf(targetMemberId),
-                "/queue/invite",
-                invitePayload
-            );
+            // 1. SSE 채널로 초대 푸시 발송
+            sseNotificationService.sendToClient(targetMemberId, "CHAT_INVITE", invitePayload);
+
+            // 2. 상대방이 채팅 페이지에 있어 웹소켓이 연결된 경우, 웹소켓 토픽으로도 초대 알림 발송 (이중 방어)
+            if (isWsConnected) {
+                messagingTemplate.convertAndSend("/topic/chat/" + roomId, (Object)invitePayload);
+            }
 
             return ResponseEntity.ok(Map.of(
                 "exists", false,
@@ -131,7 +137,6 @@ public class ChatController {
 
             if (accept) {
                 chatRoomRegistry.activateRoom(roomId, currentMemberId, targetUserId);
-                
                 responsePayload.put("type", "INVITE_ACCEPTED");
                 responsePayload.put("roomId", roomId);
                 responsePayload.put("message", currentMember.getName() + "님이 대화 요청을 수락했습니다.");
@@ -140,11 +145,7 @@ public class ChatController {
                 responsePayload.put("message", "상대방이 채팅 요청을 거절했습니다.");
             }
 
-            messagingTemplate.convertAndSendToUser(
-                String.valueOf(targetUserId),
-                "/queue/inviteResponse",
-                responsePayload
-            );
+            sseNotificationService.sendToClient(targetUserId, "INVITE_RESPONSE", responsePayload);
 
             return ResponseEntity.ok(Map.of("success", true, "accept", accept, "roomId", roomId));
         } catch (Exception e) {
@@ -167,11 +168,7 @@ public class ChatController {
                 .content("메세지를 보낼 수 없습니다. 나간 후 다시 초대해주세요.")
                 .build();
 
-            messagingTemplate.convertAndSendToUser(
-                String.valueOf(message.getSenderId()),
-                "/queue/private",
-                errorMsg
-            );
+            sseNotificationService.sendToClient(message.getSenderId(), "ERROR_NOTICE", errorMsg);
             return;
         }
 
@@ -179,11 +176,8 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
 
         if (message.getReceiver() != null && !message.getReceiver().isEmpty()) {
-            messagingTemplate.convertAndSendToUser(
-                message.getReceiver(),
-                "/queue/private",
-                message
-            );
+            Long receiverId = Long.parseLong(message.getReceiver());
+            sseNotificationService.sendToClient(receiverId, "TALK_TOAST", message);
         }
     }
 }

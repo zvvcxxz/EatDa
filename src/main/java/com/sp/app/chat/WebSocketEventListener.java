@@ -19,6 +19,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import com.sp.app.domain.dto.SessionInfo;
 import com.sp.app.security.CustomUserDetails;
 
+import jakarta.annotation.PreDestroy; // ★ 추가
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,26 +30,32 @@ public class WebSocketEventListener {
 
     private final ChatRoomRegistry chatRoomRegistry;
     private final SimpMessagingTemplate messagingTemplate;
+    private final SseNotificationService sseNotificationService;
 
-    // 3초 유예 시간용 스케줄러
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private final Map<Long, ScheduledFuture<?>> pendingTasks = new ConcurrentHashMap<>();
+    private final Map<Long, ScheduledFuture<?>> pendingDisconnectTasks = new ConcurrentHashMap<>();
 
-    // 페이지 이동 후 재접속 시 예약 취소
+    //서버 종료(Tomcat 종료) 시 스레드 풀을 즉시 종료하여 STS 셧다운 지연 방지
+    @PreDestroy
+    public void cleanup() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+    }
+
     @EventListener
     public void handleConnect(SessionConnectEvent event) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
         SessionInfo info = extractSessionInfo(sha);
 
         if (info != null && info.getMember_id() != null) {
-            ScheduledFuture<?> task = pendingTasks.remove(info.getMember_id());
+            ScheduledFuture<?> task = pendingDisconnectTasks.remove(info.getMember_id());
             if (task != null) {
-                task.cancel(false); // 페이지 이동이었으므로 퇴장 알림 취소
+                task.cancel(false);
             }
         }
     }
 
-    // 소켓 끊김 감지 (브라우저 종료 또는 페이지 이동)
     @EventListener
     public void handleDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
@@ -58,29 +65,33 @@ public class WebSocketEventListener {
             Long memberId = info.getMember_id();
             String memberName = info.getName();
 
-            // 2.5초 후에도 다시 연결되지 않으면 실제 브라우저 종료로 간주
             ScheduledFuture<?> task = scheduler.schedule(() -> {
-                pendingTasks.remove(memberId);
+                pendingDisconnectTasks.remove(memberId);
+
+                if (sseNotificationService.isConnected(memberId)) {
+                    log.info("[WebSocket] 페이지 이동 감지 - 회원ID: {} (SSE 연결 유지 중)", memberId);
+                    return;
+                }
 
                 List<ChatRoomRegistry.RoomInfo> activeRooms = chatRoomRegistry.getActiveRoomsForUser(memberId);
                 for (ChatRoomRegistry.RoomInfo room : activeRooms) {
                     String roomId = room.getRoomId();
 
-                    // 대화방으로 종료 알림 전송
                     ChatMessage leaveMsg = ChatMessage.builder()
                             .type("LEAVE")
                             .roomId(roomId)
                             .senderId(memberId)
                             .senderName(memberName)
-                            .content(memberName + "님이 접속을 종료하셨습니다.")
+                            .content(memberName + "님이 접속을 종료하였습니다.")
                             .build();
 
                     messagingTemplate.convertAndSend("/topic/chat/" + roomId, leaveMsg);
                     chatRoomRegistry.closeRoom(roomId);
+                    log.info("[WebSocket] 완전한 접속 단절 감지 - 방 번호: {}, 회원: {}", roomId, memberName);
                 }
-            }, 2500, TimeUnit.MILLISECONDS);
+            }, 3000, TimeUnit.MILLISECONDS);
 
-            pendingTasks.put(memberId, task);
+            pendingDisconnectTasks.put(memberId, task);
         }
     }
 

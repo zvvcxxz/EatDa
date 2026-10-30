@@ -26,13 +26,28 @@ public class SpringSecurityConfig {
 
 		HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
 		requestCache.setMatchingRequestParameterName(null);
+		requestCache.setRequestMatcher(request -> {
+            String uri = request.getRequestURI();
+            String accept = request.getHeader("Accept");
+            String xmlHeader = request.getHeader("X-Requested-With");
+
+            // /api/ 경로, SSE 요청, AJAX 요청은 RequestCache에 저장하지 않음
+            if (uri.startsWith("/api/") || 
+                uri.startsWith("/ws-chat/") || 
+                "XMLHttpRequest".equals(xmlHeader) || 
+                (accept != null && accept.contains("text/event-stream"))) {
+                return false;
+            }
+            return true;
+        });
 
 		String[] excludeUri = { "/", "/index.html", "/member/login", "/member/account", "/member/logout",
 				"/member/userIdCheck", "/member/complete", "/member/pwdFind", "/member/expired",
 				"/dist/**", "/error/**", "/ws-chat/**", "/member/idFind",
 				"/guest/main", "/guest/list", "/uploads/photo/**", "/favicon.ico", 
 				"/oauth/kakao/callback" ,"/css/**", "/js/**", "/images/**", "/home/**",
-				"/uploads/community/recipes/**","/uploads/community/cooking/**", "/home/recipe-slides"
+				"/uploads/community/recipes/**","/uploads/community/cooking/**", "/home/recipe-slides",
+				"/api/notifications/subscribe"
 				};
 
 		http.cors(Customizer.withDefaults())
