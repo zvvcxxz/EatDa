@@ -15,8 +15,9 @@ export default {
             required: true
         }
     },
+	emits: ['edit', 'deleted'],
 
-    setup(props) {
+    setup(props, {emit}) {
         const store = useInquiryStore();
 
         const loading = ref(false);
@@ -45,11 +46,35 @@ export default {
                 loading.value = false;
             }
         };
+		
+		const fileDownloadUrl = (fileId) => {
+		    return `/api/inquiries/${props.reply.inquiryId}/files/${fileId}`;
+		};
+		
+		const removeReply = async () => {
+		    if (!confirm('이 추가 문의를 삭제하시겠습니까?')) {
+		        return;
+		    }
+
+		    try {
+		        await window.axios.delete(
+		            `/api/inquiries/${props.reply.inquiryId}`
+		        );
+		        alert('추가 문의가 삭제되었습니다.');
+
+		        emit('deleted', props.reply.inquiryId);
+		    } catch (error) {
+		        console.error('추가 문의 삭제 실패:', error);
+		        alert( error.response?.data || '추가 문의 삭제에 실패했습니다.');
+		    }
+		};
 
         return {
             loading,
             detail,
-            toggleReply
+            toggleReply,
+			fileDownloadUrl,
+			removeReply
         };
     }
 };

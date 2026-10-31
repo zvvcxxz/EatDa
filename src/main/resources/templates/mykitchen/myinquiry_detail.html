@@ -94,7 +94,8 @@
 
                             <div v-else>
                                 <inquiry-reply v-for="reply in replies" :key="reply.inquiryId"
-                                    :reply="reply" :parent-id="inquiry.inquiryId"> </inquiry-reply>
+                                    :reply="reply" :parent-id="inquiry.inquiryId"
+                                    @edit="$emit('edit', $event)" @deleted="onReplyDeleted"> </inquiry-reply>
                             </div>
 
                             <inquiry-form v-if="showReplyForm" mode="reply" :parent-id="inquiry.inquiryId"

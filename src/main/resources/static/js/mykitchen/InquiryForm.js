@@ -1,6 +1,7 @@
 import { useInquiryStore } from './InquiryStore.js';
 
 const { ref, reactive, computed, onMounted, onBeforeUnmount } = window.Vue;
+const { useRouter } = window.VueRouter;
 
 export default {
     template: '#inquiry-form-template',
@@ -24,6 +25,7 @@ export default {
 
     setup(props, { emit }) {
         const store = useInquiryStore();
+		const router = useRouter();
 
         const form = reactive({
             inquiryType: 0,
@@ -66,8 +68,12 @@ export default {
                         ['bold', 'italic', 'underline'],
                         [{ list: 'ordered' }, { list: 'bullet' }],
                         ['link'],
-                        ['clean']
-                    ]
+                        ['clean'],
+						['image']
+                    ],
+					imageResize: {
+						modules: ['Resize', 'DisplaySize']
+					}
                 }
             });
         };
@@ -240,7 +246,15 @@ export default {
                 }
 
                 emit('saved', response?.data);
-                emit('cancel');
+                
+				if (props.mode === 'reply') {
+				    // 추가 문의 폼은 부모 상세 화면 안에 있으므로 라우트를 바꾸지 않고 폼만 닫음
+				    emit('cancel');
+				} else { // 일반 문의 등록/수정은 목록 화면으로 이동
+				    await router.push('/');
+				}
+				
+				
             } catch (error) {
                 console.error('문의 저장 실패:', error);
 
@@ -252,6 +266,14 @@ export default {
                 saving.value = false;
             }
         };
+		
+		const cancelForm = () => {
+		    if (props.mode === 'reply') {
+		        emit('cancel');// 상세 화면 안의 추가 문의 작성 폼만 닫기
+		    } else {
+		        router.push('/');// 일반 등록/수정 화면은 목록으로 이동
+		    }
+		};
 
         onMounted(async () => {
             initQuill();
@@ -272,7 +294,8 @@ export default {
             selectFiles,
             removeSelectedFile,
             deleteExistingFile,
-            submit
+            submit,
+			cancelForm
         };
     }
 };

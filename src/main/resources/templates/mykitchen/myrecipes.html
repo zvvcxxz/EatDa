@@ -10,7 +10,7 @@
 <th:block layout:fragment="kitchenContent">
     <section class="panel">
         <div class="section-heading">
-            <h2 th:text="${pageTitle}">내가 작성한 레시피</h2>
+            <h4 th:text="${pageDescribe}">내 레시피</h4>
             <a th:if="${tab == 'mine'}" class="btn btn-primary" th:href="@{/community/recipes/write}">+ 레시피 작성</a>
         </div>
 

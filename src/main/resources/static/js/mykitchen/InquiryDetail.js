@@ -123,6 +123,19 @@ export default {
                 alert('추가 문의 목록을 새로 불러오지 못했습니다.');
             }
         };
+		
+		const onReplyDeleted = async () => {
+		    try {
+		        replies.value = await store.fetchFollowUps(
+		            props.inquiry.inquiryId
+		        );
+
+		        repliesLoaded.value = true;
+		    } catch (error) {
+		        console.error('추가 문의 목록 갱신 실패:', error);
+		        alert('추가 문의 목록을 갱신하지 못했습니다.');
+		    }
+		};
 
         return {
             loading,
@@ -133,7 +146,8 @@ export default {
             fileDownloadUrl,
             toggleDetail,
             removeInquiry,
-            onReplySaved
+            onReplySaved,
+			onReplyDeleted
         };
     }
 };

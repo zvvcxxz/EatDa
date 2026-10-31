@@ -68,6 +68,7 @@ public class MyKitchenController {
     		@RequestParam(name="sort", defaultValue="latest") String sort) {
         model.addAttribute("tab", "mine");
         model.addAttribute("pageTitle", "내가 작성한 레시피");
+        model.addAttribute("pageDescribe", "내가 올린 레시피들을 모아서 볼 수 있어요.");
         
         Long memberId = getLoginMemberId();
 		List<MyRecipeDto> list = null;
@@ -97,6 +98,7 @@ public class MyKitchenController {
     		@RequestParam(name="sort", defaultValue="latest") String sort) {
         model.addAttribute("tab", "favorites");
         model.addAttribute("pageTitle", "찜한 레시피");
+        model.addAttribute("pageDescribe", "내가 찜 해놓은 레시피는 어떤 것들이 있을까요?");
 
         Long memberId = getLoginMemberId();
         List<MyRecipeDto> list = null; 

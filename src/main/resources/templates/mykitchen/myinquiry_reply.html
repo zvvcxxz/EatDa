@@ -29,8 +29,29 @@
 
                     <template v-else-if="detail">
                         <h3>추가 문의 내용</h3>
-
                         <div class="inquiry-detail-content" v-html="detail.content"></div>
+                        
+						<section v-if="detail.files && detail.files.length" class="file-attach-list">	
+						    <h3>첨부파일</h3>						
+						    <ul>
+						        <li v-for="file in detail.files" :key="file.inquiryFileId" class="file-item">						
+						            <a :href="fileDownloadUrl(file.inquiryFileId)">
+						                {{ file.originalFileName }}
+						            </a>
+						        </li>
+						    </ul>
+						</section>
+						
+						<div v-if="detail.status === 0" class="inquiry-actions">
+						    <button type="button" class="inquiry-btn inquiry-btn-outline"
+						            @click="$emit('edit', reply.inquiryId)">
+						        수정
+						    </button>
+						    <button type="button" class="inquiry-btn inquiry-btn-danger"
+						            @click="removeReply">
+						        삭제
+						    </button>
+						</div>
 
                         <section v-if="detail.answerContent" class="admin-answer">
                             <h3>관리자 답변</h3>
