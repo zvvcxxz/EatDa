@@ -55,7 +55,7 @@ public class MyRecipeAiServiceImpl implements MyRecipeAiService {
 			
 			// PostgreSQL pgVector 유사 검색
 			List<Map<String, Object>> recipes = 
-					recipeMapper.findBySimilarRecipes(vectorString, 5);
+					recipeMapper.findBySimilarRecipes(vectorString, 8);
 			
 			
 			// 사용자가 보유한 재료 정규화

@@ -126,7 +126,12 @@ public class MemberServiceImpl implements MemberService {
 				
 				String saveFilename = storageService.uploadFileToServer(dto.getSelectFile(), uploadPath);
 				dto.setProfile_photo(saveFilename);
-			}			
+			} else if("true".equals(dto.getDeleteProfileFlag())) {
+	            if(dto.getProfile_photo() != null && !dto.getProfile_photo().isBlank()) {
+	                storageService.deleteFile(uploadPath, dto.getProfile_photo());
+	            }
+	            dto.setProfile_photo(""); // DB에 NULL 또는 빈값 업데이트
+	        }
 			
 			// 패스워드가 입력되었고, 기존 패스워드와 다른 경우 암호화
 			if(dto.getPassword() != null && !dto.getPassword().isBlank()) {
@@ -136,9 +141,7 @@ public class MemberServiceImpl implements MemberService {
 					dto.setPassword(encPassword);
 				}
 			}
-			
 			mapper.updateMember(dto);
-			mapper.updateMemberPassword(dto);
 			
 		} catch (Exception e) {
 			log.info("updateMember : ", e);
@@ -306,21 +309,21 @@ public class MemberServiceImpl implements MemberService {
 			
 			Mail mail = new Mail();
 			mail.setReceiverEmail(dto.getEmail());
-			mail.setSenderEmail("메일설정이메일@도메인");
-			mail.setSenderName("관리자");
+			mail.setSenderEmail("아이디@gmail.com");
+			mail.setSenderName("EatDa");
 			mail.setSubject("임시 패스워드 발급");
 			mail.setContent(result);
 			
 			String encPassword = bcryptEncoder.encode(password.toString());
 			dto.setPassword(encPassword);
-			mapper.updateMemberPassword(dto);
-			
-			mapper.updateFailureCountReset(dto.getLogin_id());
 			
 			boolean b = mailSender.mailSend(mail);
 			if(!b) {
 				throw new Exception("이메일 전송중 오류가 발생했습니다.");
 			}
+			mapper.updateMemberPassword(dto);
+			
+			mapper.updateFailureCountReset(dto.getLogin_id());
 
 		} catch (Exception e) {
 			throw e;

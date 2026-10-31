@@ -19,6 +19,7 @@ public class MemberDto {
 		private String email;
 		private String tel;            // PHONE 
 		private String profile_photo;  // PROFILE_URL 
+		private String deleteProfileFlag;  // PROFILE_URL 
 		
 		// 계정 상태 및 로그인 보안
 		private int enabled;  // STATUS 매핑 (1: 정상, 2: 정지, 3: 탈퇴)

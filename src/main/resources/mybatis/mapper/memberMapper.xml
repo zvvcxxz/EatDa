@@ -201,6 +201,7 @@
 			<if test="addr2 != null">ADDR2 = #{addr2},</if>
 			<if test="receive_email != 0">RECEIVE_EMAIL = #{receive_email},</if>
 			<if test="role_id != 0">ROLE_ID = #{role_id},</if>
+			<if test="password != null and password != ''">PASSWORD_HASH = #{password},</if>
 			UPDATED_AT = SYSTIMESTAMP
 		</set>
 		WHERE MEMBER_ID = #{member_id}

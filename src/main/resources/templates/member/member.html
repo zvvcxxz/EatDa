@@ -41,6 +41,8 @@
                     <label for="selectFile" class="profile-upload-btn" title="프로필 사진 선택">
                         <i class="bi bi-camera-fill"></i>
                     </label>
+                    <!-- 프로필 사진 삭제 여부 플래그 (기본값: false) -->
+					<input type="hidden" name="deleteProfileFlag" id="deleteProfileFlag" value="false">
                 </div>
                 <!-- MemberDto의 MultipartFile selectFile 필드 매핑 -->
                 <input type="file" class="file-input-hidden" id="selectFile" name="selectFile" accept="image/png, image/jpg, image/jpeg">
@@ -162,8 +164,6 @@
 <th:block layout:fragment="script">
     <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', () => {
-    	  	
-    	
         const defaultImg = /*[[@{/dist/images/user.png}]]*/ '/dist/images/user.png';
         const uploadImgPath = /*[[@{/uploads/member/}]]*/ '/uploads/member/';
         const existingImg = /*[[${dto?.profile_photo}]]*/ null;
@@ -171,14 +171,13 @@
         const avatarEL = document.querySelector('.img-avatar');
         const inputEL = document.querySelector('#selectFile');
         const btnInitEL = document.querySelector('.btn-photo-init');
-        
+
         const pwdInput = document.querySelector('#password');
         const pwd2Input = document.querySelector('#password2');
         const pwdRuleMsg = document.querySelector('#pwdRuleMsg');
         const pwdMatchMsg = document.querySelector('#pwdMatchMsg');
 
-        // 영문, 숫자, 특수문자(!@#$%^&*+=-) 필수 포함, 5~10자 정규식
-        //const pwdPattern = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*+=-]).{5,10}$/;
+        // 영문, 숫자, 특수문자 조합 5~10자 정규식
         const pwdPattern = /^(?=.*[a-zA-Z])(?=.*[0-9!@#$%^&*+=-]).{5,10}$/;
 
         // 1. 비밀번호 입력 시 규칙 및 재확인 동시 검증
@@ -190,13 +189,12 @@
                     pwdRuleMsg.textContent = '';
                 } else if (!pwdPattern.test(val)) {
                     pwdRuleMsg.textContent = '❌ 5~10자 이내의 영문, 숫자 또는 특수문자를 조합하세요.';
-                    pwdRuleMsg.style.color = '#e53e3e'; // 빨간색
+                    pwdRuleMsg.style.color = '#e53e3e';
                 } else {
                     pwdRuleMsg.textContent = '✅ 안전한 비밀번호입니다.';
-                    pwdRuleMsg.style.color = '#38a169'; // 초록색
+                    pwdRuleMsg.style.color = '#38a169';
                 }
 
-                // 비밀번호 재확인 입력창에 값이 있으면 일치 여부도 다시 체크
                 checkPasswordMatch();
             });
         }
@@ -207,6 +205,8 @@
         }
 
         function checkPasswordMatch() {
+            if (!pwdInput || !pwd2Input || !pwdMatchMsg) return;
+
             const val1 = pwdInput.value;
             const val2 = pwd2Input.value;
 
@@ -217,57 +217,126 @@
 
             if (val1 === val2) {
                 pwdMatchMsg.textContent = '✅ 비밀번호가 일치합니다.';
-                pwdMatchMsg.style.color = '#38a169'; // 초록색
+                pwdMatchMsg.style.color = '#38a169';
             } else {
                 pwdMatchMsg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
-                pwdMatchMsg.style.color = '#e53e3e'; // 빨간색
+                pwdMatchMsg.style.color = '#e53e3e';
             }
         }
-        
+
         // 프로필 사진 변경 미리보기
         const maxSize = 800 * 1024; // 800KB
-        inputEL.addEventListener('change', ev => {
-            let file = ev.target.files[0];
-            if (!file) {
-                avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
-                return;
-            }
-            
-            if (file.size > maxSize || !file.type.match('image.*')) {
-                alert('800KB 이하의 이미지 파일만 업로드 가능합니다.');
-                inputEL.value = '';
-                return;
-            }
-            
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                avatarEL.src = e.target.result;
-            }
-            reader.readAsDataURL(file);          
-        });
-        
-        // 사진 초기화 버튼
-        btnInitEL.addEventListener('click', () => {
-            inputEL.value = '';
-            avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
-        });
+        if (inputEL) {
+            inputEL.addEventListener('change', ev => {
+                let file = ev.target.files[0];
+                if (!file) {
+                    avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
+                    return;
+                }
 
+                if (file.size > maxSize || !file.type.match('image.*')) {
+                    alert('800KB 이하의 이미지 파일만 업로드 가능합니다.');
+                    inputEL.value = '';
+                    return;
+                }
+
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarEL.src = e.target.result;
+                }
+                reader.readAsDataURL(file);          
+            });
+        }
+
+    	 // 사진 초기화 버튼
+        if (btnInitEL) {
+            btnInitEL.addEventListener('click', () => {
+                if (inputEL) inputEL.value = ''; // 선택된 파일 초기화
+                if (avatarEL) avatarEL.src = defaultImg; // 무조건 기본 이미지로 변경
+                
+                // 수정 모드일 때 기존 프로필 사진을 삭제하겠다는 플래그 설정
+                const deleteFlagEL = document.querySelector('#deleteProfileFlag');
+                if (deleteFlagEL) {
+                    deleteFlagEL.value = 'true';
+                }
+            });
+        }
+
+        // 새 파일 선택 시 삭제 플래그 다시 false로 원복
+        if (inputEL) {
+            inputEL.addEventListener('change', ev => {
+                let file = ev.target.files[0];
+                const deleteFlagEL = document.querySelector('#deleteProfileFlag');
+                
+                if (!file) {
+                    avatarEL.src = existingImg ? (uploadImgPath + existingImg) : defaultImg;
+                    if (deleteFlagEL) deleteFlagEL.value = 'false';
+                    return;
+                }
+
+                if (file.size > maxSize || !file.type.match('image.*')) {
+                    alert('800KB 이하의 이미지 파일만 업로드 가능합니다.');
+                    inputEL.value = '';
+                    return;
+                }
+
+                if (deleteFlagEL) deleteFlagEL.value = 'false'; // 새 파일 선택했으므로 삭제 플래그 해제
+
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarEL.src = e.target.result;
+                }
+                reader.readAsDataURL(file);          
+            });
+        }
         // 아이디 변경 시 중복 검사 초기화
         const loginIdInput = document.querySelector('#login_id');
         if (loginIdInput) {
             loginIdInput.addEventListener('input', () => {
-                document.querySelector('#loginIdValid').value = 'false';
+                const loginIdValid = document.querySelector('#loginIdValid');
+                if (loginIdValid) loginIdValid.value = 'false';
             });
         }
-        
-        const withdrawForm = document.getElementById('withdrawForm');
-    	function withdraw () {
-	   		if(! confirm ("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
-	   		withdrawForm.submit();
-    	};
-    	document.getElementById('withdrawBtn').addEventListener('click', withdraw);
+
+        // 회원탈퇴 버튼 처리 (Null 안전 처리)
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        if (withdrawBtn) {
+            withdrawBtn.addEventListener('click', () => {
+                if (!confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+                const withdrawForm = document.getElementById('withdrawForm');
+                if (withdrawForm) withdrawForm.submit();
+            });
+        }
     });
 
+    // 생년월일 유효성 검증 함수 (미입력 시 통과, 입력 시 날짜 정확성 검사)
+    function isValidDateString(dateStr) {
+        if (!dateStr || dateStr.trim() === '') {
+            return true; // 입력하지 않은 경우 (선택사항이므로 정상 통과)
+        }
+
+        // YYYY-MM-DD 형식 검사
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateStr)) return false;
+
+        const parts = dateStr.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const day = parseInt(parts[2], 10);
+
+        // 연도 범위 체크 (1900년 이상 ~ 현재 연도 이하)
+        const currentYear = new Date().getFullYear();
+        if (year < 1900 || year > currentYear) return false;
+
+        // 월/일 범위 기본 체크
+        if (month < 1 || month > 12) return false;
+
+        // 실제 존재하는 날짜인지 체크 (예: 2월 30일, 4월 31일 등 자동 오버플로우 감지)
+        const dateObj = new Date(year, month - 1, day);
+        return dateObj.getFullYear() === year &&
+               dateObj.getMonth() === (month - 1) &&
+               dateObj.getDate() === day;
+    }
 
     // 아이디 중복 검사 (Controller /member/userIdCheck 연동)
     function userIdCheck() {
@@ -283,7 +352,7 @@
         }
 
         const url = /*[[@{/member/userIdCheck}]]*/ '/member/userIdCheck';
-        
+
         fetch(url, {
             method: 'POST',
             headers: {
@@ -315,8 +384,8 @@
         const f = document.memberForm;
         const mode = /*[[${mode}]]*/ 'account';
         let str, p; 
-		
-        // 회원가입 모드일 때만 아이디 및 중복검사 체크
+
+        // 1. 회원가입 모드일 때만 아이디 및 중복검사 체크
         if (mode === 'account') {
             p = /^[a-z][a-z0-9_]{4,9}$/i;
             str = f.login_id.value;
@@ -333,7 +402,6 @@
             }
 
             // 비밀번호 필수 입력
-            
             p = /^(?=.*[a-z])(?=.*[!@#$%^*+=-]|.*[0-9]).{5,10}$/i;
             str = f.password.value;
             if (!p.test(str)) { 
@@ -366,7 +434,7 @@
             }
         }
 
-        // 이름 검증
+        // 2. 이름 검증
         p = /^[가-힣]{2,5}$/;
         str = f.name.value;
         if (!p.test(str)) {
@@ -375,15 +443,15 @@
             return;
         }
 
-        // 생년월일 검증
-        /*str = f.birth.value;
+        // 3. 생년월일 검증 (입력 시에만 날짜 유효성 체크)
+        str = f.birth.value;
         if (!isValidDateString(str)) {
-            alert('올바른 생년월일을 선택하세요.');
+            alert('올바른 생년월일을 입력하거나 선택하세요.');
             f.birth.focus();
             return;
-        }*/
+        }
 
-        // 이메일 검증
+        // 4. 이메일 검증
         p = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;    
         str = f.email.value;
         if (!p.test(str)) {
@@ -391,21 +459,6 @@
             f.email.focus();
             return;
         }
-
-        // 전화번호 검증
-        p = /^(010)-?\d{4}-?\d{4}$/;    
-        str = f.tel.value;
-        if (!p.test(str)) {
-            alert('올바른 전화번호를 입력하세요.');
-            f.tel.focus();
-            return;
-        }
-
-        /* 주소 검증
-        if (f.zip.value === '' || f.addr1.value === '') {
-            alert('우편번호 검색을 통해 주소를 입력해 주세요.');
-            return;
-        }*/
 
         f.submit();
     }
