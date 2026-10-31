@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 public class KakaoUser {
 	private Long id;
-	private String nickname;
+	private String name;
 	private String email;
 	private boolean email_verified;
 }

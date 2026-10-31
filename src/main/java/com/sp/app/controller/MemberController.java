@@ -176,6 +176,21 @@ public class MemberController {
 	@GetMapping("pwd")
 	public String pwdForm(@RequestParam(name = "dropout", required = false) String dropout, 
 			Model model) {
+		SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+	    // 소셜 로그인 회원인 경우 비밀번호 확인 없이 바로 수정/탈퇴 페이지로 이동
+	    if (info.getLogin_type() != null && !"local".equals(info.getLogin_type())) {
+	        MemberDto dto = service.findById(info.getMember_id());
+	        model.addAttribute("dto", dto);
+	        
+	        if (dropout == null) {
+	            model.addAttribute("mode", "update");
+	            return "member/member"; // 회원 정보 수정 페이지로 직접 이동
+	        } else {
+	            model.addAttribute("mode", "dropout");
+	            return "member/pwd"; 
+	        }
+	    }
 
 		if (dropout == null) {
 			model.addAttribute("mode", "update");
@@ -301,11 +316,18 @@ public class MemberController {
 		try {
 			MemberDto dto = service.findByLoginId(login_id);
 			
-			// 계정이 존재하지 않거나, 이메일이 없거나, 정지/탈퇴(STATUS != 1)된 계정이거나, 이름 불일치 시
-			if (dto == null || dto.getEmail() == null || dto.getEnabled() != 1 || !dto.getName().equals(name)) {
-				model.addAttribute("message", "등록된 정보가 없거나 이용할 수 없는 계정입니다.");
-				return "member/pwdFind";
-			}
+			if (dto == null || dto.getEnabled() != 1 || !name.equals(dto.getName())) {
+	            model.addAttribute("message", "등록된 정보가 없거나 이용할 수 없는 계정입니다.");
+	            return "member/pwdFind";
+	        }
+	        if (dto.getSns_id() != null || dto.getSns_provider() != null) {
+	            model.addAttribute("message", "소셜 로그인 계정은 사이트 비밀번호가 따로 존재하지 않습니다. 해당 SNS를 이용해 주세요.");
+	            return "member/pwdFind";
+	        }
+	        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
+	            model.addAttribute("message", "등록된 이메일 정보가 없어 패스워드를 재발급할 수 없습니다.");
+	            return "member/pwdFind";
+	        }
 			
 			// 임시 패스워드 생성 및 이메일 전송
 			service.generatePwd(dto);

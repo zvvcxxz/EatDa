@@ -3,7 +3,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
-    <!-- 커스텀 회원 공통 CSS -->
     <link rel="stylesheet" th:href="@{/css/member/common.css}" />
 </head>
 <body>
@@ -19,19 +18,16 @@
             <!-- Spring Security 로그인 폼 -->
             <form name="loginForm" th:action="@{/member/login}" method="post" class="login-form">
                 
-                <!-- 아이디 입력 -->
                 <div class="input-group">
                     <label for="login_id">아이디</label>
                     <input type="text" id="login_id" name="login_id" placeholder="아이디를 입력하세요" autofocus required>
                 </div>
 
-                <!-- 비밀번호 입력 -->
                 <div class="input-group" style="margin-top: 12px;">
                     <label for="password">패스워드</label>
                     <input type="password" id="password" name="password" placeholder="패스워드를 입력하세요" autocomplete="off" required>
                 </div>
 
-                <!-- 아이디 저장 체크박스 -->
                 <div style="margin-top: 12px;">
                     <label class="checkbox-label" for="rememberMe">
                         <input type="checkbox" id="rememberMe">
@@ -39,34 +35,24 @@
                     </label>
                 </div>
 
-                <!-- 로그인 버튼 -->
                 <button type="button" class="btn-submit" onclick="sendLogin()">로그인</button>
 
-                <!-- ★ 에러 메시지 박스 (실패 시에만 표시) ★ -->
                 <div class="message-area" th:if="${param.error != null or message != null}">
                     <i class="bi bi-exclamation-circle-fill"></i>
                     <span th:text="${message != null ? message : '아이디 또는 패스워드가 일치하지 않습니다.'}">아이디 또는 패스워드가 일치하지 않습니다.</span>
                 </div>
 
-                <!-- SNS 로그인 구분선 -->
                 <div class="social-divider">
                     <span>SNS 계정으로 간편 로그인</span>
                 </div>
 
-                <!-- 소셜 로그인 버튼 영역 -->
+                <!-- 전체 버튼 클릭 시 카카오 로그인 동작 -->
                 <div class="social-login-group">
-                    <a th:href="@{/oauth/kakao}" class="btn-social btn-kakao">
+                    <a href="javascript:void(0);" onclick="loginWithKakao(event)" class="btn-social btn-kakao">
                         <i class="bi bi-chat-fill"></i> 카카오
-                    </a>
-                    <a th:href="@{/oauth/naver}" class="btn-social btn-naver">
-                        <span class="naver-icon">N</span> 네이버
-                    </a>
-                    <a th:href="@{/oauth/google}" class="btn-social btn-google">
-                        <i class="bi bi-google"></i> 구글
                     </a>
                 </div>
 
-                <!-- ★ 하단 링크 영역 (3가지 링크) ★ -->
                 <div class="page-links">
                     <a th:href="@{/member/idFind}">아이디 찾기</a>
                     <span class="divider">|</span>
@@ -114,9 +100,20 @@
 
             f.submit();
         }
+        
+        function loginWithKakao(e) {
+            if (e) e.preventDefault();
+            
+            const JAVASCRIPT_KEY = '카카오js키';
+            const REDIRECT_URI = window.location.origin + '/oauth/kakao/callback';
+            
+            const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${JAVASCRIPT_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&prompt=login`;
+            const setting = 'width=500,height=700,menubar=no,location=no,status=no,scrollbars=yes,resizable=no';
+            
+            window.open(kakaoAuthUrl, 'kakaoLogin', setting);
+        }
     </script>
 </th:block>
 
 </body>
-
 </html>

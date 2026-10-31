@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <!-- 기존 로그인 디자인을 순수 CSS로 표현한 독립 프래그먼트 -->
+  <!-- 독립형 로그인 모달 프래그먼트 -->
   <dialog th:fragment="loginModal" id="login-modal" class="login-dialog"
           aria-labelledby="modal-login-title" aria-describedby="modal-login-description">
     <button type="button" class="login-close" data-close-login aria-label="로그인 닫기">
@@ -26,57 +26,77 @@
                autocomplete="current-password" placeholder="••••••••" required>
       </div>
       <div class="login-options">
-		  <label class="login-remember">
-		    <input type="checkbox" id="modal-remember-id" name="remember-id">
-		    <span>아이디 저장</span>
-		  </label>
-		  <nav class="login-links" aria-label="회원 계정 메뉴">
-		    <a class="login-signup" href="/member/account" th:href="@{/member/account}">회원가입</a>
-		    <span class="login-divider" aria-hidden="true">|</span>
-		    <a href="/member/pwdFind" th:href="@{/member/idFind}">아이디 찾기</a>
-		    <span class="login-divider" aria-hidden="true">|</span>
-		    <a href="/member/pwdFind" th:href="@{/member/pwdFind}">비밀번호 찾기</a>
-		  </nav>
-		</div>
+        <label class="login-remember">
+          <input type="checkbox" id="modal-remember-id" name="remember-id">
+          <span>아이디 저장</span>
+        </label>
+        <nav class="login-links" aria-label="회원 계정 메뉴">
+          <a class="login-signup" href="/member/account" th:href="@{/member/account}">회원가입</a>
+          <span class="login-divider" aria-hidden="true">|</span>
+          <a th:href="@{/member/idFind}">아이디 찾기</a>
+          <span class="login-divider" aria-hidden="true">|</span>
+          <a th:href="@{/member/pwdFind}">비밀번호 찾기</a>
+        </nav>
+      </div>
       <button type="submit" class="login-submit">로그인하고 조리 시작하기 🍳</button>
     </form>
 
     <div class="login-social">
       <p>SNS 계정으로 간편 시작</p>
       <div class="login-social-buttons">
-        <a href="/oauth/kakao" th:href="@{/oauth/kakao}" class="login-social-button kakao">카카오</a>
-        <a href="/oauth/naver" th:href="@{/oauth/naver}" class="login-social-button naver">네이버</a>
-        <a href="/oauth/google" th:href="@{/oauth/google}" class="login-social-button google">구글</a>
+        <!-- onclick 이벤트에 event 객체 전달 -->
+        <a href="javascript:void(0);" onclick="loginWithKakao(event)" class="login-social-button kakao">카카오</a>
       </div>
     </div>
 
-	<script type="text/javascript">
-		document.addEventListener('DOMContentLoaded', () => {
-			  const loginForm = document.querySelector('.login-form');
-			  const loginIdInput = document.getElementById('modal-login-id');
-			  const rememberIdCheckbox = document.getElementById('modal-remember-id');
-			
-			  // 1. 페이지 로드 시 저장된 아이디 불러오기
-			  const savedLoginId = localStorage.getItem('savedLoginId');
-			  if (savedLoginId) {
-			    loginIdInput.value = savedLoginId;
-			    rememberIdCheckbox.checked = true;
-			  }
-			
-			  // 2. 로그인 폼 제출(submit) 시 아이디 저장 여부 처리
-			  if (loginForm) {
-			    loginForm.addEventListener('submit', () => {
-			      if (rememberIdCheckbox.checked) {
-			        // '아이디 저장' 체크 시 localStorage에 저장
-			        localStorage.setItem('savedLoginId', loginIdInput.value.trim());
-			      } else {
-			        // 체크 해제 시 저장된 아이디 삭제
-			        localStorage.removeItem('savedLoginId');
-			      }
-			    });
-			  }
-		});
-	</script>
+    <!-- 스크립트는 <dialog> 내부에 배치 -->
+    <script type="text/javascript">
+      (function initModalScript() {
+        const loginForm = document.querySelector('.login-dialog .login-form');
+        const loginIdInput = document.getElementById('modal-login-id');
+        const rememberIdCheckbox = document.getElementById('modal-remember-id');
+
+        if (loginIdInput && rememberIdCheckbox) {
+          // 1. 아이디 저장 복원
+          const savedLoginId = localStorage.getItem('savedLoginId');
+          if (savedLoginId) {
+            loginIdInput.value = savedLoginId;
+            rememberIdCheckbox.checked = true;
+          }
+
+          // 2. 폼 제출 시 아이디 저장 처리
+          if (loginForm) {
+            loginForm.addEventListener('submit', () => {
+              if (rememberIdCheckbox.checked) {
+                localStorage.setItem('savedLoginId', loginIdInput.value.trim());
+              } else {
+                localStorage.removeItem('savedLoginId');
+              }
+            });
+          }
+        }
+      })();
+
+      // 카카오 팝업 로그인
+      function loginWithKakao(e) {
+        if (e) e.preventDefault();
+
+        // 1. Native HTML <dialog> 모달 닫기
+        const modalEl = document.getElementById('login-modal');
+        if (modalEl && typeof modalEl.close === 'function') {
+          modalEl.close();
+        }
+
+        // 2. 카카오 인증 팝업 호출
+        const JAVASCRIPT_KEY = '4939a799e891d448a0cad8ab676720cf';
+        const REDIRECT_URI = window.location.origin + '/oauth/kakao/callback';
+        
+        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${JAVASCRIPT_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&prompt=login`;
+        const setting = 'width=500,height=700,menubar=no,location=no,status=no,scrollbars=yes,resizable=no';
+        
+        window.open(kakaoAuthUrl, 'kakaoLogin', setting);
+      }
+    </script>
   </dialog>
 </body>
 </html>

@@ -49,7 +49,7 @@ public class MemberSnsController {
 				
 				dto.setSns_id(sns_id);
 				dto.setSns_provider(sns_provider);
-				dto.setName(kakaoUser.getNickname());
+				dto.setName(kakaoUser.getName());
 				dto.setEmail(kakaoUser.getEmail());
 				
 				memberService.insertSnsMember(dto);
