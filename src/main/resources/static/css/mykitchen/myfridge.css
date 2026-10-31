@@ -424,7 +424,7 @@
     flex: 1;
 }
 
-/* 말풍선 뱃지 (중복 통합 및 바운스 애니메이션) */
+/* 말풍선 뱃지 */
 .speech-bubble {
     position: relative;
     display: inline-block;
@@ -437,7 +437,7 @@
     animation: bubbleBounce 1.2s infinite alternate ease-in-out;
 }
 
-.speech-bubble.expired { background-color: #e03131; }
+.speech-bubble.expired { background-color: #ff8080; }
 .speech-bubble.expiring { background-color: #f59f00; }
 
 @keyframes bubbleBounce {

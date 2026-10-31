@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -49,4 +50,9 @@ public interface MemberFridgeRepository extends JpaRepository<MemberFridge, Long
     // 특정 회원의 냉장고 품목 전체 조회 (재료 정보와 함께 Fetch Join)
     @Query("SELECT mf FROM MemberFridge mf JOIN FETCH mf.ingredient WHERE mf.memberId = :memberId ORDER BY mf.createdAt DESC")
     List<MemberFridge> findAllByMemberIdWithIngredient(@Param("memberId") Long memberId);
+    
+    // 💡 기준일(thresholdDate) 이하의 유통기한을 가진 재료 일괄 삭제
+    @Modifying
+    @Query("DELETE FROM MemberFridge mf WHERE mf.expiresOn <= :thresholdDate")
+    int deleteExpiredItemsOlderThanWeek(@Param("thresholdDate") LocalDate thresholdDate);
 }
