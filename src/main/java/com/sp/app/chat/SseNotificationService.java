@@ -1,6 +1,7 @@
 package com.sp.app.chat;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class SseNotificationService {
 
     private static final Long DEFAULT_TIMEOUT = 60 * 1000L * 30; // 30분
@@ -20,13 +23,22 @@ public class SseNotificationService {
         closeEmitter(memberId);
 
         SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+
+        // 구 연결의 콜백이 신규 emitter를 삭제하지 못하도록 (memberId, emitter) 쌍으로 삭제
+        emitter.onCompletion(() -> emitters.remove(memberId, emitter));
+        emitter.onTimeout(() -> emitters.remove(memberId, emitter));
+        emitter.onError((e) -> emitters.remove(memberId, emitter));
+
         emitters.put(memberId, emitter);
+        log.info("[SSE] 구독 등록 완료 - 회원ID: {}", memberId);
 
-        emitter.onCompletion(() -> emitters.remove(memberId));
-        emitter.onTimeout(() -> emitters.remove(memberId));
-        emitter.onError((e) -> emitters.remove(memberId));
-
-        sendToClient(memberId, "INIT", Map.of("message", "SSE Connected"));
+        // INIT 메시지는 Spring MVC 핸들러가 응답을 생성한 직후 비동기로 안전하게 전송
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(150);
+                sendToClient(memberId, "INIT", Map.of("message", "SSE Connected"));
+            } catch (Exception ignored) {}
+        });
 
         return emitter;
     }
@@ -39,7 +51,8 @@ public class SseNotificationService {
                         .name(eventName)
                         .data(data, MediaType.APPLICATION_JSON));
             } catch (Exception e) {
-                emitters.remove(memberId);
+                // 해당 emitter 인스턴스만 안전하게 제거
+                emitters.remove(memberId, emitter);
                 try {
                     emitter.completeWithError(e);
                 } catch (Exception ignored) {}
@@ -56,7 +69,7 @@ public class SseNotificationService {
                         .name("PING")
                         .data("keep-alive", MediaType.TEXT_PLAIN));
             } catch (Exception e) {
-                emitters.remove(memberId);
+                emitters.remove(memberId, emitter);
                 try {
                     emitter.completeWithError(e);
                 } catch (Exception ignored) {}
@@ -73,7 +86,6 @@ public class SseNotificationService {
         }
     }
 
-    //서버 종료 시 모든 SSE 연결 해제
     @PreDestroy
     public void clearAllEmitters() {
         emitters.forEach((id, emitter) -> {

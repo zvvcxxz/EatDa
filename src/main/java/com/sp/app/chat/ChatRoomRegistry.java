@@ -45,6 +45,11 @@ public class ChatRoomRegistry {
         return info != null && info.isActive();
     }
 
+    //roomId로 RoomInfo 객체 직접 조회
+    public RoomInfo getRoomInfo(String roomId) {
+        return roomMap.get(roomId);
+    }
+
     public void activateRoom(String roomId, Long user1, Long user2) {
         RoomInfo info = roomMap.get(roomId);
         if (info == null) {

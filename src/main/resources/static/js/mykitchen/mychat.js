@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 대화방을 연 채로 동일 상대에게 다시 초대를 받은 경우
                 if (message.type === 'CHAT_INVITE') {
-                    const accept = confirm(`${message.senderName}님이 다시 대화를 요청했습니다.\n수락하시겠습니까?`);
+                    const accept = confirm(`${message.senderName}님에게 1:1 대화요청이 들어왔습니다.\n수락하시겠습니까?`);
                     if (accept) {
                         fetch('/mychat/respondInvite', {
                             method: 'POST',

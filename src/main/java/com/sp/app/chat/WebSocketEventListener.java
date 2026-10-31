@@ -19,7 +19,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import com.sp.app.domain.dto.SessionInfo;
 import com.sp.app.security.CustomUserDetails;
 
-import jakarta.annotation.PreDestroy; // ★ 추가
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,11 +65,13 @@ public class WebSocketEventListener {
             Long memberId = info.getMember_id();
             String memberName = info.getName();
 
+         // 페이지 이동 시 새 페이지에서 global-sse.js 연결이 안정화되도록 5초 유예
             ScheduledFuture<?> task = scheduler.schedule(() -> {
                 pendingDisconnectTasks.remove(memberId);
 
+                // 웹소켓은 끊겼지만 다른 페이지에서 SSE 연결이 유지 중인지 확인
                 if (sseNotificationService.isConnected(memberId)) {
-                    log.info("[WebSocket] 페이지 이동 감지 - 회원ID: {} (SSE 연결 유지 중)", memberId);
+                    log.info("[WebSocket] 페이지 이동 감지 - 회원ID: {} (SSE 연결 유지 중이므로 대화방을 닫지 않습니다.)", memberId);
                     return;
                 }
 
@@ -89,7 +91,7 @@ public class WebSocketEventListener {
                     chatRoomRegistry.closeRoom(roomId);
                     log.info("[WebSocket] 완전한 접속 단절 감지 - 방 번호: {}, 회원: {}", roomId, memberName);
                 }
-            }, 3000, TimeUnit.MILLISECONDS);
+            }, 5000, TimeUnit.MILLISECONDS); // ★ 3초 -> 5초로 확장
 
             pendingDisconnectTasks.put(memberId, task);
         }

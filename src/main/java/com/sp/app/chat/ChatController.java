@@ -85,6 +85,9 @@ public class ChatController {
             boolean isWsConnected = simpUserRegistry.getUser(String.valueOf(targetMemberId)) != null;
             boolean isTargetConnected = isSseConnected || isWsConnected;
 
+            log.info("[ChatRoom] 초대 시도 - 발신자: {}, 수신자: {}, SSE연결: {}, WS연결: {}",
+                    currentMemberId, targetMemberId, isSseConnected, isWsConnected);
+
             if (!isTargetConnected) {
                 return ResponseEntity.ok(Map.of(
                     "exists", false,
@@ -102,10 +105,10 @@ public class ChatController {
             // 1. SSE 채널로 초대 푸시 발송
             sseNotificationService.sendToClient(targetMemberId, "CHAT_INVITE", invitePayload);
 
-            // 2. 상대방이 채팅 페이지에 있어 웹소켓이 연결된 경우, 웹소켓 토픽으로도 초대 알림 발송 (이중 방어)
+            /* 2. 상대방이 채팅 페이지에 있어 웹소켓이 연결된 경우, 웹소켓 토픽으로도 초대 알림 발송
             if (isWsConnected) {
                 messagingTemplate.convertAndSend("/topic/chat/" + roomId, (Object)invitePayload);
-            }
+            }*/
 
             return ResponseEntity.ok(Map.of(
                 "exists", false,
@@ -172,12 +175,19 @@ public class ChatController {
             return;
         }
 
+        // 1. 메시지 저장 및 현재 대화방 웹소켓 전송
         chatRoomRegistry.saveMessage(roomId, message);
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
 
-        if (message.getReceiver() != null && !message.getReceiver().isEmpty()) {
-            Long receiverId = Long.parseLong(message.getReceiver());
-            sseNotificationService.sendToClient(receiverId, "TALK_TOAST", message);
+        // 2. 백엔드에서 방 정보 기반으로 상대방(수신자) ID 자동 추출 후 SSE 토스트 발송
+        ChatRoomRegistry.RoomInfo roomInfo = chatRoomRegistry.getRoomInfo(roomId);
+        if (roomInfo != null) {
+            Long receiverId = roomInfo.getTargetUserId(message.getSenderId());
+            if (receiverId != null) {
+                message.setReceiver(String.valueOf(receiverId));
+                // 다른 페이지에 있는 상대방에게 SSE 토스트 발송
+                sseNotificationService.sendToClient(receiverId, "TALK_TOAST", message);
+            }
         }
     }
 }

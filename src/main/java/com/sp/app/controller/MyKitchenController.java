@@ -121,7 +121,7 @@ public class MyKitchenController {
     @GetMapping("/myRecipeAi")
     public String notifications(Model model) {
         model.addAttribute("tab", "myRecipeAi");
-        model.addAttribute("pageTitle", "냉장고를 털어봐");
+        model.addAttribute("pageTitle", "냉장고를 부탁해");
         
         return "mykitchen/myRecipeAi";
     }
@@ -242,7 +242,7 @@ public class MyKitchenController {
     @GetMapping("/recipeai")
     public String activity(Model model) {
         model.addAttribute("tab", "recipeai");
-        model.addAttribute("pageTitle", "냉장고를 털어봐");
+        model.addAttribute("pageTitle", "냉장고를 부탁해");
         
         return "mykitchen/myRecipeAi";
     }

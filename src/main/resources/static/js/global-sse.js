@@ -74,6 +74,14 @@ function initGlobalSse() {
             console.log('[SSE] 연결이 종료되었습니다.');
         }
     };
+	
+	window.addEventListener('pagehide', () => {
+	        if (eventSource) {
+	            eventSource.close();
+	        }
+	        // 브라우저가 닫혀도 비동기로 서버에 종료 요청을 확실히 전달
+	        navigator.sendBeacon('/api/notifications/unsubscribe');
+	    });
 }
 
 // 전역에서 사용할 수 있도록 window 객체에 등록

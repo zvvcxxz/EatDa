@@ -24,8 +24,8 @@
 
         <!-- 채팅 메인 레이아웃 (좌: 방 목록, 우: 대화창) -->
 		<div class="chat-wrapper" 
-     		th:attr="data-current-member-id=${currentMemberId}, data-current-member-name=${currentMemberName}">  
-            <!-- [좌측] 참여 중인 채팅방 목록 -->
+		     th:classappend="${currentRoom != null} ? 'has-room'"
+		     th:attr="data-current-member-id=${currentMemberId}, data-current-member-name=${currentMemberName}">    <!-- [좌측] 참여 중인 채팅방 목록 -->
             <aside class="chat-sidebar">
                 <div class="empty-state" th:if="${#lists.isEmpty(chatRooms)}">
                     <p class="muted">참여 중인 대화가 없습니다.<br>회원을 검색하여 대화를 시작해 보세요!</p>
@@ -64,20 +64,21 @@
                 </div>
 
                 <!-- 2) 채팅방이 선택되었을 때 -->
-                <!-- chat.html 내 chat-box 요소 수정 -->
 				<div class="chat-box" 
 				     th:if="${currentRoom != null}" 
 				     th:attr="data-room-id=${currentRoom.roomId}, data-target-member-id=${currentRoom.targetMemberId}">
-			     <!-- 대화창 헤더 -->
-                    <div class="chat-header">
-                        <div class="chat-target">
-                            <span class="avatar-sm">👤</span>
-                            <strong th:text="${currentRoom.targetNickname}">상대방 닉네임</strong>
-                        </div>
-                        <button type="button" class="btn btn-danger-light btn-small" id="leaveRoomBtn" th:attr="data-room-id=${currentRoom.roomId}">
-                            나가기
-                        </button>
-                    </div>
+					<!-- 대화창 헤더 (뒤로가기 버튼 btn-back-list 추가) -->
+		            <div class="chat-header">
+		                <div class="chat-target">
+		                    <!-- ★ 좁은 화면 전용 뒤로가기 버튼 -->
+		                    <a th:href="@{/my/chat}" class="btn-back-list" title="목록으로 이동">←</a>
+		                    <span class="avatar-sm">👤</span>
+		                    <strong th:text="${currentRoom.targetNickname}">상대방 닉네임</strong>
+		                </div>
+		                <button type="button" class="btn btn-danger-light btn-small" id="leaveRoomBtn" th:attr="data-room-id=${currentRoom.roomId}">
+		                    나가기
+		                </button>
+		            </div>
 
                     <!-- 대화 메시지 출력 영역 -->
                     <div class="chat-messages" id="chatMessageArea">
