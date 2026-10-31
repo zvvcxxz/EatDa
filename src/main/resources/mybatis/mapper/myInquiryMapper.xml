@@ -38,13 +38,13 @@
 	<select id="selectMyInquiryList" parameterType="Map" resultType="com.sp.app.domain.dto.MyInquiryDto">
 	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId, i.CONTENT as content,
 	        i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title, i.STATUS AS status,
-	        i.CREATED_AT AS createdAt, i.PARENT_INQUIRY_ID AS parentInquiryId
+	        TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt, i.PARENT_INQUIRY_ID AS parentInquiryId
 	    FROM INQUIRY i
 		<where>
 			i.MEMBER_ID = #{memberId} AND i.PARENT_INQUIRY_ID IS NULL
 			<include refid="where-list"/>	
 		</where>
-		order by i.CREATED_AT desc, i.INQUIRY_ID desc
+		order by i.INQUIRY_ID desc
 		offset #{offset} rows fetch first #{size} rows only
 	</select>
 	
@@ -63,8 +63,9 @@
 	    SELECT i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, 
 		    i.INQUIRY_TYPE as inquiryType, i.TITLE as title, i.CONTENT as content, 
 		    i.STATUS as status, i.ANSWER_ADMIN_ID as answerAdminId, 
-		    i.ANSWER_CONTENT as answerContent, i.ANSWERED_AT as answeredAt, 
-		    i.CREATED_AT as createdAt, i.UPDATED_AT as updatedAt, 
+		    i.ANSWER_CONTENT as answerContent, TO_CHAR(i.ANSWERED_AT, 'YYYY-MM-DD HH24:MI') answeredAt,
+		    TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') as createdAt, 
+		    TO_CHAR(i.UPDATED_AT, 'YYYY-MM-DD HH24:MI') as updatedAt, 
 		    i.PARENT_INQUIRY_ID as parentInquiryId
 	
 		FROM INQUIRY i
@@ -102,8 +103,8 @@
     <select id="selectFollowUpInquiries" resultType="com.sp.app.domain.dto.MyInquiryDto">
     	select i.INQUIRY_ID as inquiryId, i.MEMBER_ID as memberId, 
     	i.INQUIRY_TYPE as inquiryType, i.TITLE as title, i.STATUS as status, 
-    	i.PARENT_INQUIRY_ID AS parentInquiryId, i.CREATED_AT as createdAt,
-    	i.CONTENT, i.ANSWER_CONTENT, i.ANSWERED_AT
+    	i.PARENT_INQUIRY_ID AS parentInquiryId, TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') as createdAt,
+    	i.CONTENT, i.ANSWER_CONTENT, TO_CHAR(i.ANSWERED_AT, 'YYYY-MM-DD HH24:MI') answeredAt
     	from inquiry i
     	where PARENT_INQUIRY_ID = #{parentInquiryId} and MEMBER_ID = #{memberId}
     	ORDER BY i.CREATED_AT ASC, i.INQUIRY_ID ASC
@@ -154,7 +155,8 @@
 	    SELECT i.INQUIRY_ID AS inquiryId, i.MEMBER_ID AS memberId,
 	        i.INQUIRY_TYPE AS inquiryType, i.TITLE AS title,
 	        i.CONTENT AS content, i.STATUS AS status,
-	        i.ANSWER_CONTENT AS answerContent, i.CREATED_AT AS createdAt,
+	        i.ANSWER_CONTENT AS answerContent, 
+	        TO_CHAR(i.CREATED_AT, 'YYYY-MM-DD HH24:MI') as createdAt,
 	        i.PARENT_INQUIRY_ID AS parentInquiryId
 	    FROM INQUIRY i
 	    WHERE i.INQUIRY_ID = #{followUpId}

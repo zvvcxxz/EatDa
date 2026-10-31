@@ -30,11 +30,11 @@ public class MyInquiryDto {
     // 관리자 답변 정보
     private Long answerAdminId;
     private String answerContent;
-    private LocalDateTime answeredAt;
+    private String answeredAt;
 
     // 등록 및 수정 일시
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 
     // 사용자가 업로드 요청으로 보낸 파일
     private List<MultipartFile> uploadFiles;
