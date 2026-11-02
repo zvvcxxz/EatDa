@@ -23,9 +23,9 @@
                 <button type="button" 
                         class="eatda-ai-item item-weird" 
                         id="open-weird-food" 
-                        aria-label="AI 괴식 추천">
+                        aria-label="AI 괴식 조합기">
                     <span class="eatda-ai-icon"><i class="fa-solid fa-flask" aria-hidden="true"></i></span>
-                    <span class="eatda-ai-label">AI 괴식 추천</span>
+                    <span class="eatda-ai-label">괴식 조합기</span>
                 </button>
                 <!-- 3. 냉장고를 부탁해 -->
                 <button type="button" 
@@ -63,6 +63,8 @@
                 </button>
             </div>
         </aside>
+
+        <th:block th:replace="~{fragments/weird-food-game :: game}"></th:block>
 
         <!-- 점심 추천 챗봇 모달 다이얼로그 -->
         <dialog id="lunch-chat-dialog" class="lunch-chat-dialog" aria-labelledby="lunch-modal-title">

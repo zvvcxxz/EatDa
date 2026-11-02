@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="game">
+    <link rel="stylesheet" th:href="@{/dist/css/weird-food-game.css}">
+    <dialog id="weird-food-dialog" class="wfg" aria-labelledby="wfg-title" th:data-api="@{/home/weird-food}">
+        <header class="wfg-header">
+            <span class="wfg-brand">EAT-DA <span>PLAY KITCHEN</span></span>
+            <button class="wfg-close" type="button" data-wfg-close aria-label="괴식 조합기 닫기" title="닫기">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+        </header>
+        <div class="wfg-body">
+            <section class="wfg-intro">
+                <span class="wfg-eyebrow">맛의 상식을 잠깐 내려놓고</span>
+                <h2 id="wfg-title">이 조합,<br><em>감당 가능?</em></h2>
+                <p>말만 해봐요. 상상 속 한 접시를<br>AI가 만들고, 그리고, 심사해드릴게요.</p>
+                <div class="wfg-stamp" aria-hidden="true"><span>상상 속 주방</span><strong>괴식<br>조합기</strong><small>EST. EAT-DA</small></div>
+                <p class="wfg-footnote">이미지와 평가는 AI가 만든 상상이에요.<br>실제 음식 사진이나 섭취 권유가 아니에요.</p>
+            </section>
+            <section class="wfg-workbench" aria-label="괴식 요청과 심사">
+                <form data-wfg-setup>
+                    <span class="wfg-step">01 — IMAGINE YOUR MIX</span>
+                    <h3>어떤 조합을 상상했나요?</h3>
+                    <p class="wfg-description">재료 이름만 적어도, 문장으로 부탁해도 좋아요.</p>
+                    <label class="wfg-input-label" for="wfg-prompt">만들고 싶은 괴식</label>
+                    <div class="wfg-input-wrap">
+                        <textarea id="wfg-prompt" name="prompt" maxlength="300" rows="4" required
+                            placeholder="김치랑 파인애플로 괴식 만들어줘" aria-describedby="wfg-input-hint wfg-status"></textarea>
+                        <span class="wfg-input-count" data-wfg-count>0 / 300</span>
+                    </div>
+                    <p class="wfg-hint" id="wfg-input-hint">식용 재료를 2~6개 넣어주세요. Enter로 만들기 · Shift+Enter로 줄바꿈</p>
+                    <div class="wfg-examples" aria-label="예시 문장">
+                        <span>이런 조합은 어때요?</span>
+                        <button type="button" data-wfg-example="김치랑 파인애플로 괴식 만들어줘">김치 × 파인애플 ↗</button>
+                        <button type="button" data-wfg-example="초콜릿과 라면으로 상상도 못한 요리 만들어줘">초콜릿 × 라면 ↗</button>
+                        <button type="button" data-wfg-example="민트와 치즈, 딸기를 한 접시에 조합해줘">민트 × 치즈 × 딸기 ↗</button>
+                    </div>
+                    <button class="wfg-submit" type="submit" data-wfg-submit disabled>상상 속 요리 만들기 <span aria-hidden="true">↗</span></button>
+                    <p class="wfg-hint">심사 결과를 먼저 보여드리고, 이어서 요리 이미지를 생성해요.</p>
+                </form>
+                <section class="wfg-loading" data-wfg-loading hidden aria-label="AI 심사 중">
+                    <div class="wfg-orbit" aria-hidden="true"><span>🧪</span></div>
+                    <span class="wfg-step">02 — MAKING YOUR MIX</span>
+                    <h3>상상 속 주방에<br>주문이 들어갔어요.</h3>
+                    <p>문장에서 재료를 파악하고, 어울릴 듯 말 듯한 한 접시를 구상 중이에요.</p>
+                    <p class="wfg-loading-mix" data-wfg-loading-prompt></p>
+                </section>
+                <section class="wfg-result" data-wfg-result hidden aria-label="AI 심사 결과">
+                    <div class="wfg-result-top"><span class="wfg-step">02 — THE VERDICT</span><span class="wfg-result-label">AI가 만든 상상의 요리</span></div>
+                    <p class="wfg-result-mix" data-wfg-result-mix></p><h3 data-wfg-name></h3>
+                    <figure class="wfg-picture">
+                        <div class="wfg-picture-stage" data-wfg-picture-stage aria-busy="true">
+                            <img data-wfg-image hidden alt="">
+                            <div class="wfg-picture-placeholder" data-wfg-picture-placeholder>
+                                <span aria-hidden="true">✳</span><p data-wfg-image-status role="status" aria-live="polite">Gemini가 이 요리의 이미지를 그리고 있어요.</p>
+                                <button type="button" class="wfg-image-retry" data-wfg-image-retry hidden>이미지 다시 만들기 ↻</button>
+                            </div>
+                        </div>
+                        <figcaption>Gemini 생성 이미지 · 실제 음식 사진이 아닙니다.</figcaption>
+                    </figure>
+                    <div class="wfg-score"><div><span>괴식 지수</span><strong><b data-wfg-score>0</b><small>/100</small></strong></div><span data-wfg-grade></span></div>
+                    <div class="wfg-meter" role="meter" aria-label="괴식 지수" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span data-wfg-meter></span></div>
+                    <div class="wfg-meter-labels"><span>익숙함</span><span>상상 초월</span></div>
+                    <p class="wfg-flavor" data-wfg-flavor></p>
+                    <blockquote><span>심사위원의 한마디</span><p data-wfg-comment></p></blockquote>
+                    <button class="wfg-submit" type="button" data-wfg-again>다른 조합으로 도전 <span aria-hidden="true">↻</span></button>
+                    <p class="wfg-hint">점수와 맛 평가는 재미용이며 같은 요청도 결과가 달라질 수 있어요.</p>
+                </section>
+                <p id="wfg-status" class="wfg-status" data-wfg-status role="status" aria-live="polite"></p>
+            </section>
+        </div>
+    </dialog>
+    <script defer th:src="@{/dist/js/weird-food-game.js}"></script>
+</th:block>
+</body>
+</html>
