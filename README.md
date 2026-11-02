@@ -8,3 +8,11 @@
 <img width="1546" height="902" alt="스크린샷 2026-10-25 232914" src="https://github.com/user-attachments/assets/85808d9d-7695-46ce-a818-88031cc0dc55" />
 
 
+
+## 관리자 홈
+
+<img src="./스크린샷 2026-10-25 232884.png" alt="관리자 홈">
+
+## 레시피 관리
+
+<img src="./스크린샷 2026-10-25 232885.png" alt="레시피 관리">
