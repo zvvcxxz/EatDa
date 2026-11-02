@@ -5,15 +5,6 @@ function searchList() {
     f.submit();
 }
 
-// 레시피 탭
-function searchTab(el) {
-    const sourceType = el.getAttribute("data-source");
-    const f = document.searchForm;
-    
-    f.sourceType.value = sourceType;
-    f.submit();
-}
-
 // 초기화
 function resetList() {
     location.href = location.pathname;

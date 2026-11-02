@@ -4,13 +4,15 @@
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-noticelist">
+        <p th:if="${error != null}" th:text="${error}" role="alert" class="view-noticelist-1"></p>
+        <p th:if="${message != null}" th:text="${message}" role="status"></p>
 		<section class="page-heading">
-		    <div onclick="location.href='/admin/notice'" style="cursor: pointer;">
+		    <div onclick="location.href='/admin/notice'" class="view-noticelist-2">
 		        <p class="eyebrow">NOTICE MANAGEMENT</p>
 		        <h2>공지사항 관리</h2>
 		        <p class="subtitle">서비스 소식을 회원들에게 전해주세요.</p>
@@ -36,13 +38,13 @@
 					<tbody id="notice-rows">
 						<tr th:each="dto : ${list}" 
 						    th:onclick="|location.href='@{/admin/notice/article(noticeId=${dto.noticeId})}'|" 
-						    style="cursor: pointer;">
+						    class="view-noticelist-3">
 						    <td>
 						        <span class="custom-badge orange" th:text="${dto.pinnedYn == 'Y' ? '공지' : '일반'}">공지</span>
 						    </td>
 						    <td class="cell-title" th:text="${dto.title}">제목</td>
 						    <td>
-						        <span th:if="${dto.fileCount > 0}" style="color: #89847c; font-size: 16px;">
+						        <span th:if="${dto.fileCount > 0}" class="view-noticelist-4">
 						            <i class="bi bi-paperclip"></i> 
 						        </span>
 						    </td>
@@ -68,8 +70,8 @@
                         <option value="content" th:selected="${schType=='content'}">내용</option>
                     </select>
                     <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
-                    <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
-                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                    <button type="button" class="custom-btn secondary" onclick="searchList()">검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/list}'|">초기화</button>
                 </form>
             </div>
 		</section>

@@ -4,13 +4,13 @@
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-inquirylist">
 		<section class="page-heading">
-			<div onclick="location.href='/admin/inquiry/list'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/inquiry/list'" class="view-inquirylist-1">
 				<p class="eyebrow">INQUIRY MANAGEMENT</p>
 				<h2>문의 관리</h2>
 				<p class="subtitle">회원들의 문의에 답변하고 소통하세요.</p>
@@ -24,7 +24,7 @@
 		<section class="panel">
 			<div class="panel-head">
 				<div>
-					<h2>1:1 문의 목록 <span style="font-size: 14px; font-weight: normal; color: #857868; margin-left: 8px;" th:text="|총 ${dataCount}건|"></span></h2>
+					<h2>1:1 문의 목록 <span th:text="|총 ${dataCount}건|" class="view-inquirylist-2"></span></h2>
 				</div>
 			</div>
             
@@ -43,12 +43,12 @@
 					<tbody>
 						<tr th:each="dto : ${list}" 
 						    th:onclick="|location.href='@{/admin/inquiry/article(inquiryId=${dto.inquiryId}, page=${page}, inquiryType=${inquiryType}, status=${status}, schType=${schType}, kwd=${kwd})}'|" 
-						    style="cursor: pointer;">
+						    class="view-inquirylist-3">
 						    
 						    <td th:text="${dto.inquiryId}">번호</td>
 						    
 						    <td>
-						        <span class="custom-badge" style="background-color: #f0e8dc; color: #857868;" 
+						        <span class="custom-badge view-inquirylist-4" 
 						              th:text="${dto.inquiryType == null ? '미분류' : (dto.inquiryType == 0 ? '서비스' : (dto.inquiryType == 1 ? '레시피' : (dto.inquiryType == 2 ? '커뮤니티' : '기타')))}">유형</span>
 						    </td>
 						    
@@ -97,8 +97,8 @@
                     
                     <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
                     
-                    <button type="submit" class="custom-btn secondary"><i class="bi bi-search"></i> 검색</button>
-                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/inquiry/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                    <button type="submit" class="custom-btn secondary">검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/inquiry/list}'|">초기화</button>
                 </form>
             </div>
 		</section>

@@ -5,18 +5,19 @@
     </span>
     
     <div class="search-tools">
-        <select id="statusFilter" class="select-ui" style="width: 110px;">
+        <select id="statusFilter" class="select-ui view-memberlist-1">
             <option value="" th:selected="${status == ''}">전체 상태</option>
             <option value="1" th:selected="${status == '1'}">정상(활성)</option>
             <option value="0" th:selected="${status == '0'}">정지(잠금)</option>
+            <option value="3" th:selected="${status == '3'}">탈퇴</option>
         </select>
-        <select id="searchType" class="select-ui" style="width: 100px;">
+        <select id="searchType" class="select-ui view-memberlist-2">
             <option value="loginId" th:selected="${schType == 'loginId'}">아이디</option>
             <option value="name" th:selected="${schType == 'name'}">이름</option>
         </select>
         <input type="text" id="keyword" class="search-input" th:value="${kwd}" placeholder="검색어 입력" onkeypress="if(event.key === 'Enter') searchList();">
-        <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
-        <button type="button" class="custom-btn secondary" onclick="resetList()"><i class="bi bi-arrow-clockwise"></i></button>
+        <button type="button" class="custom-btn secondary" onclick="searchList()">검색</button>
+        <button type="button" class="custom-btn secondary" onclick="resetList()">초기화</button>
     </div>
 </div>
 
@@ -26,7 +27,7 @@
             <tr><th>번호</th><th>아이디</th><th>이름</th><th>권한</th><th>가입일</th><th>상태</th></tr>
         </thead>
         <tbody>
-            <tr th:each="dto, stat : ${list}" th:onclick="|profile(${dto.memberId}, ${page})|" style="cursor: pointer;">
+            <tr th:each="dto, stat : ${list}" th:onclick="|profile(${dto.memberId}, ${page})|" class="view-memberlist-3">
                 <td th:text="${dataCount - (page-1) * size - stat.index}">1</td>
                 <td class="cell-title" th:text="${dto.loginId != null ? dto.loginId : dto.snsId}">admin123</td>
                 <td th:text="${dto.name}">홍길동</td>
@@ -38,13 +39,14 @@
                 <td>
                     <span class="custom-badge green" th:if="${dto.status == 1}">정상</span>
                     <span class="custom-badge danger" th:if="${dto.status == 0}">정지</span>
+                    <span class="custom-badge gray" th:if="${dto.status == 3}">탈퇴</span>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<p class="empty" th:if="${#lists.isEmpty(list)}" style="display: block;">검색 결과가 없습니다.</p>
+<p class="empty view-memberlist-4" th:if="${#lists.isEmpty(list)}">검색 결과가 없습니다.</p>
 
 <div class="page-navigation page-navigation-wrap" th:if="${dataCount > 0}">
     <a th:if="${page > 1}" th:onclick="|listMember(${page - 1})|">이전</a>

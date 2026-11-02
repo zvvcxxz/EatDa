@@ -4,13 +4,13 @@
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-membermain">
 		<section class="page-heading">
-		    <div onclick="location.href='/admin/member'" style="cursor: pointer;">
+		    <div onclick="location.href='/admin/member'" class="view-membermain-1">
 		        <p class="eyebrow">MEMBER MANAGEMENT</p>
 		        <h2>회원 관리</h2>
 		        <p class="subtitle">서비스에 가입한 회원들의 정보와 상태를 관리해요.</p>
@@ -22,8 +22,8 @@
 		</section>
 
 		<section class="panel">
-			<div class="panel-head" style="flex-direction: column; align-items: flex-start; padding-bottom: 0; border-bottom: none;">
-				<div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+			<div class="panel-head view-membermain-2">
+				<div class="view-membermain-3">
                     <div><h2>회원 목록</h2></div>
                 </div>
                 <div class="custom-tabs" id="myTab">
@@ -33,13 +33,13 @@
                 </div>
 			</div>
             
-			<div id="nav-content" style="padding-top: 20px;">
-                <div style="text-align:center; padding: 50px; color: var(--muted-dash);">데이터를 불러오는 중입니다...</div>
+			<div id="nav-content" class="view-membermain-4">
+                <div class="view-membermain-5">데이터를 불러오는 중입니다...</div>
             </div>
 		</section>
 	</div>
     
-    <form name="memberSearchForm" style="display:none;">
+    <form name="memberSearchForm" class="view-membermain-6">
         <input type="hidden" name="schType" value="loginId">
         <input type="hidden" name="kwd" value="">
         <input type="hidden" name="status" value="">

@@ -22,4 +22,5 @@ public interface AdminNoticeService {
 	public List<AdminNoticeDto> listNoticeFile(long noticeId);
 	public AdminNoticeDto findByFileId(long noticeFileId);
 	public boolean deleteNoticeFile(long noticeFileId, String pathname) throws Exception;
+    void downloadFile(String savedName, String originalName, jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException;
 }

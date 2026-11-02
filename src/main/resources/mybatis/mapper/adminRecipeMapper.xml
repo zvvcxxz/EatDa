@@ -3,9 +3,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sp.app.admin.mapper.AdminRecipeMapper">
 	<sql id="where-list">
-		<if test="sourceType != null and sourceType != ''">
-			AND r.SOURCE_TYPE = #{sourceType}
-		</if>
+		AND r.SOURCE_TYPE = 'MEMBER' AND r.DELETED_AT IS NULL
 		<if test="kwd != null and kwd != ''">
 			<choose>
 				<when test="schType == 'userName'">
@@ -49,13 +47,13 @@
 			m.NAME AS userName, m.LOGIN_ID AS loginId
 		FROM RECIPE r
 		JOIN MEMBER m ON r.AUTHOR_ID = m.MEMBER_ID
-		WHERE r.RECIPE_ID = #{recipeId}
+		WHERE r.RECIPE_ID = #{recipeId} AND r.SOURCE_TYPE = 'MEMBER' AND r.DELETED_AT IS NULL
 	</select>
 	
 	<update id="updateRecipeStatus" parameterType="map">
 		UPDATE RECIPE
 		SET STATUS = #{status}
-		WHERE RECIPE_ID = #{recipeId}
+		WHERE RECIPE_ID = #{recipeId} AND SOURCE_TYPE = 'MEMBER' AND DELETED_AT IS NULL
 	</update>
 	
 </mapper>

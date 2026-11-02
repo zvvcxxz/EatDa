@@ -4,7 +4,7 @@
 	layout:decorate="~{admin/layout/layout3}">
 	
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
 
 <head>
@@ -12,9 +12,9 @@
 </head>
 <body>
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-inquiryarticle">
 		<section class="page-heading">
-			<div onclick="location.href='/admin/inquiry/list'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/inquiry/list'" class="view-inquiryarticle-1">
 				<p class="eyebrow">INQUIRY MANAGEMENT</p>
 				<h2>1:1 문의 상세</h2>
 				<p class="subtitle">회원의 문의 내용을 확인하고 답변을 등록하세요.</p>
@@ -42,7 +42,7 @@
 				<div class="inquiry-content-box" th:utext="${dto.content}"></div>
 				
 				<div class="inquiry-attach-box" th:if="${not #lists.isEmpty(dto.files)}">
-					<h4 class="inquiry-attach-title">📁 첨부파일</h4>
+					<h4 class="inquiry-attach-title">첨부파일</h4>
 					<ul class="inquiry-attach-list">
 						<li class="inquiry-attach-item" th:each="file : ${dto.files}">
 							<a class="inquiry-attach-link" 
@@ -74,7 +74,7 @@
 		</section>
 
 		<th:block th:if="${not #lists.isEmpty(dto.followUps)}">
-			<h3 class="followup-section-title">↳ 추가 문의 내역</h3>
+			<h3 class="followup-section-title">추가 문의 내역</h3>
 			
 			<section class="panel followup-panel" th:each="child : ${dto.followUps}">
 				<div class="panel-head followup-panel-head">
@@ -104,7 +104,7 @@
 
 		<div class="inquiry-bottom-actions">
 			<button type="button" class="custom-btn secondary btn-return-list" th:onclick="|location.href='@{/admin/inquiry/list(page=${page})}'|">
-				<i class="bi bi-list"></i> 목록으로 돌아가기
+				목록으로 돌아가기
 			</button>
 		</div>
 	</div>

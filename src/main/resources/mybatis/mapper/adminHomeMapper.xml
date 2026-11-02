@@ -19,4 +19,12 @@
 		SELECT COUNT(*) FROM INQUIRY WHERE STATUS = 0
 	</select>
 
+	<select id="tagCount" resultType="Integer">
+        SELECT COUNT(*) FROM TAG
+    </select>
+
+    <select id="ingredientCount" resultType="Integer">
+        SELECT COUNT(*) FROM INGREDIENT
+    </select>
+
 </mapper>

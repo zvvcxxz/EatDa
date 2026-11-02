@@ -4,14 +4,14 @@
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-ingredientlist">
 		<div class="alert alert-warning" th:if="${message}" th:text="${message}"></div>
 		<section class="page-heading">
-			<div onclick="location.href='/admin/ingredient'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/ingredient'" class="view-ingredientlist-1">
 				<p class="eyebrow">INGREDIENT MANAGEMENT</p>
 				<h2>재료 관리</h2>
 				<p class="subtitle">레시피에 사용되는 식재료와 양념의 기준 데이터를 관리합니다.</p>
@@ -32,12 +32,12 @@
 				<table>
 					<thead>
 						<tr>
-							<th style="width: 80px;">번호</th>
-                            <th style="width: 120px;">분류</th>
+							<th class="view-ingredientlist-2">번호</th>
+                            <th class="view-ingredientlist-3">분류</th>
                             <th>재료명</th>
-                            <th style="width: 120px;">기본 단위</th>
-                            <th style="width: 100px;">상태</th>
-                            <th style="width: 100px;">관리</th>
+                            <th class="view-ingredientlist-4">기본 단위</th>
+                            <th class="view-ingredientlist-5">상태</th>
+                            <th class="view-ingredientlist-6">관리</th>
 						</tr>
 					</thead>
 					<tbody id="ingredient-rows">
@@ -84,8 +84,8 @@
                         <option value="ingredientType" th:selected="${schType=='ingredientType'}">분류 (FOOD/SEASONING)</option>
                     </select>
                     <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
-                    <button type="button" class="custom-btn secondary" onclick="searchList()"><i class="bi bi-search"></i> 검색</button>
-                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/ingredient/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                    <button type="button" class="custom-btn secondary" onclick="searchList()">검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/ingredient/list}'|">초기화</button>
                 </form>
             </div>
 		</section>
@@ -129,7 +129,7 @@
                     <input type="text" name="defaultUnit" id="form-defaultUnit" required placeholder="예: g, 개, 큰술, 모">
                 </label>
                 
-                <label class="field wrap-active-yn" id="wrap-activeYn" style="display:none;">
+                <label class="field wrap-active-yn view-ingredientlist-7" id="wrap-activeYn">
                     <span>사용 여부 (상태)</span>
                     <select name="activeYn" id="form-activeYn" class="select-ui">
                         <option value="Y">사용중 (Y)</option>

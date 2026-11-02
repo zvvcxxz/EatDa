@@ -12,7 +12,7 @@
 					AND INSTR(m.Name, #{kwd}) &gt; 0
 				</when>
 				<when test="schType == 'email'">
-					AND INSTR(m.EMAIL, #{kwd} &gt; 0
+					AND INSTR(m.EMAIL, #{kwd}) &gt; 0
 				</when>
 				<when test="schType == 'phone'">
 					AND INSTR(m.PHONE, #{kwd}) &gt; 0

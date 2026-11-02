@@ -62,7 +62,7 @@
 		SELECT n.NOTICE_ID AS noticeId, n.ADMIN_ID AS adminId, m.NAME AS adminName, n.TITLE AS title, n.HIT_COUNT AS hitCount,
 			TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt
 		FROM NOTICE n
-		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		LEFT JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
 		WHERE n.PINNED_YN = 'Y'
 		ORDER BY n.NOTICE_ID DESC
 	</select>
@@ -72,7 +72,7 @@
 			TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt,
 			NVL(f.fileCount, 0) AS fileCount
 		FROM NOTICE n
-		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		LEFT JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
 		LEFT JOIN (
 			SELECT NOTICE_ID, COUNT(*) AS fileCount
 			FROM NOTICE_FILE
@@ -86,7 +86,7 @@
 	</select>
 	
 	<update id="updateHitCount" parameterType="long">
-		UPDATE NOTICE SET HIT_COUNT = HIT_COUNT + 1 WHERE NOTICE_ID = #{noticeId}
+		UPDATE NOTICE SET HIT_COUNT = NVL(HIT_COUNT, 0) + 1 WHERE NOTICE_ID = #{noticeId}
 	</update>
 	
 	<select id="findById" parameterType="long" resultType="com.sp.app.admin.domain.dto.AdminNoticeDto">
@@ -100,7 +100,7 @@
 			n.HIT_COUNT AS hitCount,
 			TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt
 		FROM NOTICE n
-		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		LEFT JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
 		WHERE n.NOTICE_ID = #{noticeId}
 	</select>
 	
@@ -139,6 +139,11 @@
 	</select>
 	
 	<delete id="deleteNoticeFile" parameterType="map">
-		DELETE FROM NOTICE_FILE WHERE ${field} = #{noticeId}
+		DELETE FROM NOTICE_FILE
+        <choose>
+            <when test="field == 'NOTICE_FILE_ID'">WHERE NOTICE_FILE_ID = #{noticeId}</when>
+            <when test="field == 'NOTICE_ID'">WHERE NOTICE_ID = #{noticeId}</when>
+            <otherwise>WHERE 1 = 0</otherwise>
+        </choose>
 	</delete>
 </mapper>

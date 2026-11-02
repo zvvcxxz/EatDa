@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-counts)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-home">
 		<section class="page-heading">
-			<div onclick="location.href='/admin'" style="cursor: pointer;">
+			<div onclick="location.href='/admin'" class="cursor-pointer">
 				<p class="eyebrow">ADMIN DASHBOARD</p>
 				<h2>관리자 페이지</h2>
 				<p class="subtitle">우리의 주방을 더 즐겁고 안전하게 관리해요.</p>
@@ -22,22 +22,27 @@
 
 		<section class="summary-grid" aria-label="관리 현황">
 		    <article class="summary-card">
-		        <div class="summary-top"><span>전체 회원</span><span class="summary-icon">👥</span></div>
+		        <div class="summary-top"><span>전체 회원</span></div>
 		        <strong th:text="${stats.memberCount}">0</strong>
 		        <small>전체 서비스 회원</small>
 		    </article>
 		    <article class="summary-card">
-		        <div class="summary-top"><span>등록 레시피</span><span class="summary-icon">📖</span></div>
+		        <div class="summary-top"><span>등록 레시피</span></div>
 		        <strong th:text="${stats.recipeCount}">0</strong>
 		        <small>회원이 공유한 레시피</small>
 		    </article>
+		    <article class="summary-card">
+                <div class="summary-top"><span>태그 관리</span></div>
+                <strong th:text="${stats.tagCount}">0</strong>
+                <small>전체 등록 태그</small>
+            </article>
+            <article class="summary-card">
+                <div class="summary-top"><span>재료 관리</span></div>
+                <strong th:text="${stats.ingredientCount}">0</strong>
+                <small>전체 등록 재료</small>
+            </article>
 		    <article class="summary-card attention">
-		        <div class="summary-top"><span>처리 대기 신고</span><span class="summary-icon">🚩</span></div>
-		        <strong th:text="${stats.pendingReportCount}">0</strong>
-		        <small>확인이 필요한 신고</small>
-		    </article>
-		    <article class="summary-card attention">
-		        <div class="summary-top"><span>답변 대기 문의</span><span class="summary-icon">💬</span></div>
+		        <div class="summary-top"><span>답변 대기 문의</span></div>
 		        <strong th:text="${stats.pendingInquiryCount}">0</strong>
 		        <small>회원의 질문</small>
 		    </article>

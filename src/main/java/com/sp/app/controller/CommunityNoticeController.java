@@ -32,9 +32,9 @@ public class CommunityNoticeController {
     private PaginateUtil paginateUtil;
     
     @Autowired
-    private FileManager fileManager;
+    private com.sp.app.admin.service.AdminNoticeService noticeFileService;
 
-    @GetMapping({"/list"})
+    @GetMapping({"", "/", "/list"})
     public String list(
             @RequestParam(value = "page", defaultValue = "1") int current_page,
             @RequestParam(value = "schType", defaultValue = "all") String schType,
@@ -54,9 +54,8 @@ public class CommunityNoticeController {
         int dataCount = service.dataCount(map);
         int total_page = paginateUtil.pageCount(dataCount, size);
 
-        if (current_page > total_page) {
-            current_page = total_page;
-        }
+        current_page = Math.max(1, Math.min(current_page, Math.max(1, total_page)));
+        map.put("offset", (current_page - 1) * size);
 
         List<CommunityNoticeDto> list = service.listNotice(map);
 
@@ -65,7 +64,7 @@ public class CommunityNoticeController {
         String listUrl = cp + "/community/notice/list";
 
         if (!kwd.isBlank()) {
-            query = "schType=" + schType + "&kwd=" + kwd;
+            query = "schType=" + schType + "&kwd=" + java.net.URLEncoder.encode(kwd, java.nio.charset.StandardCharsets.UTF_8);
             listUrl += "?" + query;
         }
 
@@ -85,19 +84,20 @@ public class CommunityNoticeController {
 
     @GetMapping("/article")
     public String article(
-            @RequestParam long noticeId,
+            @RequestParam("noticeId") long noticeId,
             @RequestParam(value = "page", defaultValue = "1") String page,
             @RequestParam(value = "schType", defaultValue = "all") String schType,
             @RequestParam(value = "kwd", defaultValue = "") String kwd,
             Model model) throws Exception {
 
-        service.updateHitCount(noticeId);
 
         CommunityNoticeDto dto = service.findById(noticeId);
         if (dto == null) {
             return "redirect:/community/notice/list?page=" + page;
         }
 
+        service.updateHitCount(noticeId);
+        dto = service.findById(noticeId);
         Map<String, Object> map = new HashMap<>();
         map.put("schType", schType);
         map.put("kwd", kwd);
@@ -119,51 +119,9 @@ public class CommunityNoticeController {
     }
     
     @GetMapping("/download")
-    public void download(@RequestParam long fileId,
-                         HttpServletRequest req,
-                         HttpServletResponse resp,
-                         HttpSession session) throws Exception {
-        
-        CommunityNoticeDto dto = service.findByFileId(fileId);
-        
-        if(dto != null) {
-            String root = session.getServletContext().getRealPath("/");
-            String pathname = root + "uploads" + File.separator + "notice" + File.separator + dto.getFilePath();
-            
-            File file = new File(pathname);
-            
-            if(file.exists()) {
-                String originalFilename = dto.getOriginalFileName();
-                
-                String browser = req.getHeader("User-Agent");
-                if (browser.contains("MSIE") || browser.contains("Trident") || browser.contains("Edge")) {
-                    originalFilename = java.net.URLEncoder.encode(originalFilename, "UTF-8").replaceAll("\\+", "%20");
-                } else {
-                    originalFilename = new String(originalFilename.getBytes("UTF-8"), "ISO-8859-1");
-                }
-                
-                resp.setContentType("application/octet-stream");
-                resp.setHeader("Content-disposition", "attachment; filename=\"" + originalFilename + "\"");
-                resp.setContentLength((int) file.length());
-                
-                try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(new java.io.FileInputStream(file));
-                     java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(resp.getOutputStream())) {
-                    
-                    byte[] b = new byte[8192];
-                    int len;
-                    while ((len = bis.read(b)) != -1) {
-                        bos.write(b, 0, len);
-                    }
-                    bos.flush();
-                    return;
-                    
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        
-        resp.setContentType("text/html; charset=utf-8");
-        resp.getWriter().print("<script>alert('파일이 존재하지 않거나 다운로드에 실패했습니다.');history.back();</script>");
+    public void download(@RequestParam("fileId") long fileId, HttpServletResponse response) throws Exception {
+        CommunityNoticeDto file = service.findByFileId(fileId);
+        if (file == null) { response.sendError(404); return; }
+        noticeFileService.downloadFile(file.getFilePath(), file.getOriginalFileName(), response);
     }
 }

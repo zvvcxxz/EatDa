@@ -4,11 +4,13 @@
       layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-    <link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
       
 <th:block layout:fragment="content">
-    <div class="admin-wrap">
+    <div class="admin-wrap admin-view-noticewrite">
+        <p th:if="${error != null}" th:text="${error}" role="alert" class="view-noticewrite-1"></p>
+        <p th:if="${message != null}" th:text="${message}" role="status"></p>
         <section class="page-heading">
             <div>
                 <p class="eyebrow" th:text="${mode == 'update' ? 'NOTICE UPDATE' : 'NOTICE WRITE'}">NOTICE</p>
@@ -24,7 +26,7 @@
             
             <div class="panel-body">
                 <form th:action="@{${mode == 'update' ? '/admin/notice/update' : '/admin/notice/write'}}" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="noticeId" th:value="${dto?.noticeId}">
+                    <input th:if="${mode == 'update'}" type="hidden" name="noticeId" th:value="${dto?.noticeId}">
                     
                     <div class="field form-section">
                         <span>제목</span>
@@ -51,9 +53,9 @@
                     
                     <div class="field form-section">
                         <span>내용</span>
-                        <textarea name="content" required th:text="${dto?.content}" class="textarea-ui" 
+                        <textarea name="content" required th:text="${dto?.content}" class="textarea-ui view-noticewrite-2" 
                                   placeholder="공지사항 내용을 상세히 입력해주세요." 
-                                  style="width: 100%; padding: 15px; border: 1px solid #e7e1d9; border-radius: 9px; box-sizing: border-box; resize: vertical;"></textarea>
+                                 ></textarea>
                     </div>
                     
                     <div class="field form-section large">
@@ -65,8 +67,13 @@
                         <h3>현재 등록된 파일</h3>
                         <div class="tag-list">
                             <span class="tag-item" th:each="file : ${listFile}">
-                                <i class="bi bi-paperclip" style="color: var(--orange);"></i>
+                                <i class="bi bi-paperclip view-noticewrite-3"></i>
                                 <span th:text="${file.originalFileName}">파일.jpg</span>
+                                <button type="button" class="custom-btn danger small"
+                                        th:data-file-id="${file.noticeFileId}"
+                                        th:data-notice-id="${dto.noticeId}"
+                                        th:data-delete-url="@{/admin/notice/deleteFile}"
+                                        onclick="deleteNoticeFile(this)">삭제</button>
                             </span>
                         </div>
                     </div>
@@ -83,5 +90,6 @@
 
 <th:block layout:fragment="script">
     <script th:src="@{/dist/js/admin-dashboard.js}"></script>
+    <script th:src="@{/dist/js/admin-notice.js}"></script>
 </th:block>
 </html>

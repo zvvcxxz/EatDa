@@ -18,12 +18,13 @@
         <span>
             <span class="custom-badge green" th:if="${dto.status == 1}">정상</span>
             <span class="custom-badge danger" th:if="${dto.status == 0}">정지</span>
-            <span style="font-size: 12px; color: #f03e3e; margin-left: 8px;" th:if="${dto.failureCnt > 0}">(비번 실패 [[${dto.failureCnt}]]회)</span>
+                    <span class="custom-badge gray" th:if="${dto.status == 3}">탈퇴</span>
+            <span th:if="${dto.failureCnt > 0}" class="view-memberprofile-1">(비번 실패 [[${dto.failureCnt}]]회)</span>
         </span>
     </div>
     
     <div class="profile-footer">
-        <button type="button" class="custom-btn secondary" th:onclick="|listMember(${page})|"><i class="bi bi-list"></i> 목록으로</button>
+        <button type="button" class="custom-btn secondary" th:onclick="|listMember(${page})|">목록으로</button>
         <div class="btn-group">
             <button type="button" class="custom-btn primary" data-open="memberUpdateDialog">정보 수정</button>
             <button type="button" class="custom-btn danger" data-open="memberStatusDialog">상태 변경</button>
@@ -37,13 +38,13 @@
             <tbody>
                 <tr th:each="hist : ${listStatus}">
                     <td class="muted" th:text="${hist.startAt}"></td>
-                    <td th:text="${hist.beforeStatus == '1' ? '정상' : '정지'}"></td>
-                    <td th:text="${hist.afterStatus == '1' ? '정상' : '정지'}"></td>
+                    <td th:text="${hist.beforeStatus == '1' ? '정상' : (hist.beforeStatus == '3' ? '탈퇴' : '정지')}"></td>
+                    <td th:text="${hist.afterStatus == '1' ? '정상' : (hist.afterStatus == '3' ? '탈퇴' : '정지')}"></td>
                     <td class="cell-title" th:text="${hist.reason}"></td>
                     <td th:text="${hist.adminName}">관리자</td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(listStatus)}">
-                    <td colspan="5" style="text-align: center; padding: 20px;">상태 변경 이력이 없습니다.</td>
+                    <td colspan="5" class="view-memberprofile-2">상태 변경 이력이 없습니다.</td>
                 </tr>
             </tbody>
         </table>
@@ -81,14 +82,16 @@
             <label class="field">
                 <span>변경할 상태</span>
                 <select name="afterStatus" class="select-ui">
+                    <option value="3" th:if="${dto.status == 3}" selected disabled>탈퇴 (현재 상태)</option>
                     <option value="1" th:selected="${dto.status == 1}">정상 (잠금 해제)</option>
                     <option value="0" th:selected="${dto.status == 0}">정지 (블랙리스트)</option>
                 </select>
             </label>
             <label class="field">
                 <span>사유</span>
-                <textarea name="reason" rows="3" style="padding: 10px; border: 1px solid #e7e1d9; border-radius: 9px;"></textarea>
+                <textarea name="reason" rows="3" class="view-memberprofile-3"></textarea>
             </label>
             <button type="button" class="custom-btn danger full" th:onclick="|updateStatusOk(${page})|">상태 변경 확정</button>
         </form>
     </div>
+</dialog>

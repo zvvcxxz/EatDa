@@ -4,13 +4,13 @@
 	layout:decorate="~{admin/layout/layout3}">
       
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
   	  
 <th:block layout:fragment="content">
-	<div class="admin-wrap">
+	<div class="admin-wrap admin-view-taglist">
 		<section class="page-heading">
-			<div onclick="location.href='/admin/tag'" style="cursor: pointer;">
+			<div onclick="location.href='/admin/tag'" class="view-taglist-1">
 				<p class="eyebrow">TAG MANAGEMENT</p>
 				<h2>태그 관리</h2>
 				<p class="subtitle">레시피 분류와 검색에 사용되는 해시태그를 관리해요.</p>
@@ -57,7 +57,7 @@
 						    </td>
 						    <td class="muted" th:text="${dto.createdAt}">2026-10-16</td>
 						    <td>
-								<button type="button" class="custom-btn secondary small" th:onclick="openTagDialog('update', [[${dto.tagId}]], '[[${dto.tagName}]]', '[[${dto.tagGroup}]]', '[[${dto.activeYn}]]')">수정</button>
+								<button type="button" class="custom-btn secondary small" th:data-tag-id="${dto.tagId}" th:data-tag-name="${dto.tagName}" th:data-tag-group="${dto.tagGroup}" th:data-active-yn="${dto.activeYn}" onclick="openTagDialog('update', this.dataset.tagId, this.dataset.tagName, this.dataset.tagGroup, this.dataset.activeYn)">수정</button>
                             </td>
 						</tr>
 					</tbody>
@@ -73,8 +73,8 @@
                         <option value="tagGroup" th:selected="${schType=='tagGroup'}">태그 그룹명</option>
                     </select>
                     <input type="text" name="kwd" th:value="${kwd}" class="search-input" placeholder="검색어를 입력하세요">
-                    <button type="button" class="custom-btn secondary" onclick="searchTagList()"><i class="bi bi-search"></i>검색</button>
-                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/tag/list}'|"><i class="bi bi-arrow-clockwise"></i> 초기화</button>
+                    <button type="button" class="custom-btn secondary" onclick="searchTagList()">검색</button>
+                    <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/tag/list}'|">초기화</button>
                 </form>
             </div>
 		</section>

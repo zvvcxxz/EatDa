@@ -32,7 +32,7 @@
 			   n.PINNED_YN AS pinnedYn, n.HIT_COUNT AS hitCount,
 			   TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD') AS createdAt
 		FROM NOTICE n
-		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		LEFT JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
 		WHERE n.STATUS = 1
 		<include refid="where-list"/>
 		ORDER BY n.PINNED_YN DESC, n.NOTICE_ID DESC
@@ -40,7 +40,7 @@
 	</select>
 	
 	<update id="updateHitCount" parameterType="long">
-		UPDATE NOTICE SET HIT_COUNT = HIT_COUNT + 1 WHERE NOTICE_ID = #{noticeId}
+		UPDATE NOTICE SET HIT_COUNT = NVL(HIT_COUNT, 0) + 1 WHERE NOTICE_ID = #{noticeId} AND STATUS = 1 AND EXISTS (SELECT 1 FROM NOTICE n WHERE n.NOTICE_ID = NOTICE_FILE.NOTICE_ID AND n.STATUS = 1)
 	</update>
 	
 	<select id="findById" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
@@ -48,7 +48,7 @@
 			   n.CONTENT AS content, n.PINNED_YN AS pinnedYn, n.HIT_COUNT AS hitCount,
 			   TO_CHAR(n.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS createdAt
 		FROM NOTICE n
-		JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
+		LEFT JOIN MEMBER m ON n.ADMIN_ID = m.MEMBER_ID
 		WHERE n.NOTICE_ID = #{noticeId} AND n.STATUS = 1
 	</select>
 	
@@ -70,11 +70,11 @@
 	
 	<select id="listNoticeFile" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
 		SELECT NOTICE_FILE_ID AS noticeFileId, ORIGINAL_FILE_NAME AS originalFileName, FILE_PATH AS filePath
-		FROM NOTICE_FILE WHERE NOTICE_ID = #{noticeId}
+		FROM NOTICE_FILE WHERE NOTICE_ID = #{noticeId} AND EXISTS (SELECT 1 FROM NOTICE n WHERE n.NOTICE_ID = NOTICE_FILE.NOTICE_ID AND n.STATUS = 1)
 	</select>
 	
 	<select id="findByFileId" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">
-		SELECT NOTICE_FILE_ID AS noticeFileId, ORIGINAL_FILE_NAME AS originalFIleName, FILE_PATH AS filePath
-		FROM NOTICE_FILE WHERE NOTICE_FILE_ID = #{fileId}
+		SELECT NOTICE_FILE_ID AS noticeFileId, ORIGINAL_FILE_NAME AS originalFileName, FILE_PATH AS filePath
+		FROM NOTICE_FILE WHERE NOTICE_FILE_ID = #{fileId} AND EXISTS (SELECT 1 FROM NOTICE n WHERE n.NOTICE_ID = NOTICE_FILE.NOTICE_ID AND n.STATUS = 1)
 	</select>
 </mapper>

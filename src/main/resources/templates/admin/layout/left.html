@@ -2,36 +2,36 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 	
-	<aside th:fragment="leftMenu" class="vertical-nav nav-expand-lg sidebar panel" style="background-color: var(--white); border-right: 1px solid var(--border-dash); z-index: 100; overflow: hidden; white-space: nowrap;">
+	<aside th:fragment="leftMenu" class="vertical-nav nav-expand-lg sidebar panel view-left-1">
 		
-		<p class="sidebar-label" style="margin-top: 20px;">MANAGEMENT</p>
+		<p class="sidebar-label view-left-2">MANAGEMENT</p>
 		
-		<nav class="nav-list" aria-label="관리 메뉴" style="padding: 0 12px;">
+		<nav class="nav-list view-left-3" aria-label="관리 메뉴">
 			<a th:href="@{/admin}" class="nav-btn">
-				<span aria-hidden="true">🏠</span> 홈
+				홈
 			</a>
 			<a th:href="@{/admin/notice}" class="nav-btn">
-				<span aria-hidden="true">📢</span> 공지사항
+				공지사항
 			</a>
 			<a th:href="@{/admin/member}" class="nav-btn">
-				<span aria-hidden="true">👥</span> 회원 관리
+				회원 관리
 			</a>
 			<a th:href="@{/admin/recipe}" class="nav-btn">
-				<span aria-hidden="true">📖</span> 레시피 관리
+				레시피 관리
 			</a>
 			<a th:href="@{/admin/inquiry/list}" class="nav-btn">
-				<span aria-hidden="true">💬</span> 문의 관리
+				문의 관리
 				<!-- <span class="nav-count" id="request-count">0</span> -->
 			</a>
 			<a th:href="@{/admin/tag}" class="nav-btn">
-				<span aria-hidden="true">🏷️</span> 태그 관리
+				태그 관리
 			</a>
 			<a th:href="@{/admin/ingredient}" class="nav-btn">
-				<span aria-hidden="true">🥕</span> 재료 관리
+				재료 관리
 			</a>
 		</nav>
 
-		<div class="sidebar-note" style="white-space: normal; line-height: 1.5;">
+		<div class="sidebar-note view-left-4">
 			<strong>함께 만드는 즐거운 주방</strong><br>
 			회원과 콘텐츠를 관리하고<br>새로운 요리 경험을 만들어보세요.
 		</div>

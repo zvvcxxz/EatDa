@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface AdminHomeMapper {
 	public int memberCount();
 	public int recipeCount();
+	public int tagCount();
+	public int ingredientCount();
 	public int pendingReportCount();
 	public int pendingInquiryCount();
 }

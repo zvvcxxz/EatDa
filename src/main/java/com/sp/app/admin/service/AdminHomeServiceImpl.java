@@ -25,7 +25,8 @@ public class AdminHomeServiceImpl implements AdminHomeService {
 		try {
 			map.put("memberCount", mapper.memberCount());
 			map.put("recipeCount", mapper.recipeCount());
-			map.put("pendingReportCount", mapper.pendingReportCount());
+			map.put("tagCount", mapper.tagCount());
+			map.put("ingredientCount", mapper.ingredientCount());
 			map.put("pendingInquiryCount", mapper.pendingInquiryCount());
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -4,13 +4,13 @@
       layout:decorate="~{admin/layout/layout3}">
 
 <th:block layout:fragment="css">
-    <link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="admin-wrap">
+    <div class="admin-wrap admin-view-recipearticle">
         <section class="page-heading">
-            <div onclick="location.href='/admin/recipe/list'" style="cursor: pointer;">
+            <div onclick="location.href='/admin/recipe/list'" class="view-recipearticle-1">
                 <p class="eyebrow">RECIPE DETAIL</p>
                 <h2>레시피 상세 보기</h2>
                 <p class="subtitle">등록된 레시피의 상세 정보를 확인하고 게시 상태를 관리해요.</p>
@@ -24,8 +24,8 @@
                     <p>레시피 ID: #[[${dto.recipeId}]]</p>
                 </div>
                 <div>
-                    <span class="custom-badge blue" th:if="${dto.sourceType == 'API'}">공식 레시피</span>
-                    <span class="custom-badge gray" th:if="${dto.sourceType != 'API'}">유저 레시피</span>
+                    
+                    <span class="custom-badge gray">모두의 레시피</span>
                 </div>
             </div>
 
@@ -35,7 +35,7 @@
                     <span th:text="${dto.recipeId}">1</span>
 
                     <strong>출처</strong>
-                    <span th:text="${dto.sourceType == 'API' ? '공식 (API)' : '유저 작성'}">유저 작성</span>
+                    <span>회원 작성</span>
 
                     <strong>작성자</strong>
                     <span th:text="${dto.userName != null ? dto.userName : dto.loginId}">홍길동</span>
@@ -58,12 +58,12 @@
                     <strong>비고/사유</strong>
                     <span class="muted" th:text="${dto.blindReason != null ? dto.blindReason : '특이사항 없음'}">특이사항 없음</span>
 
-                    <strong style="grid-column: span 1;">요약 정보</strong>
-                    <span style="grid-column: span 3; line-height: 1.6;" th:text="${dto.summary != null ? dto.summary : '등록된 요약 정보가 없습니다.'}">요약 내용</span>
+                    <strong class="view-recipearticle-2">요약 정보</strong>
+                    <span th:text="${dto.summary != null ? dto.summary : '등록된 요약 정보가 없습니다.'}" class="view-recipearticle-3">요약 내용</span>
                 </div>
 
-                <div class="profile-footer" style="margin-top: 30px;">
-                    <form th:action="@{/admin/recipe/updateStatus}" method="post" style="margin: 0;">
+                <div class="profile-footer view-recipearticle-4">
+                    <form th:action="@{/admin/recipe/updateStatus}" method="post" class="view-recipearticle-5">
                         <input type="hidden" name="recipeId" th:value="${dto.recipeId}">
                         <input type="hidden" name="page" th:value="${page}">
                         <input type="hidden" name="schType" th:value="${schType}">
@@ -84,7 +84,7 @@
                     <div class="btn-group">
                         <button type="button" class="custom-btn secondary"
                                 th:onclick="|location.href='@{/admin/recipe/list(page=${page}, schType=${schType}, kwd=${kwd}, sourceType=${sourceType})}'|">
-                            <i class="bi bi-list"></i> 목록으로
+                            목록으로
                         </button>
                     </div>
                 </div>

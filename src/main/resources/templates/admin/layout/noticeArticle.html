@@ -4,11 +4,13 @@
 	layout:decorate="~{admin/layout/layout3}">
 
 <th:block layout:fragment="css">
-	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin-dashboard.css(v=20261103-3)}">
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="admin-wrap">
+    <div class="admin-wrap admin-view-noticearticle">
+        <p th:if="${error != null}" th:text="${error}" role="alert" class="view-noticearticle-1"></p>
+        <p th:if="${message != null}" th:text="${message}" role="status"></p>
         <section class="page-heading">
             <div>
                 <p class="eyebrow">NOTICE DETAILS</p>
@@ -18,14 +20,14 @@
         </section>
 
         <section class="panel">
-            <div class="panel-head article-head-info" style="display: flex;">
-                <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="panel-head article-head-info view-noticearticle-2">
+                <div class="view-noticearticle-3">
                     <span th:if="${dto.pinnedYn == 'Y'}" class="custom-badge red">공지</span>
                     <span th:if="${dto.status == 0}" class="custom-badge gray">숨김</span>
                     <h3 class="article-title" th:text="${dto.title}">공지사항 제목</h3>
                 </div>
                 
-                <div class="article-meta" style="margin-top: 10px;">
+                <div class="article-meta view-noticearticle-4">
                     <strong th:text="${dto.adminName}">관리자명</strong>
                     <span class="divider">|</span>
                     <span th:text="${dto.createdAt}">등록일</span>
@@ -35,7 +37,7 @@
             </div>
             
             <div class="panel-body">
-                <div class="article-content" th:text="${dto.content}">
+                <div class="article-content view-noticearticle-5" th:text="${dto.content}">
                     공지사항 내용
                 </div>
 
@@ -51,8 +53,8 @@
 				           th:each="file : ${listFile}"
 				           th:href="@{/admin/notice/download(fileId=${file.noticeFileId})}">
 				
-				            <i class="bi bi-file-earmark-text"
-				               style="color: var(--orange);"></i>
+				            <i class="bi bi-file-earmark-text view-noticearticle-6"
+				              ></i>
 				
 				            <span th:text="${file.originalFileName}">
 				                첨부파일
@@ -64,7 +66,10 @@
                 <div class="article-footer">
                     <div>
                         <button type="button" class="custom-btn secondary" th:onclick="|location.href='@{/admin/notice/update(noticeId=${dto.noticeId})}'|">수정</button>
-                        <button type="button" class="custom-btn danger" th:onclick="|if(confirm('이 공지사항을 삭제하시겠습니까?')) location.href='@{/admin/notice/delete(noticeId=${dto.noticeId})}'|">삭제</button>
+                        <form th:action="@{/admin/notice/delete}" method="post" onsubmit="return confirm('이 공지사항을 삭제하시겠습니까?')" class="view-noticearticle-7">
+                            <input type="hidden" name="noticeId" th:value="${dto.noticeId}">
+                            <button type="submit" class="custom-btn danger">삭제</button>
+                        </form>
                     </div>
                     <button type="button" class="custom-btn primary" th:onclick="|location.href='@{/admin/notice/list}'|">목록으로</button>
                 </div>
