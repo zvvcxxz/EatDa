@@ -22,6 +22,6 @@ public class ChatBotRestController {
     
     @GetMapping("/aichatbot/chatbot")
     public ModelAndView chatView() {
-    	return new ModelAndView("/aichatbot/chatbot");
+    	return new ModelAndView("aichatbot/chatbot");
     }
 }
