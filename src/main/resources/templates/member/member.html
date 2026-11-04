@@ -55,13 +55,21 @@
 			    <div class="section-title">🔒 계정 정보</div>
 			    <div class="form-grid">
 			
-			        <!-- 아이디 표시 -->
+			        <!-- 아이디 표시/입력 -->
 			        <div class="input-group full-width wrap-loginId">
 			            <label for="login_id">아이디 / 로그인 방식</label>
-			            <!-- SNS 회원인 경우 소셜 유형 표시 -->
-			            <input type="text" id="login_id" name="login_id" 
-			                   th:value="${dto?.sns_provider != null ? #strings.toUpperCase(dto.sns_provider) + ' 연동 계정' : dto?.login_id}"
-			                   readonly tabindex="-1" style="background-color: #f7fafc;">
+			            <div class="input-wrapper" style="display: flex; gap: 8px;">
+			                <input type="text" id="login_id" name="login_id" 
+			                       th:value="${dto?.sns_provider != null ? #strings.toUpperCase(dto.sns_provider) + ' 연동 계정' : dto?.login_id}"
+			                       th:readonly="${mode == 'update'}"
+			                       th:style="${mode == 'update'} ? 'background-color: #f7fafc;' : ''"
+			                       placeholder="영문 소문자 시작, 5~10자">
+			                
+			                <!-- 회원가입(mode != 'update')일 때만 중복 검사 버튼 표시 -->
+			                <button type="button" class="btn-sub" th:if="${mode != 'update'}" onclick="userIdCheck()">중복 확인</button>
+			            </div>
+			            <!-- 중복 확인 결과 메시지 출력용 -->
+			            <small id="userIdMessage" class="profile-help-text"></small>
 			        </div>
 			
 			        <!-- 🔑 일반 회원일 때만 비밀번호 변경 입력창 표시 -->
