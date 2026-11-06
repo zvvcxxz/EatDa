@@ -36,8 +36,7 @@
                 <div class="profile-avatar-wrapper">
                     <!-- 기존 프로필 이미지가 있으면 렌더링, 없으면 기본 아이콘 -->
                     <img class="img-avatar profile-avatar-preview" 
-     					th:src="${dto?.profile_photo != null and !#strings.isEmpty(dto.profile_photo)} ? @{/uploads/member/{img}(img=${dto.profile_photo})} : @{/dist/images/user.png}" 
-                         alt="프로필 이미지">
+     					th:src="${dto?.profile_photo != null and !#strings.isEmpty(dto.profile_photo)} ? @{/uploads/member/{img}(img=${dto.profile_photo})} : @{/dist/images/user.png}">
                     <label for="selectFile" class="profile-upload-btn" title="프로필 사진 선택">
                         <i class="bi bi-camera-fill"></i>
                     </label>

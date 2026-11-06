@@ -309,7 +309,7 @@ public class MemberServiceImpl implements MemberService {
 			
 			Mail mail = new Mail();
 			mail.setReceiverEmail(dto.getEmail());
-			mail.setSenderEmail("아이디@gmail.com");
+			mail.setSenderEmail("지메일아이디@gmail.com");
 			mail.setSenderName("EatDa");
 			mail.setSubject("임시 패스워드 발급");
 			mail.setContent(result);

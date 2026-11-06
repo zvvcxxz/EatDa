@@ -54,11 +54,11 @@
                 </div>
 
                 <div class="page-links">
+                	<a th:href="@{/member/account}">회원가입</a>
+                	<span class="divider">|</span>
                     <a th:href="@{/member/idFind}">아이디 찾기</a>
                     <span class="divider">|</span>
-                    <a th:href="@{/member/pwdFind}">패스워드 찾기</a>
-                    <span class="divider">|</span>
-                    <a th:href="@{/member/account}">회원가입</a>
+                    <a th:href="@{/member/pwdFind}">패스워드 찾기</a>  
                 </div>
 
             </form>
@@ -104,7 +104,7 @@
         function loginWithKakao(e) {
             if (e) e.preventDefault();
             
-            const JAVASCRIPT_KEY = '카카오js키';
+            const JAVASCRIPT_KEY = '카카오 js 키';
             const REDIRECT_URI = window.location.origin + '/oauth/kakao/callback';
             
             const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${JAVASCRIPT_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&prompt=login`;

@@ -40,7 +40,7 @@
 	</select>
 	
 	<update id="updateHitCount" parameterType="long">
-		UPDATE NOTICE SET HIT_COUNT = NVL(HIT_COUNT, 0) + 1 WHERE NOTICE_ID = #{noticeId} AND STATUS = 1 AND EXISTS (SELECT 1 FROM NOTICE n WHERE n.NOTICE_ID = NOTICE_FILE.NOTICE_ID AND n.STATUS = 1)
+	    UPDATE NOTICE SET HIT_COUNT = NVL(HIT_COUNT, 0) + 1 WHERE NOTICE_ID = #{noticeId} AND STATUS = 1
 	</update>
 	
 	<select id="findById" parameterType="long" resultType="com.sp.app.domain.dto.CommunityNoticeDto">

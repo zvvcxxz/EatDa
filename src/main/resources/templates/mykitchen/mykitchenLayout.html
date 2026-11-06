@@ -27,8 +27,7 @@
             <div class="avatar" aria-hidden="true">
 			<!-- 프로필 사진이 존재할 때 -->
 			<img th:if="${#authentication.principal.member.avatar != null and !#authentication.principal.member.avatar.isEmpty()}" 
-			     th:src="@{/uploads/member/{file}(file=${#authentication.principal.member.avatar})}" 
-			     alt="프로필 이미지"
+			     th:src="@{/uploads/member/{file}(file=${#authentication.principal.member.avatar})}"
 			     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
 
 		    <!-- 프로필 사진이 없을 때 (기본 이모지) -->
